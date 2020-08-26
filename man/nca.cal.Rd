@@ -39,8 +39,11 @@ nca.cal(
 nca.cal()
 }
 \examples{
-data<-data.frame(id=1,time=c(0,0.1,0.5,1,4,6,10,15,20,24,c(0,0.1,0.5,1,4,6,10,15,20,24)+48),dv=c(0,0.1,0.5,10,9,8,3,1,0.5,0.1,c(2,3,4,12,10,9,4,2,0.8,0.5)),amt=20)
+data<-data.frame(id=1,time=c(0,0.1,0.5,1,4,6,10,15,20,24,c(0,0.1,0.5,1,4,6,10,15
+,20,24)+48),dv=c(0,0.1,0.5,10,9,8,3,1,0.5,0.1,c(2,3,4,12,10,9,4,2,0.8,0.5)),
+amt=20)
 data$flag<-ifelse(data$time<=24,1,2)
-partialAUC=c(0,20,2,14),partialConc=c(4,5))
+test<-nca.cal(data=data,n_lambda = 3, id = "id", time = "time", dv = "dv",dose
+="amt",multiple.dose="flag",partialAUC=c(0,20,2,14),partialConc=c(4,5))
 }
 \keyword{nca.cal}
