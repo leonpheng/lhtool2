@@ -148,7 +148,7 @@ lhwide<-function(data,wide.data,wide.vector){
   b <- function(x) {}
   x1<-paste(paste(names(data)[!names(data)%in%c(wide.data,wide.vector)],collapse="+"),"~",wide.vector)
   body(b) <- parse(text = x1)
-  z1<-dcast(data,b())}
+  z1<-reshape2::dcast(data,b())}
 
 #' Reshape long
 #'
@@ -160,7 +160,7 @@ lhwide<-function(data,wide.data,wide.vector){
 #' @examples
 #' lhlong()
 lhlong<-function(data,long.vector){
-  z1<-melt(data,names(data)[!names(data)%in%long.vector])
+  z1<-reshape2::melt(data,names(data)[!names(data)%in%long.vector])
 }
 
 
@@ -1587,8 +1587,6 @@ indiv.tab<-function(data,id,by,variables,rtype="sigfig",dec=3){
 
 #' Calculate AUC Using the Trapezoidal Method
 #'
-#' Calculate the area under the curve (AUC) for each subject over the time interval for dv using the trapezoidal rule.
-#' nca.analysis(data,n_lambda=3,id,time,dv,ss,partialAUC="no")
 #' data
 #' @param data.frame containing the data to use for the AUC calculation
 #' @param time	chronologically ordered time variable present in data
@@ -1630,68 +1628,49 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #' @param time Sampling time after dose (TAD)
 #' @param dv Concentration
 #' @param dosing.regimen PK profile profile flag (ex: single, sd, md ,ss).As vector or numeric. Note that only one prefile per dose is to be analyzed.
-#' @param label.for.sd Label to identify sd profile used in dosing.regimen. Need to compute the effective half-life
-#' @param label.for.ss Label to identify ss profile used in dosing.regimen. Need to compute the effective half-life
-#' @param tau Dose interval. As vector or numeric.
-#' @param dose Dose administered. As vector or numeric. Required to estimate CL and Vss
+#' @param dose Dose administered as vector. Required to estimate CL and Vss
 #' @param partialAUC Time interval for partial AUC. Ex: c(0,6,0,12,6,12) for AUC0-6, AUC0-12 and AUC6-12
-#' @param partialConc Concentration at particular time (Ex:c(1,4) for concentration after 1 and 4 h)
+#' @param partialConc Point estimated concentration (Ex:c(1,4) for concentration after 1 and 4 h)
 #' @keywords nca.cal
 #' @export
-#' @examples
-#' p<-nca.cal(data=data, n_lambda = 3, id = "id", time = "time", dv = "dv",
-#' tau="ii",dose="dose",dosing.regimen = "ss",label.for.sd="single", partialAUC = NULL, partialConc = NULL)
-#'
+#' @examples 
+#'@examples data<-data.frame(id=1,time=c(0,0.1,0.5,1,4,6,10,15,20,24,c(0,0.1,0.5,1,4,6,10,15,20,24)+48),dv=c(0,0.1,0.5,10,9,8,3,1,0.5,0.1,c(2,3,4,12,10,9,4,2,0.8,0.5)),amt=20)
+#'@examples data$flag<-ifelse(data$time<=24,1,2)
+#'@examplesresult<-nca.cal(data=data,n_lambda = 3, id = "id", time = "time", dv = "dv",dose="amt",multiple.dose="flag",
+#'@examples partialAUC=c(0,20,2,14),partialConc=c(4,5))
 
-nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",sort.by=NULL, ss.variable = "ss", sd_label_in_ss = NULL, ss_label_in_ss = NULL,tau = NULL, dose = NULL, partialAUC = NULL, partialConc = NULL)
+
+nca.cal<-function (data=data,n_lambda = 3, id = "id", time = "time", dv = "dv",dose="amt",multiple.dose="flag",
+                   partialAUC=c(0,20,2,14),partialConc=c(4,5))
 {
   dat <- data
-  dat$time1 <- dat[, time]
   dat$time <- dat[, time]
   dat[, "tad"] <- NULL
   dat$id <- dat[, id]
   dat$dv <- dat[, dv]
-  if (is.numeric(ss.variable)) {
-    dat$ss <- ss.variable
-  } else {
-    dat$ss <- dat[,ss.variable]
+  dat$dose <- dat[, dose]
+  dos<-nodup(dat[,c(id,"dose",time,multiple.dose)],c(id,"dose",multiple.dose),"all")
+  dos$time1<-dos$time
+  dos$uid<-paste0(dos$id,"-",dos$time,"-OCC")
+  dos$OCC<-paste0(dos$time)
+  dat1<-dplyr::left_join(dat[,names(dat)!="dose"],dos)
+  for(i in c("time1","uid","dose","OCC")){
+  dat1<-locf2(dat1,i,"id")
   }
-  if (is.numeric(dose)) {
-    dat$dose <- dose
-  } else {
-    if (!is.null(dose)) {
-      dat$dose <- dat[, dose]
-    } else {
-      dat$dose <- "dose required"
-    }
-  }
-  if (is.numeric(tau) & !is.null(tau)) {
-    dat$tau <- tau
-  }else{
-    if (!is.null(tau)) {
-      dat$tau <- dat[, tau]
-    }else {dat}
-  }
-  dat$idss <- paste(dat$id, dat$ss, sep = "-")
-  if(!is.null(sort.by)){
-    for(i in sort.by){
-      dat$idss <- paste(dat$idss, dat[,i], sep = "-")
-    }}else{dat$idss<-dat$idss}
-
-  dat <- dat[order(dat$idss, dat$time), ]
-  dat <- addvar(dat, "idss", "time", "min(x)", "yes", "tad")
-  dat$time <- dat$time - dat$tad
-  idss <- nodup(dat, c("idss", "id", "ss", "dose",sort.by), "var")
+dat1$tad<-with(dat1,time-time1);dat1$tad[dat1$tad<0]<-0  
+dat<-dat1
+  dat <- dat[order(dat$uid, dat$tad), ]
+  idss <- nodup(dat, c("uid","id", "dose","OCC"), "var")
   dat$dvtm <- dat$dv * dat$time
   datauc <- dat
-  auclast <- AUC(datauc, time = time, id = "idss", dv = dv)
-  names(auclast) <- c("idss", "AUClast")
+  auclast <- AUC(datauc, time = time, id = "uid", dv = dv)
+  names(auclast) <- c("uid", "AUClast")
   auclast <- plyr::join(auclast, idss)
-  aucmlast <- AUC(datauc, time = time, id = "idss", dv = "dvtm")
-  names(aucmlast) <- c("idss", "AUMClast")
+  aucmlast <- AUC(datauc, time = time, id = "uid", dv = "dvtm")
+  names(aucmlast) <- c("uid", "AUMClast")
   aucmlast <- plyr::join(aucmlast, idss)
-  head(dat)
-  dat$tad1 <- dat$time
+
+  dat$tad1 <- dat$tad
   aucpart <- NULL
   if (!is.null(partialAUC)) {
     nauc <- length(partialAUC)/2
@@ -1699,8 +1678,8 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",sort.
       tm1 <- partialAUC[z]
       tm2 <- partialAUC[z + 1]
       auc <- AUC(dat[dat[, "tad1"] >= tm1 & dat[, "tad1"] <=
-                       tm2, ], time = "tad1", id = "idss", dv = dv)
-      names(auc) <- c("idss", paste0("AUC", tm1, "-", tm2))
+                       tm2, ], time = "tad1", id = "uid", dv = dv)
+      names(auc) <- c("uid", paste0("AUC", tm1, "-", tm2))
       if (z == 1) {
         aucpart <- rbind(aucpart, auc)
       } else {
@@ -1708,19 +1687,20 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",sort.
                                                        2]
       }
     }
-    aucpart <- join(aucpart, idss)
+    aucpart <- dplyr::left_join(aucpart, idss)
     aucpart$idss <- NULL
     aucpart
   } else {
     aucpart <- NULL
   }
+  
   Cpart <- NULL
   if (!is.null(partialConc)) {
     nauc <- length(partialConc)
     for (z in 1:length(partialConc)) {
       tm1 <- partialConc[z]
-      partc <- dat[dat[, "tad1"] == tm1, c("idss", "dv")]
-      names(partc) <- c("idss", paste0("C", tm1))
+      partc <- dat[dat[, "tad1"] == tm1, c("uid", "dv")]
+      names(partc) <- c("uid", paste0("C", tm1))
       if (z == 1) {
         Cpart <- rbind(Cpart, partc)
       } else {
@@ -1728,27 +1708,29 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",sort.
       }
     }
     Cpart
-    Cpart <- join(Cpart, idss)
+    Cpart <- dplyr::left_join(Cpart, idss)
     Cpart$idss <- NULL
     Cpart
   }else {
     Cpart <- NULL
   }
-  if (n_lambda != "no") {
+  
+  if (!is.null(n_lambda)) {
     dat1 <- dat
+    dat1$time<-dat1$tad
     dat1$tmp <- seq(nrow(dat1))
-    dat1 <- addvar(dat1, "idss", "tmp", "max(x)", "yes",
+    dat1 <- addvar(dat1, "uid", "tmp", "max(x)", "yes",
                    "tmp2")
     head(dat1)
     dat1$tmp <- dat1$tmp2 - dat1$tmp
     dat1 <- dat1[dat1$tmp < n_lambda, ]
     str(dat1)
-    dat1[, c("idss", "time", "dv")]
-    test1 <- ddply(dat1[, c("idss", "time", "dv")], .(idss),
+    dat1[, c("uid", "time", "dv")]
+    test1 <- ddply(dat1[, c("uid", "time", "dv")], .(uid),
                    summarize, interc = lm(log(dv) ~ time)$coef[1], Lambda = lm(log(dv) ~ time)$coef[2] * -1, R2 = summary(lm(log(dv) ~ time))$r.squared, HL = (log(2)/lm(log(dv) ~ time)$coef[2]) *  -1, that = max(time))
     test1$n_lambda <- n_lambda
     test1$Clast_hat <- with(test1, exp(-Lambda * that + interc))
-    test1a <- ddply(dat1[, c("idss", "time", "dvtm")], .(idss),
+    test1a <- ddply(dat1[, c("uid", "time", "dvtm")], .(uid),
                     summarize, intercc = lm(log(dvtm) ~ time)$coef[1],
                     Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1,
                     R2c = summary(lm(log(dvtm) ~ time))$r.squared,
@@ -1763,18 +1745,19 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",sort.
   if (TRUE %in% c(test1$HL < 0)) {
     test1$Warning.HL.Negative = ifelse(test1$HL, "yes", "")
   }
-  max <- ddply(dat[, c("idss", "dv", "time", "time1")], .(idss),
+  dat$time1<-dat$time
+  max <- ddply(dat[, c("uid", "dv", "time", "time1")], .(uid),
                summarize, Cmax = max(dv), Tmax = time1[dv == max(dv)],
                Cmin = min(dv[time >= time[dv == max(dv)]]), Tlast = max(dat$time1),
                Clast = dv[time == max(time)])
-  maxa <- ddply(dat, .(idss), summarize, Clastc = dvtm[time ==
+  maxa <- ddply(dat, .(uid), summarize, Clastc = dvtm[time ==
                                                          max(time)])
   head(dat)
   test <- plyr::join(max, idss)
   test <- plyr::join(test, maxa)
   test <- plyr::join(test, auclast)
   test <- plyr::join(test, aucmlast)
-  if (n_lambda != "no") {
+if (!is.null(n_lambda)) {
     test <- join(test, test1)
     test <- join(test, test1a)
     test$AUCinf_obs <- abs(as.numeric(as.character(test$AUClast)) +
@@ -1797,11 +1780,11 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",sort.
   if (!is.null(aucpart)) {
     test <- plyr::join(test, aucpart)
   }
-  test$idss <- test$interc <- test$that <- NULL
+test$uid  <- test$interc <- test$that <- NULL
   n <- names(test)
-  n <- n[!n %in% c("id", "ss")]
-  test <- test[, c("id", "ss", n)]
-  if ("AUCinf_pred" %in% names(test) & is.numeric(test$dose)) {
+  n <- n[!n %in% c("id", "OCC")]
+  test <- test[, c("id", "OCC", n)]
+if ("AUCinf_pred" %in% names(test) & is.numeric(test$dose)) {
     test$CLobs <- with(test, dose/AUCinf_obs)
     test$CLpred <- with(test, dose/AUCinf_pred)
     test$Vss_obs <- with(test, CLobs * AUMCinf_obs)
@@ -1815,65 +1798,32 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",sort.
     test$Vss_obs <- "Dose required"
     test$Vss_pred <- "Dose required"
   }
-  if (!is.null(ss_label_in_ss) | !is.null(sd_label_in_ss)) {
-    if (!is.null(ss_label_in_ss) & !is.null(sd_label_in_ss)) {
-      head(dat)
-      ss1 <- dat[dat$ss == ss_label_in_ss & dat$time <= dat$tau,
-                 ]
-      single <- dat[dat$ss == sd_label_in_ss & dat$time <=
-                      dat$tau, ]
-    }
-    if (!is.null(sd_label_in_ss) & is.null(ss_label_in_ss)) {
-      ss1 <- dat[dat$ss != sd_label_in_ss & dat$time <= dat$tau,
-                 ]
-      single <- dat[dat$ss == sd_label_in_ss & dat$time <=
-                      dat$tau, ]
-    }
-    if (is.null(sd_label_in_ss) & !is.null(ss_label_in_ss)) {
-      ss1 <- dat[dat$ss == ss_label_in_ss & dat$time <= dat$tau,
-                 ]
-      single <- dat[dat$ss != ss_label_in_ss & dat$time <=
-                      dat$tau, ]
-    }
-
-    auctau <- AUC(ss1, time = "time", id = "idss", dv = "dv")
-    names(auctau) <- c("idss", "AUCtau")
-    aucsdtau <- AUC(single, time = "time", id = "idss", dv = "dv")
-    names(aucsdtau) <- c("idss", "AUCsd_tau")
-    test<-join(test,idss,type="left")
-    #test$idss <- paste(test$id, test$ss, sep = "-")
-    test <- join(test, aucsdtau, type = "left")
-    test <- join(test, auctau, type = "left")
-    ident <- nodup(test, c("id", "idss"), "var")
-    a <- join(auctau, ident)
-    a$idss <- NULL
-    b <- join(aucsdtau, ident)
-    b$idss <- NULL
-    EHL <- join(a, b)
-    EHL$Rc <- with(EHL, AUCtau/AUCsd_tau)
-    tau1 <- nodup(single, c("id", "tau"), "var")
-    EHL <- join(EHL, tau1)
-    EHL$EHL <- with(EHL, log(2) * tau/(log(Rc/(Rc - 1))))
-    test <- join(test, EHL[, c("id", "tau", "EHL")], type = "left")
-  }
-  if ("AUCinf_obs" %in% names(test)) {
-    single <- dat[dat$time <= dat$tau, ]
-    aucsdtau <- AUC(single, time = "time", id = "idss", dv = "dv")
-    names(aucsdtau) <- c("idss", "AUCsd_tau")
-    head(test)
-    test$idss <- paste(test$id, test$ss, sep = "-")
-    test <- join(test, aucsdtau, type = "left")
-    test$Rc <- with(test, AUCinf_obs/AUCsd_tau)
-    test$EHL <- with(test, log(2) * tau/(log(Rc/(Rc - 1))))
-    test <- join(test, nodup(dat, c("idss", "tau"), "var"))
-  } else {
-    if (!c("tau") %in% names(dat)) {
-      test$EHL <- "AUCinf or TAU is missing"
-    }
-  }
-  keep <- names(test)[!names(test) %in% c("Lambdac", "R2c",
-                                          "HLc", "thatc", "n_lambdac", "Clast_hatc", "intercc",
-                                          "idss", "Rc")]
-  test <- test[, keep]
+test
 }
+
+
+##nca_EHL
+#' Derive Effective Half-life and Accumulation Ratio 
+#'
+#' Require AUC of first dose, AUCtau and tau
+#' @param data NCA results 
+#' @param id unique subject identifier
+#' @param AUCsd AUCtau SD 
+#' @param AUCss AUCtau SS
+#' @param OCC Identifier of SD and SS
+#' @param TAU Dosing iterval
+#' @keywords lh.ehl.rc()
+#' @export
+#' @examples t<-lhwide(test[,c("id","OCC","AUClast")],"AUClast","OCC")   
+#' @examples names(t)<-c("id","AUCsd","AUCss")   
+#' @examples lh.ehl.rc(data=t,AUCsd="AUCsd",AUCss="AUCss",TAU=24)
+
+lh.ehl.rc<-function(data,AUCsd="AUCsd",AUCss="AUCss",TAU=24){
+  data$Rc <- with(data, AUCss/AUCsd)
+  data$EHL <- with(data, log(2) * TAU/(log(Rc/(Rc - 1))))
+  data$TAU<-TAU
+data
+  }
+
+
 ###########################

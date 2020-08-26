@@ -16,8 +16,6 @@ AUC(data, time = "TIME", id = "ID", dv = "DV")
 \item{data.frame}{containing the data to use for the AUC calculation}
 }
 \description{
-Calculate the area under the curve (AUC) for each subject over the time interval for dv using the trapezoidal rule.
-nca.analysis(data,n_lambda=3,id,time,dv,ss,partialAUC="no")
 data
 }
 \examples{

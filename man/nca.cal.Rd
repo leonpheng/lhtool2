@@ -5,19 +5,15 @@
 \title{Derive Common NCA parameters using single and multiple profiles}
 \usage{
 nca.cal(
-  data,
+  data = data,
   n_lambda = 3,
   id = "id",
   time = "time",
   dv = "dv",
-  sort.by = NULL,
-  ss.variable = "ss",
-  sd_label_in_ss = NULL,
-  ss_label_in_ss = NULL,
-  tau = NULL,
-  dose = NULL,
-  partialAUC = NULL,
-  partialConc = NULL
+  dose = "amt",
+  multiple.dose = "flag",
+  partialAUC = c(0, 20, 2, 14),
+  partialConc = c(4, 5)
 )
 }
 \arguments{
@@ -31,26 +27,20 @@ nca.cal(
 
 \item{dv}{Concentration}
 
-\item{tau}{Dose interval. As vector or numeric.}
-
-\item{dose}{Dose administered. As vector or numeric. Required to estimate CL and Vss}
+\item{dose}{Dose administered as vector. Required to estimate CL and Vss}
 
 \item{partialAUC}{Time interval for partial AUC. Ex: c(0,6,0,12,6,12) for AUC0-6, AUC0-12 and AUC6-12}
 
-\item{partialConc}{Concentration at particular time (Ex:c(1,4) for concentration after 1 and 4 h)}
+\item{partialConc}{Point estimated concentration (Ex:c(1,4) for concentration after 1 and 4 h)}
 
 \item{dosing.regimen}{PK profile profile flag (ex: single, sd, md ,ss).As vector or numeric. Note that only one prefile per dose is to be analyzed.}
-
-\item{label.for.sd}{Label to identify sd profile used in dosing.regimen. Need to compute the effective half-life}
-
-\item{label.for.ss}{Label to identify ss profile used in dosing.regimen. Need to compute the effective half-life}
 }
 \description{
 nca.cal()
 }
 \examples{
-p<-nca.cal(data=data, n_lambda = 3, id = "id", time = "time", dv = "dv",
-tau="ii",dose="dose",dosing.regimen = "ss",label.for.sd="single", partialAUC = NULL, partialConc = NULL)
-
+data<-data.frame(id=1,time=c(0,0.1,0.5,1,4,6,10,15,20,24,c(0,0.1,0.5,1,4,6,10,15,20,24)+48),dv=c(0,0.1,0.5,10,9,8,3,1,0.5,0.1,c(2,3,4,12,10,9,4,2,0.8,0.5)),amt=20)
+data$flag<-ifelse(data$time<=24,1,2)
+partialAUC=c(0,20,2,14),partialConc=c(4,5))
 }
 \keyword{nca.cal}
