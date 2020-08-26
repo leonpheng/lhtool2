@@ -3,12 +3,15 @@
 #' Look up for items in the dataset that matched with any keywords
 #'
 #' @param search.keyword Any keyword as character
-#' @param read.function Read function as character including package
+#' @param read.function Read function as character including required package 
 #' @param path File path as character
 #' @param file File name as character
+#' @param data.frame Look up in data frame instead of file
 #' @keywords lhseek()
 #' @export
-#' @examples
+#' @examples lhseek(search.keyword=c("STDYID","0.125 mg/kg","Treatment-emergent","ADA"), read
+#'@examples .function="haven::read_xpt(x)",path="C:/xxx/xxx/xx/yyy", file="zzzz.xpt",data
+#'@examples .frame=dataset)
 
 lhseek<-function (search.keyword=c("STDYID","0.125 mg/kg","Treatment-emergent","ADA"), read.function="haven::read_xpt(x)",path="C:/xxx/xxx/xx/yyy", file="zzzz.xpt",data.frame=NULL)
 {

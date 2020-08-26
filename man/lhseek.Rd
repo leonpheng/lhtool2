@@ -15,13 +15,20 @@ lhseek(
 \arguments{
 \item{search.keyword}{Any keyword as character}
 
-\item{read.function}{Read function as character including package}
+\item{read.function}{Read function as character including required package}
 
 \item{path}{File path as character}
 
 \item{file}{File name as character}
+
+\item{data.frame}{Look up in data frame instead of file}
 }
 \description{
 Look up for items in the dataset that matched with any keywords
+}
+\examples{
+lhseek(search.keyword=c("STDYID","0.125 mg/kg","Treatment-emergent","ADA"), read
+.function="haven::read_xpt(x)",path="C:/xxx/xxx/xx/yyy", file="zzzz.xpt",data
+.frame=dataset)
 }
 \keyword{lhseek()}
