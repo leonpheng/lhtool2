@@ -1,9 +1,364 @@
+#' Descriptive Statistics Continuous with Style
+#'
+#' Generate descriptive statistic of continuous variable with style
+#' @param data dataset
+#' @param sort.by sorting variables
+#' @param cont list of continuous variables
+#' @param cat list of categorical variables
+#' @param stats statistic functions. stat1 contained most of basic statistic function (mean, median up to CI95). User can define personal list of function (ex: c("length(x)/mean(x)=RT"))
+#' @param fun define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
+#' @param overall if the overall stats required then overall="yes"
+#' @param render the output format as flexible table "flex", as "csv", or word document ("word"). Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))
+#' @param transpose when transpose is TRUE, the output will be in docx containing both continuous and categorical covariate
+#' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
+#' @export
+#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
+#'@examples print(tab1,"Demog.docx")
+#'@examples
+
+lhtab2<-function(data=df,sort.by=c("BSTUDYN"),cont=cont,cat=cat,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=c("BSTUDYN"),stat.group=list(c("MEAN"," (","N",", ","SD",")"),c("MEDIAN"," [","MIN",", ","MAX","]")),stat.id=list("MEAN (N, SD)","MEDIAN [MIN, MAX]")){
+
+  N="length(x[!is.na(x)])=N"
+  Nmiss="length(x[is.na(x)])=Nmiss"
+  MEAN="mean(x,na.rm=T)=MEAN"
+  SD="sd(x,na.rm=T)=SD"
+  CV="cv(x)=CV"
+  GEOM="geom(x)=GEOM"
+  GEOCV="geocv(x)=GEOCV"
+  MEDIAN="median(x,na.rm=T)=MEDIAN"
+  MIN="min(x,na.rm=T)=MIN"
+  MAX="max(x,na.rm=T)=MAX"
+  QT025=c("quantile(x,0.025,na.rm=T)=QT025")
+  QT975=c("quantile(x,0.975,na.rm=T)=QT975")
+  QT05=c("quantile(x,0.05,na.rm=T)=QT05")
+  QT95=c("quantile(x,0.95,na.rm=T)=QT95")
+  CI95="ciup(x)=CI95"
+  CI05="cilow(x)=CI05"
+
+stat1=c(N,Nmiss,MEAN,SD,CV,MEDIAN,MIN,MAX,GEOM,GEOCV,QT025,QT975,CI95,CI05,QT05,QT95)
+fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
+fun2=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]\n","GEOM"," (","GEOCV",")")
+
+
+if(stats=="stat1"){
+comp.stats=stat1
+}else{comp.stats=stats}
+
+
+if(fun=="fun1"){
+comp.fun=fun1
+}else{
+if(fun=="fun2"){
+    comp.fun=fun2
+  }else{comp.fun=funx}}
+
+if(!is.null(overall)){
+  dataxxx<-data
+  dataxxx[,sort.by]<-"Overall"
+  setdiff(names(dataxxx),names(data))
+  data3<-rbind(data,dataxxx)}else{data3<-data}
+
+#if(!is.null(cont)){
+  t1<-addvar2(data3,sort=sort.by,cont,comp.stats)
+
+s2<-sub(".*)=","",stat1)
+
+stat1<-stat.group
+fun1<-stat.id
+for(i in 1:length(stat1)){
+  t1[,fun1[[i]]]=""
+  do1<-stat1[[i]]
+  for(j in do1 ){
+    if(j%in%s2){
+      t1[,fun1[[i]]]=paste0(t1[,fun1[[i]]],t1[,j])
+    }else{t1[,fun1[[i]]]=paste0(t1[,fun1[[i]]],j)}
+  }}
+unlist(fun1)
+out<-t1[,c(sort.by,"var",unlist(fun1))]
+
+head(out)
+
+z=sort.by
+
+out$sort<-""
+for(i in z){
+  out$sort<-paste0(out$sort,"-",out[,i])
+}
+out
+kp<-nodup(out[,c(z,"sort")],z,"all")
+
+xx<-unlist(fun1)[1]
+t4<-NULL
+for(xx in unlist(fun1)){
+  d<-out[,c("var","sort",xx)]
+  d<-lhlong(d,xx)
+  dw<-lhwide(d[,c("var","variable","sort","value")],"value","sort")
+  t4<-rbind(t4,dw)
+}
+t4<-reflag(t4,"variable",unlist(fun1))
+t4<-t4[order(t4$var,t4$variable),]
+
+t4<-stackvar(t4,c("var","variable"))
+
+bold<-data.frame(x=t4[,c("variable")],
+y=seq(nrow(t4)))
+bold<-bold[bold$x%in%unique(out$var),]["y"]
+
+header<-kp
+x<-header[1,]
+x<-chclass(x,names(x),"char")
+x[1,]<-"variable"
+header<-rbind(x,header)
+header$sort<-NULL
+
+t3<-lhflex(t4,select=names(t4),add.h=header,size=11)
+t3 <- bold(t3, i = unlist(c(bold)), j = NULL, bold = TRUE, part = "body")
+
+if(render=="csv"){t.render=t4}else{
+  if(render=="word"){
+    t.render<-read_docx()%>%
+      body_add_flextable(t3)%>%
+      body_add_break()
+  }else{t.render=t3}}
+
+}
+
+
+
+
+#' Descriptive Statistics Continuous and Discrete
+#'
+#' Generate descriptive statistic of continuous and/or categorical variables
+#'
+#' @param data dataset
+#' @param sort.by sorting variables
+#' @param cont list of continuous variables
+#' @param cat list of categorical variables
+#' @param stats statistic functions. stat1 contained most of basic statistic function (mean, median up to CI95). User can define personal list of function (ex: c("length(x)/mean(x)=RT"))
+#' @param fun define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
+#' @param overall if the overall stats required then overall="yes"
+#' @param render the output format as flexible table "flex", as "csv", or word document ("word"). Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))
+#' @param transpose when transpose is TRUE, the output will be in docx containing both continuous and categorical covariate
+#' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
+#' @export
+#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
+#'@examples print(tab1,"Demog.docx")
+#'@examples
+
+lhtab1<-function(data=df,sort.by=c("study","form"),cont=cont,cat=cat,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F){
+
+  N="length(x[!is.na(x)])=N"
+  Nmiss="length(x[is.na(x)])=Nmiss"
+  MEAN="mean(x,na.rm=T)=MEAN"
+  SD="sd(x,na.rm=T)=SD"
+  CV="cv(x)=CV"
+  GEOM="geom(x)=GEOM"
+  GEOCV="geocv(x)=GEOCV"
+  MEDIAN="median(x,na.rm=T)=MEDIAN"
+  MIN="min(x,na.rm=T)=MIN"
+  MAX="max(x,na.rm=T)=MAX"
+  QT025=c("quantile(x,0.025,na.rm=T)=QT025")
+  QT975=c("quantile(x,0.975,na.rm=T)=QT975")
+  QT05=c("quantile(x,0.05,na.rm=T)=QT05")
+  QT95=c("quantile(x,0.95,na.rm=T)=QT95")
+  CI95="ciup(x)=CI95"
+  CI05="cilow(x)=CI05"
+
+  stat1=c(N,Nmiss,MEAN,CV,MEDIAN,MIN,MAX,GEOM,GEOCV,QT025,QT975,CI95,CI05,QT05,QT95)
+  fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
+  fun2=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]\n","GEOM"," (","GEOCV",")")
+
+  if(stats=="stat1"){
+  comp.stats=stat1
+  }else{comp.stats=stats}
+  if(fun=="fun1"){
+  comp.fun=fun1
+  }else{
+  if(fun=="fun2"){
+  comp.fun=fun2
+  }else{comp.fun=funx}}
+
+  if(!is.null(overall)){
+    dataxxx<-data
+    dataxxx[,sort.by]<-"Overall"
+    setdiff(names(dataxxx),names(data))
+    data3<-rbind(data,dataxxx)}else{data3<-data}
+
+  if(!is.null(cont)){
+    t1<-addvar2(data3,sort=sort.by,cont,comp.stats)
+
+    s2<-sub(".*)=","",stat1)
+
+
+
+    t1$sum=""
+    title=""
+    for(i in comp.fun){
+      if(i%in%s2){
+        t1$sum=paste0(t1$sum,t1[,i])
+      }else{t1$sum=paste0(t1$sum,i)}
+      title=paste0(title,i)
+    }
+
+
+    t1$nrow<-seq(nrow(t1))
+    t1$x<-""
+    for(i in 1:length(sort.by)){
+      t1$x<-paste0(t1$x,"-",t1[,i])
+    }
+
+head2<-nodup(t1[,c(sort.by,"x")],sort.by,"all")
+t2<-lhwide(t1[,c("var","x","sum")],"sum","x")
+  }else{t2=NULL}
+
+#CATEGORICA
+  if(!is.null(cat)){
+    dcat<-data
+    dcat$sort<-""
+    for(i in sort.by){
+      dcat$sort<-paste0(dcat$sort,"-",dcat[,i])
+    }
+    catheader<-nodup(dcat[,c(sort.by,"sort")],"sort","all")
+    t11<-lhtool::lhcattab(dcat,cat,"sort")
+
+    t11<-t11[t11$var!="all",]
+
+    bold<-t11[,"var"]
+    t111<-t11
+    headwide11<-t11[,c("var","value")]
+    t11<-stackvar(t11,c("var","value"))
+
+    row11<-data.frame(x=t11[,c("value")],
+    y=seq(nrow(t11)))
+    row11<-row11[row11$x%in%bold,"y"]
+
+    if(!is.null(overall)){
+      t11<-t11
+      names(t11)[grep("overall",names(t11))]<-"tobereplaced"
+    }else{t11$overall<-NULL
+    }
+  }else{t11<-NULL}
+
+  if(!is.null(t2)&!is.null(t11)){
+    names(t11)[names(t11)=="tobereplaced"]<-names(t2)[grep("Overall",names(t2))]
+    names(t11)[names(t11)=="value"]<-"var"
+    t11<-t11[,names(t2)]
+  }else{t11<-t11}
+
+#CATEGORICA
+#HEADER
+  if(!is.null(cont)){
+    tx<-chclass(t1[,c(sort.by,"N","x")],sort.by,"char")
+    tx$N<-paste0("N=",tx$N)
+    tx$tit<-title
+    tx<-nodup(tx,c(sort.by),"all")
+    tx<-tx[,c("tit",names(tx)[!names(tx)%in%"tit"])]
+    txx<-tx[1,]
+    txx[1,]<-"var"
+    tx<-rbind(txx,tx)
+    tx<-reflag(tx,"x",names(t2))
+    tx$x<-as.character(tx$x)
+    tx$x[grep("overall",tx$x)]<-"Overall"
+    tx<-reflag(tx,"x",unique(tx$x))
+    tx<-tx[order(tx$x),]
+    tx$x<-NULL
+  }else{
+    tx<-chclass(catheader[,c(sort.by,"sort")],sort.by,"char")
+    tx$sort[grep("overall",tx$sort)]<-"Overall"
+    tx$tit<-"N (%)"
+    tx<-tx[,c("tit",names(tx)[!names(tx)%in%"tit"])]
+    #tx$sort<-NULL
+    txx<-tx[1,]
+    txx[1,]<-"var"
+    if("Overall"%in%names(t11)){
+      txxx<-tx[1,]
+      txxx[1,]<-"Overall"
+      txxx[,"tit"]<-"N (%)"
+    }else{txxx<-NULL}
+    tx<-rbind(txx,tx,txxx)
+    tx<-reflag(tx,"sort",names(t11))
+    tx<-tx[order(tx$sort),]
+    tx$sort<-NULL
+  }
+
+if(!transpose){
+tx[1,]<-"Variable"
+t4<-rbind(t2,t11)
+t3<-lhflex(t4,select=names(t4),add.h=tx[1:length(names(t4)),],size=9)
+if(!is.null(t2)){rowcon<-unlist(seq(nrow(t2)))}else{rowcon<-0}
+if(!is.null(t11)){rowcat<-row11}else{rowcat<-0}
+row12<-c(rowcon,max(rowcon)+rowcat)
+t3 <- bold(t3, i = row12, j = NULL, bold = TRUE, part = "body")
+
+if(render=="csv"){t.render=t4}else{
+  if(render=="word"){
+      t.render<-read_docx()%>%
+        body_add_flextable(t3)%>%
+        body_add_break()
+    }else{t.render=t3}}
+}else{t.render<-NULL}
+
+#TRNSPOSE CONTINUOUS
+if(transpose&!is.null(cont)){
+lon<-lhlong(t2,names(t2[,2:ncol(t2)]))
+wid<-lhwide(lon[,c("variable","value","var")],"value","var")
+wid<-reflag(wid,"variable",head2$x)
+wid<-wid[order(wid$variable),]
+variable<-head2[,1]
+wid2<-cbind(variable,wid[,2:ncol(wid)])
+conttab<-lhflex(wid2,select=names(wid2),add.h=data.frame(x=c("variable",rep(title,ncol(wid2)-1)),y=names(wid2)),size=9)
+t.render<-read_docx()%>%
+  body_add_flextable(conttab)%>%
+  body_add_break()
+}else{conttab<-NULL}
+
+#TRNSPOSE CATEGORICAL
+if(transpose&!is.null(cat)){
+names(t111)[names(t111)=="value"]<-"var2"
+kn<-names(t111)
+t111$x<-""
+for(i in c("var","var2")){
+  t111$x<-paste0(t111$x,"-",t111[,i])
+}
+lon11<-lhlong(t111[,c("x",kn)],names(t111[,c("x",kn)])[4:ncol(t111)])
+kn1<-nodup(lon11[,c("x","var","var2")],c("x","var","var2"),"all")
+wid11<-lhwide(lon11[,c("variable","value","x")],"value","x")
+wid11<-wid11[,c("variable",kn1$x)]
+kn2<-kn1[,c("var","var2")]
+kn3<-kn2[1,]
+kn3[1,]<-"variable"
+kn2<-rbind(kn3,kn2)
+cattab<-lhflex(wid11,select=names(wid11),add.h=kn2,size=9,empty =0)
+}else{cattab<-NULL}
+
+if(transpose&!is.null(cat)&!is.null(cont)){
+t.render<-read_docx()%>%
+    body_add_flextable(conttab)%>%
+    body_add_break() %>%
+  body_add_flextable(cattab)
+}else{
+  if(transpose&!is.null(cont)){
+    t.render<-read_docx()%>%
+      body_add_flextable(conttab)
+  }else{
+    if(transpose&!is.null(cat)){
+      t.render<-read_docx()%>%
+        body_add_flextable(cattab)
+  }else{t.render}}}
+
+    t.render
+
+}
+
+
+
+
 #' Seek Items in Dataset
 #'
 #' Look up for items in the dataset that matched with any keywords
 #'
 #' @param search.keyword Any keyword as character
-#' @param read.function Read function as character including required package 
+#' @param read.function Read function as character including required package
 #' @param path File path as character
 #' @param file File name as character
 #' @param data.frame Look up in data frame instead of file
@@ -103,15 +458,20 @@ lhfactor<-function(data=test,leader="AGEcat",follower="catt"){
 #' @export
 #' @examples
 stackvar<-function(data,combine.var=c("xxx","variable")){
-  z$dum<-seq(nrow(z))
-  z1<-z
-  z1$dum<-z1$dum-1
-  z1<-nodup(z1,combine.var[1],"all")
-  keep<-c(combine.var[1],combine.var[2],"dum")
-  z1[,combine.var[2]]<-z1[,combine.var[1]];z1[,!names(z1)%in%keep]<-""
-  z<-rbind(z,z1[,names(z)]); z<-z[order(z$dum),]
-  z[,c(combine.var[1],"dum")]<-NULL
-  z}
+  z=data
+  z$dum <- seq(nrow(z))
+  z1 <- z
+  z1$dum <- z1$dum - 1
+  z1 <- nodup(z1, combine.var[1], "all")
+  keep <- c(combine.var[1], combine.var[2], "dum")
+  z1[, combine.var[2]] <- z1[, combine.var[1]]
+  z1[, !names(z1) %in% keep] <- ""
+  z <- rbind(z, z1[, names(z)])
+  z <- z[order(z$dum), ]
+  z[, c(combine.var[1], "dum")] <- NULL
+  z
+  }
+
 
 
 
@@ -1636,7 +1996,7 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #' @param partialConc Point estimated concentration (Ex:c(1,4) for concentration after 1 and 4 h)
 #' @keywords nca.cal
 #' @export
-#' @examples 
+#' @examples
 #'@examples data<-data.frame(id=1,time=c(0,0.1,0.5,1,4,6,10,15,20,24,c(0,0.1,0.5,1,4,6,10,15
 #'@examples ,20,24)+48),dv=c(0,0.1,0.5,10,9,8,3,1,0.5,0.1,c(2,3,4,12,10,9,4,2,0.8,0.5)),
 #'@examples amt=20)
@@ -1662,7 +2022,7 @@ nca.cal<-function (data=data,n_lambda = 3, id = "id", time = "time", dv = "dv",d
   for(i in c("time1","uid","dose","OCC")){
   dat1<-locf2(dat1,i,"id")
   }
-dat1$tad<-with(dat1,time-time1);dat1$tad[dat1$tad<0]<-0  
+dat1$tad<-with(dat1,time-time1);dat1$tad[dat1$tad<0]<-0
 dat<-dat1
   dat <- dat[order(dat$uid, dat$tad), ]
   idss <- nodup(dat, c("uid","id", "dose","OCC"), "var")
@@ -1698,7 +2058,7 @@ dat<-dat1
   } else {
     aucpart <- NULL
   }
-  
+
   Cpart <- NULL
   if (!is.null(partialConc)) {
     nauc <- length(partialConc)
@@ -1719,7 +2079,7 @@ dat<-dat1
   }else {
     Cpart <- NULL
   }
-  
+
   if (!is.null(n_lambda)) {
     dat1 <- dat
     dat1$time<-dat1$tad
@@ -1808,19 +2168,19 @@ test
 
 
 ##nca_EHL
-#' Derive Effective Half-life and Accumulation Ratio 
+#' Derive Effective Half-life and Accumulation Ratio
 #'
 #' Require AUC of first dose, AUCtau and tau
-#' @param data NCA results 
+#' @param data NCA results
 #' @param id unique subject identifier
-#' @param AUCsd AUCtau SD 
+#' @param AUCsd AUCtau SD
 #' @param AUCss AUCtau SS
 #' @param OCC Identifier of SD and SS
 #' @param TAU Dosing iterval
 #' @keywords lh.ehl.rc()
 #' @export
-#' @examples t<-lhwide(test[,c("id","OCC","AUClast")],"AUClast","OCC")   
-#' @examples names(t)<-c("id","AUCsd","AUCss")   
+#' @examples t<-lhwide(test[,c("id","OCC","AUClast")],"AUClast","OCC")
+#' @examples names(t)<-c("id","AUCsd","AUCss")
 #' @examples lh.ehl.rc(data=t,AUCsd="AUCsd",AUCss="AUCss",TAU=24)
 
 lh.ehl.rc<-function(data,AUCsd="AUCsd",AUCss="AUCss",TAU=24){
