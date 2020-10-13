@@ -1,3 +1,154 @@
+#' Make Flexible table
+#'
+#' Generate descriptive statistic of continuous variable with style
+#' @param table1 data frame
+#' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
+#' @export
+#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
+#'@examples print(tab1,"Demog.docx")
+#'@examples
+
+lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL,
+          merge.all = "yes", size = 12, empty = NULL, cf = NULL, border = NULL,
+          align = "center")
+{
+  library(flextable)
+  library(dplyr)
+  library(plyr)
+  library(stringr)
+  library(officer)
+  b <- function(x) {
+  }
+  def_cell <- fp_cell(border = fp_border(color = "black"))
+  std_b <- fp_border(color = "black")
+  def_par <- fp_par(text.align = "center")
+  def_text <- fp_text(color = "black", italic = F, font.family = "Time New Roman")
+  def_text_header <- update(color = "black", def_text, bold = TRUE)
+  if (!is.null(csv)) {
+    if (!is.null(select)) {
+      tab1 <- regulartable(table1, col_keys = select)
+    }
+    else {
+      tab1 <- regulartable(table1)
+    }
+  }
+  if (!is.null(empty)) {
+    for (i in 1:ncol(table1)) {
+      table1[, i][table1[, i] == "" | is.na(table1[, i])] <- empty
+      table1
+    }
+  }
+  else {
+    table1
+  }
+  tab1 <- style(tab1, pr_t = def_text_header, part = "header")
+  if (!is.null(add.h)) {
+    if (!is.null(select)) {
+      typology <- add.h
+    }
+    else {
+      typology <- names(tab)
+    }
+    typology$col_keys <- select
+    typology <- chclass(typology, names(typology), "char")
+    tab1 <- set_header_df(tab1, mapping = typology, key = "col_keys")
+    tab1 <- merge_h(tab1, part = "header")
+    tab1 <- merge_v(tab1, part = "header")
+  }
+  tab1 <- style(tab1, pr_p = def_par, pr_t = def_text, part = "all")
+  tab1 <- bg(tab1, bg = "gray88", part = "header")
+  tab1 <- style(tab1, pr_t = def_text_header, part = "header")
+  tab1 <- fontsize(tab1, size = size, part = "all")
+  std_b2 <- fp_border(color = "black", style = "solid")
+  std_b3 <- fp_border(color = "black", style = "dashed")
+  if (!is.null(cf)) {
+    for (xx in 1:length(cf)) {
+      coord <- gsub(sub(".*:", ":", cf[xx]), "", cf[xx])
+      fm <- gsub(sub(":.*", "", cf[xx]), "", cf[xx])
+      fm <- gsub(sub(":.*", ":", fm), "", fm)
+      if (length(grep("col", fm)) == 1) {
+        vv <- gsub("col", "", fm)
+        body(b) <- parse(text = paste("color(tab1,",
+                                      coord, ",color=vv)"))
+        tab1 <- b()
+      }
+      if (length(grep("mv", fm)) == 1) {
+        vv <- gsub("mv", "", fm)
+        body(b) <- parse(text = paste("merge_v(tab1,",
+                                      coord, ")"))
+        tab1 <- b()
+      }
+      if (length(grep("bg", fm)) == 1) {
+        vv <- gsub("bg", "", fm)
+        body(b) <- parse(text = paste("bg(tab1,", coord,
+                                      ",bg=vv)"))
+        tab1 <- b()
+      }
+      if (length(grep("mh", fm)) == 1) {
+        vv <- gsub("mh", "", fm)
+        body(b) <- parse(text = paste("merge_h(tab1,",
+                                      coord, ")"))
+        tab1 <- b()
+      }
+      if (length(grep("ma", fm)) == 1) {
+        vv <- gsub("ma", "", fm)
+        body(b) <- parse(text = paste("merge_at(tab1,",
+                                      coord, ")"))
+        tab1 <- b()
+      }
+      if (length(grep("bol", fm)) == 1) {
+        vv <- gsub("bol", "", fm)
+        body(b) <- parse(text = paste("bold(tab1,", coord,
+                                      ",bold=TRUE)"))
+        tab1 <- b()
+      }
+      if (length(grep("ita", fm)) == 1) {
+        vv <- gsub("ita", "", fm)
+        body(b) <- parse(text = paste("italic(tab1,",
+                                      coord, ")"))
+        tab1 <- b()
+      }
+    }
+  }
+  para <- fp_border(color = "black", style = "dashed")
+  para1 <- fp_border(color = "black", style = "solid")
+  tab1 <- border_remove(tab1)
+  tab1 <- border_outer(tab1, border = para1, part = "all")
+  tab1 <- border_inner_h(tab1, border = para1, part = "all")
+  tab1 <- border_inner_v(tab1, border = para1, part = "all")
+  if (!is.null(border)) {
+    for (i in 1:length(border)) {
+      ca <- gsub(sub(":.*", ":", border[i]), "", border[i])
+      co1 <- gsub(ca, "", border[i])
+      co1 <- gsub(":", "", co1)
+      ca1 <- gsub(sub(":.*", ":", ca), "", ca)
+      co2 <- gsub(ca1, "", ca)
+      co2 <- gsub(":", "", co2)
+      ca2 <- gsub(sub(":.*", ":", ca1), "", ca1)
+      co3 <- gsub(ca2, "", ca1)
+      co3 <- gsub(":", "", co3)
+      ca3 <- gsub(sub(":.*", ":", ca2), "", ca2)
+      co4 <- gsub(ca3, "", ca2)
+      co4 <- gsub(":", "", co4)
+      if (length(grep("out", co1)) == 1) {
+        out <- fp_border(color = co3, style = co2)
+        tab1 <- border_outer(tab1, border = out, part = co4)
+      }
+      if (length(grep("vi", co1)) == 1) {
+        out <- fp_border(color = co3, style = co2)
+        tab1 <- border_inner_v(tab1, border = out, part = co4)
+      }
+      if (length(grep("hi", co1)) == 1) {
+        out <- fp_border(color = co3, style = co2)
+        tab1 <- border_inner_h(tab1, border = out, part = co4)
+      }
+    }
+    tab1 <- align(tab1, align = align, part = "all")
+  }
+  tab1 <- autofit(tab1)
+}
+
+
 #' Descriptive Statistics Continuous with Style
 #'
 #' Generate descriptive statistic of continuous variable with style
