@@ -270,13 +270,13 @@ t2<-lhwide(t1[,c("var","x","sum")],"sum","x")
     #tx$sort<-NULL
     txx<-tx[1,]
     txx[1,]<-"var"
-    if("Overall"%in%names(t11)){
+    if("Overall"%in%names(t11)|"tobereplaced"%in%names(t11)){
       txxx<-tx[1,]
       txxx[1,]<-"Overall"
       txxx[,"tit"]<-"N (%)"
     }else{txxx<-NULL}
     tx<-rbind(txx,tx,txxx)
-    tx<-reflag(tx,"sort",names(t11))
+    tx<-reflag(tx,"sort",unique(tx$sort),names(t11))
     tx<-tx[order(tx$sort),]
     tx$sort<-NULL
   }
@@ -287,9 +287,15 @@ t4<-rbind(t2,t11)
 t3<-lhflex(t4,select=names(t4),add.h=tx[1:length(names(t4)),],size=9)
 if(!is.null(t2)){rowcon<-unlist(seq(nrow(t2)))}else{rowcon<-0}
 if(!is.null(t11)){rowcat<-row11}else{rowcat<-0}
-row12<-c(rowcon,max(rowcon)+rowcat)
-t3 <- bold(t3, i = row12, j = NULL, bold = TRUE, part = "body")
 
+if(!is.null(cont)&!is.null(cat)){
+row12<-c(rowcon,max(rowcon)+rowcat)
+}else{
+  if(!is.null(cont)&is.null(cat)){
+    row12<-c(rowcon)
+}else{row12<-c(rowcat)}}
+
+t3 <- bold(t3, i = row12, j = NULL, bold = TRUE, part = "body")
 if(render=="csv"){t.render=t4}else{
   if(render=="word"){
       t.render<-read_docx()%>%
