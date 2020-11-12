@@ -5,18 +5,17 @@
 \title{Descriptive Statistics Continuous with Style}
 \usage{
 lhtab2(
-  data = df,
-  sort.by = c("BSTUDYN"),
-  cont = cont,
-  cat = cat,
-  stats = "stat1",
-  fun = "fun1",
+  data = nodup(dat, "ID", "all"),
+  sort.by = c("STUDYID", "SEXC"),
+  cont = c("ALT", "BAST", "AST"),
+  stats = c("length(x[!is.na(x)])=N", "length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean",
+    "median(x,na.rm=T)=Median", "quantile(x,0.5,na.rm=T)=50thPI", "mean(x,na.rm=T)=Mean",
+    "cv(x)=CV\%", "min(x)=Min", "max(x)=Max", "geocv(x)=GeoCV\%"),
+  stat.group = list(c("N", " (", "Nmiss", ")"), c("Mean", " (", "CV\%", ")"),
+    c("Median", " [", "Min", ", ", "Max", "]"), c("GeoMean", " (", "GeoCV\%", ")")),
+  render = "flextable",
   overall = "yes",
-  render = "flex",
-  transpose = c("BSTUDYN"),
-  stat.group = list(c("MEAN", " (", "N", ", ", "SD", ")"), c("MEDIAN", " [", "MIN",
-    ", ", "MAX", "]")),
-  stat.id = list("MEAN (N, SD)", "MEDIAN [MIN, MAX]")
+  format = "stacked"
 )
 }
 \arguments{
@@ -26,17 +25,17 @@ lhtab2(
 
 \item{cont}{list of continuous variables}
 
-\item{cat}{list of categorical variables}
-
 \item{stats}{statistic functions. stat1 contained most of basic statistic function (mean, median up to CI95). User can define personal list of function (ex: c("length(x)/mean(x)=RT"))}
 
-\item{fun}{define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")}
+\item{render}{the output format as flexible table "flex", as "csv". Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))}
 
 \item{overall}{if the overall stats required then overall="yes"}
 
-\item{render}{the output format as flexible table "flex", as "csv", or word document ("word"). Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))}
+\item{format}{two formats available, stacked or not}
 
-\item{transpose}{when transpose is TRUE, the output will be in docx containing both continuous and categorical covariate}
+\item{cat}{list of categorical variables}
+
+\item{fun}{define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")}
 }
 \description{
 Generate descriptive statistic of continuous variable with style

@@ -159,119 +159,130 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
 #' @param stats statistic functions. stat1 contained most of basic statistic function (mean, median up to CI95). User can define personal list of function (ex: c("length(x)/mean(x)=RT"))
 #' @param fun define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
 #' @param overall if the overall stats required then overall="yes"
-#' @param render the output format as flexible table "flex", as "csv", or word document ("word"). Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))
-#' @param transpose when transpose is TRUE, the output will be in docx containing both continuous and categorical covariate
+#' @param render the output format as flexible table "flex", as "csv". Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))
+#' @param format two formats available, stacked or not
 #' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
 #' @export
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
 #'@examples
 
-lhtab2<-function(data=df,sort.by=c("BSTUDYN"),cont=cont,cat=cat,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=c("BSTUDYN"),stat.group=list(c("MEAN"," (","N",", ","SD",")"),c("MEDIAN"," [","MIN",", ","MAX","]")),stat.id=list("MEAN (N, SD)","MEDIAN [MIN, MAX]")){
+lhtab2<-function (data =nodup(dat,"ID","all"), sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST"),
+                  stats = c("length(x[!is.na(x)])=N","length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean","median(x,na.rm=T)=Median","quantile(x,0.5,na.rm=T)=50thPI","mean(x,na.rm=T)=Mean","cv(x)=CV%","min(x)=Min","max(x)=Max","geocv(x)=GeoCV%"), stat.group = list(c("N", " (","Nmiss", ")"),c("Mean"," (","CV%",")"), c("Median"," [","Min",", ","Max","]"),c("GeoMean"," (","GeoCV%",")")),render = "flextable", overall = "yes",format="stacked")
 
-  N="length(x[!is.na(x)])=N"
-  Nmiss="length(x[is.na(x)])=Nmiss"
-  MEAN="mean(x,na.rm=T)=MEAN"
-  SD="sd(x,na.rm=T)=SD"
-  CV="cv(x)=CV"
-  GEOM="geom(x)=GEOM"
-  GEOCV="geocv(x)=GEOCV"
-  MEDIAN="median(x,na.rm=T)=MEDIAN"
-  MIN="min(x,na.rm=T)=MIN"
-  MAX="max(x,na.rm=T)=MAX"
-  QT025=c("quantile(x,0.025,na.rm=T)=QT025")
-  QT975=c("quantile(x,0.975,na.rm=T)=QT975")
-  QT05=c("quantile(x,0.05,na.rm=T)=QT05")
-  QT95=c("quantile(x,0.95,na.rm=T)=QT95")
-  CI95="ciup(x)=CI95"
-  CI05="cilow(x)=CI05"
+{
 
-stat1=c(N,Nmiss,MEAN,SD,CV,MEDIAN,MIN,MAX,GEOM,GEOCV,QT025,QT975,CI95,CI05,QT05,QT95)
-fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
-fun2=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]\n","GEOM"," (","GEOCV",")")
+  if (!is.null(overall)) {
+    dataxxx <- data
+    dataxxx[, sort.by] <- "Overall"
+    #setdiff(names(dataxxx), names(data))
+    data3 <- rbind(data, dataxxx)
+  }else {
+    data3 <- data
+  }
+
+  data3<-chclass(data3,cont,"num")
+
+  sort(unique(data$HEPIMPC))
 
 
-if(stats=="stat1"){
-comp.stats=stat1
-}else{comp.stats=stats}
+  t1 <- addvar2(data3, sort = sort.by, cont, stats)
+
+  t1[,names(t1)=="Nmiss"]<-round(as.numeric(as.character(t1[,names(t1)=="Nmiss"])),0)
 
 
-if(fun=="fun1"){
-comp.fun=fun1
-}else{
-if(fun=="fun2"){
-    comp.fun=fun2
-  }else{comp.fun=funx}}
+  if(format=="stacked"){
+    t3<-NULL
+    for(i in 1:length(stat.group)){
+      t33<-t1
+      t33$sum<-""
+      t33$lab<-""
+      for(ii in unlist(stat.group[i])){
+        if(ii%in%names(t33)){
+          t33$sum<-paste0(t33$sum,t33[,ii])
+        }else{t33$sum<-paste0(t33$sum,ii)}
+        t33$lab<-paste0(t33$lab,ii)
+        t33$labsor<-i
+      }
+      t3<-rbind(t3,t33)
+    }
+  }else{
+    t33<-t1
+    t33$sum<-""
+    t33$lab<-""
+    for(i in 1:length(stat.group)){
 
-if(!is.null(overall)){
-  dataxxx<-data
-  dataxxx[,sort.by]<-"Overall"
-  setdiff(names(dataxxx),names(data))
-  data3<-rbind(data,dataxxx)}else{data3<-data}
+      for(ii in unlist(stat.group[i])){
+        if(ii%in%names(t33)){
+          t33$sum<-paste0(t33$sum,t33[,ii])
+        }else{t33$sum<-paste0(t33$sum,ii)}
+        t33$lab<-paste0(t33$lab,ii)
+        t33$labsor<-i
+      }
+      if(i<length(stat.group)){
+        t33$sum<-paste0(t33$sum,"\n ")
+        t33$lab<-paste0(t33$lab,"\n ")}else{
+          t33$sum<-t33$sum
+          t33$lab<-t33$lab
+        }}
+    t3<-t33}
 
-#if(!is.null(cont)){
-  t1<-addvar2(data3,sort=sort.by,cont,comp.stats)
+  #SORT
+  sby<-nodup(t3,sort.by,"all")
+  sby$sort<-""
+  sby<-sby[,c(sort.by,"sort")]
+  for(iii in sort.by){
+    sby$sort<-paste0(sby$sort,"-",sby[,iii])
+  }
+  t4<-left_join(t3,sby)
+  s1<-sort(unique(t4[,sort.by[1]]))
 
-s2<-sub(".*)=","",stat1)
+  t4<-reflag(t4,sort.by[1],c(as.character(s1[s1!="Overall"]),"Overall"))
+  t4<-t4[order(t4[,sort.by[1]]),]
+  colord<-c("var","lab",unique(t4$sort))
 
-stat1<-stat.group
-fun1<-stat.id
-for(i in 1:length(stat1)){
-  t1[,fun1[[i]]]=""
-  do1<-stat1[[i]]
-  for(j in do1 ){
-    if(j%in%s2){
-      t1[,fun1[[i]]]=paste0(t1[,fun1[[i]]],t1[,j])
-    }else{t1[,fun1[[i]]]=paste0(t1[,fun1[[i]]],j)}
-  }}
-unlist(fun1)
-out<-t1[,c(sort.by,"var",unlist(fun1))]
+  t5<-lhwide(t4[,c("var","labsor","lab","sort","sum")],"sum","sort")
+  setdiff(colord,names(t5))
+  t5<-t5[,c("labsor",colord)]
 
-head(out)
+  keep<-unlist(names(t5))
+  sby<-reflag(sby,"sort",keep)
+  sby<-sby[order(sby$sort),]
 
-z=sort.by
+  t5a<-t5[1:ncol(sby)-1,]
+  for(t in 1:nrow(t5a)){
+    t5a[t,]<-c("labsor","var","lab",as.character(unlist(sby[,t])))
+  }
 
-out$sort<-""
-for(i in z){
-  out$sort<-paste0(out$sort,"-",out[,i])
-}
-out
-kp<-nodup(out[,c(z,"sort")],z,"all")
-
-xx<-unlist(fun1)[1]
-t4<-NULL
-for(xx in unlist(fun1)){
-  d<-out[,c("var","sort",xx)]
-  d<-lhlong(d,xx)
-  dw<-lhwide(d[,c("var","variable","sort","value")],"value","sort")
-  t4<-rbind(t4,dw)
-}
-t4<-reflag(t4,"variable",unlist(fun1))
-t4<-t4[order(t4$var,t4$variable),]
-
-t4<-stackvar(t4,c("var","variable"))
-
-bold<-data.frame(x=t4[,c("variable")],
-y=seq(nrow(t4)))
-bold<-bold[bold$x%in%unique(out$var),]["y"]
-
-header<-kp
-x<-header[1,]
-x<-chclass(x,names(x),"char")
-x[1,]<-"variable"
-header<-rbind(x,header)
-header$sort<-NULL
-
-t3<-lhflex(t4,select=names(t4),add.h=header,size=11)
-t3 <- bold(t3, i = unlist(c(bold)), j = NULL, bold = TRUE, part = "body")
-
-if(render=="csv"){t.render=t4}else{
-  if(render=="word"){
-    t.render<-read_docx()%>%
-      body_add_flextable(t3)%>%
-      body_add_break()
-  }else{t.render=t3}}
-
+  if(render!="flextable"){
+    if(format=="stacked"){
+      t6<-stackvar(t5,c("var","lab"))
+      t6$labsor<-NULL
+      t6<-rbind(t5a[,names(t6)],t6)
+      names(t6)<-t6[1,]}else{
+        t6<-rbind(t5a[,names(t5)],t5)
+      }
+  }else{
+    if(format=="stacked"){
+      t6<-stackvar(t5,c("var","lab"))
+      t6$labsor<-NULL
+      hd<-data.frame(t(t5a[,names(t6)]))
+      row.names(hd)<-NULL
+      t6<-lhflex(t6,select =names(t6),add.h=hd)
+    }else{
+      t6<-t5
+      lab<-unique(t6$lab)
+      t6$labsor<-t6$lab<-NULL
+      hd<-data.frame(t(t5a[,names(t6)]))
+      kn<-names(hd)
+      hd$y<-lab
+      hd$y[1]<-"var"
+      hd<-hd[,c("y",kn)]
+      row.names(hd)<-NULL
+      t6<-lhflex(t6,select =names(t6),add.h=hd)
+    }
+  }
+  t6
 }
 
 
