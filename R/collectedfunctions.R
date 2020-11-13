@@ -256,6 +256,7 @@ lhtab2<-function (data =nodup(dat,"ID","all"), sort.by = c("STUDYID","SEXC"), co
 
   if(render!="flextable"){
     if(format=="stacked"){
+
       t6<-stackvar(t5,c("var","lab"))
       t6$labsor<-NULL
       t6<-rbind(t5a[,names(t6)],t6)
@@ -264,11 +265,17 @@ lhtab2<-function (data =nodup(dat,"ID","all"), sort.by = c("STUDYID","SEXC"), co
       }
   }else{
     if(format=="stacked"){
+      bold<-t5[,c("var","lab")]
+      bold$row<-seq(nrow(bold))
+      bold<-nodup(bold,"var","all")
+      bold$row2<-seq(0,nrow(bold)-1,1)
+      bold<-unlist(bold$row+bold$row2)
       t6<-stackvar(t5,c("var","lab"))
       t6$labsor<-NULL
       hd<-data.frame(t(t5a[,names(t6)]))
       row.names(hd)<-NULL
       t6<-lhflex(t6,select =names(t6),add.h=hd)
+      t6 <- bold(t6, i = c(bold), j = "lab")
     }else{
       t6<-t5
       lab<-unique(t6$lab)
