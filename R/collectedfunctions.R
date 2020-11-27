@@ -1982,8 +1982,7 @@ roundbatch<-function(data,variable,toround,nb){
 #' @param by  Stratification variable (ex: by="study")
 #' @keywords cat.tab
 #' @export
-#' @examples
-#' cat.tab(data=dat,var=c("SEX","RACE"),by=c("study"),colby="var",rowby=by)
+#' @examples cat.tab(data=dat,var=c("SEX","RACE"),by=c("study"),colby="var",rowby=by)
 
 lhcattab<-function (data, var, by)
   {
@@ -2057,8 +2056,8 @@ lhcattab<-function (data, var, by)
 #' @param dec round decimal or number of significant figures
 #' @keywords ind.tab
 #' @export
-#' @examples
-#' ind.tab(data=dat,id="NMID",by=c("study"))
+#' @examples ind.tab(data=dat,id="NMID",by=c("study"))
+#'
 indiv.tab<-function(data,id,by,variables,rtype="sigfig",dec=3){
   id<-id#
   data<-data[,c(id,by,variables)]#[!duplicated(data$id),]
@@ -2132,8 +2131,7 @@ indiv.tab<-function(data,id,by,variables,rtype="sigfig",dec=3){
 #' @param dv	dependent variable used to calculate AUC present in data
 #' @keywords AUC
 #' @export
-#' @examples
-#' AUC(data, time = 'TIME', id = 'ID', dv = 'DV')
+#' @examples AUC(data, time = 'TIME', id = 'ID', dv = 'DV')
 
 AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 {
@@ -2171,13 +2169,7 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #' @param partialConc Point estimated concentration (Ex:c(1,4) for concentration after 1 and 4 h)
 #' @keywords nca.cal
 #' @export
-#' @examples
-#'@examples data<-data.frame(id=1,time=c(0,0.1,0.5,1,4,6,10,15,20,24,c(0,0.1,0.5,1,4,6,10,15
-#'@examples ,20,24)+48),dv=c(0,0.1,0.5,10,9,8,3,1,0.5,0.1,c(2,3,4,12,10,9,4,2,0.8,0.5)),
-#'@examples amt=20)
-#'@examples data$flag<-ifelse(data$time<=24,1,2)
-#'@examples test<-nca.cal(data=data,n_lambda = 3, id = "id", time = "time", dv = "dv",dose
-#'@examples ="amt",multiple.dose="flag",partialAUC=c(0,20,2,14),partialConc=c(4,5))
+#'@examples test<-nca.cal(data=data,n_lambda = 3, id = "id", time = "TAD", dv = "dv",dose
 
 nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
                    dv = "dv", partialAUC = c(0,20, 2, 14), partialConc = c(4, 5))
@@ -2307,7 +2299,7 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
     test <- plyr::join(test, aucpart)
   }
   test$interc <- test$that <- NULL
-  test<-as.data.frame(test)
+  test
 }
 
 ##nca_EHL
