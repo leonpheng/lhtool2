@@ -2181,26 +2181,10 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 
 
 
-nca.cal<-function (data = data, n_lambda = 3, id = "id", time = "TAD",
+nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
                    dv = "dv", partialAUC = c(0,20, 2, 14), partialConc = c(4, 5))
 {
-  # dat <- data
-  # dat$time <- dat[, time]
-  # #dat[, "tad"] <- NULL
-  # dat$id <- dat[, id]
-  # dat$dv <- dat[, dv]
-  # dat$dose <- dat[, dose]
-  # dos <- nodup(dat[, c(id, "dose", "time", multiple.dose)], c(id,
-  #                                                           "dose", multiple.dose), "all")
-  # dos$time1 <- dos$time
-  # dos$uid <- paste0(dos$id, "-", dos$time, "-OCC")
-  # dos$OCC <- paste0(dos$time)
-  # dat1 <- dplyr::left_join(dat[, names(dat) != "dose"], dos)
-  # for (i in c("time1", "uid", "dose", "OCC")) {
-  #   dat1 <- locf2(dat1, i, "id")
-  # }
-
-  dat1<-data#$tad <- with(dat1,time - time1)
+   dat1<-data#$tad <- with(dat1,time - time1)
   dat1$id<-dat1[,id]
   dat1$time<-dat1[,time]
   dat1$dv<-dat1[,dv]
@@ -2215,12 +2199,9 @@ nca.cal<-function (data = data, n_lambda = 3, id = "id", time = "TAD",
   datauc <- dat
 
   auclast <- AUC(datauc, time = time, id = id, dv = dv)
-
   names(auclast) <- c(id, "AUClast")
-  #auclast <- plyr::join(auclast, idss)
   aucmlast <- AUC(datauc, time = time, id = id, dv = "dvtm")
   names(aucmlast) <- c(id, "AUMClast")
-  #aucmlast <- plyr::join(aucmlast, idss)
   dat$tad1 <- dat$tad
   aucpart <- NULL
   if (!is.null(partialAUC)) {
@@ -2238,8 +2219,6 @@ nca.cal<-function (data = data, n_lambda = 3, id = "id", time = "TAD",
                                                        2]
       }
     }
-    #aucpart <- dplyr::left_join(aucpart, idss)
-    #aucpart$idss <- NULL
     aucpart
   }  else {
     aucpart <- NULL
@@ -2258,16 +2237,13 @@ nca.cal<-function (data = data, n_lambda = 3, id = "id", time = "TAD",
         Cpart<-left_join(Cpart, partc)
       }
     }
-    #Cpart
-    #Cpart <- dplyr::left_join(Cpart, idss)
-    #Cpart$idss <- NULL
-    #Cpart
   } else {
     Cpart <- NULL
   }
+
+
   if (!is.null(n_lambda)) {
-    range(dat$time)
-    dat1 <- dat
+    dat1<-dat
     dat1$time <- dat1$tad
     dat1$tmp <- seq(nrow(dat1))
     dat1 <- addvar(dat1, id, "tmp", "max(x)", "yes", "tmp2")
@@ -2336,24 +2312,7 @@ nca.cal<-function (data = data, n_lambda = 3, id = "id", time = "TAD",
     test <- plyr::join(test, aucpart)
   }
   test$interc <- test$that <- NULL
-  #n <- names(test)
-  #n <- n[!n %in% c("id", "OCC")]
-  #test <- test[, c("id", "OCC", n)]
-  # if ("AUCinf_pred" %in% names(test) & is.numeric(test$dose)) {
-  #   test$CLobs <- with(test, dose/AUCinf_obs)
-  #   test$CLpred <- with(test, dose/AUCinf_pred)
-  #   test$Vss_obs <- with(test, CLobs * AUMCinf_obs)
-  #   test$Vss_pred <- with(test, CLpred * AUMCinf_pred)
-  #   test <- test[, !names(test) %in% c("Lambdac", "R2c",
-  #                                      "HLc", "thatc", "n_lambdac", "Clast_hatc", "intercc")]
-  #   names(test)[names(test) == "HL"] <- "HL_Lambda_z"
-  # }  else {
-  #   test$CLobs <- "Dose required"
-  #   test$CLpred <- "Dose required"
-  #   test$Vss_obs <- "Dose required"
-  #   test$Vss_pred <- "Dose required"
-  # }
-  test
+  test<-as.data.frame(test)
 }
 
 ##nca_EHL
