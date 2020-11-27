@@ -2274,7 +2274,7 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
 
   max <- ddply(dat1[, c("uid", "dv", "time", "time1")], .(uid),
                summarize, Cmax = max(dv), Tmax = time1[dv == max(dv)],
-               Cmin = min(dv[time >= time[dv == max(dv)]]), Tlast = max(dat$time1),
+               Cmin = min(dv[time >= time[dv == max(dv)]]), Tlast = max(dat1$time1),
                Clast = dv[time == max(time)])
   maxa <- ddply(dat1, .(uid), summarize, Clastc = dvtm[time ==
                                                          max(time)])
