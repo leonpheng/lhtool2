@@ -2163,8 +2163,6 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #' @param n_lambda  number of points for estimating the Lambda
 #' @param time Sampling time after dose (TAD)
 #' @param dv Concentration
-#' @param dosing.regimen PK profile profile flag (ex: single, sd, md ,ss).As vector or numeric. Note that only one prefile per dose is to be analyzed.
-#' @param dose Dose administered as vector. Required to estimate CL and Vss
 #' @param partialAUC Time interval for partial AUC. Ex: c(0,6,0,12,6,12) for AUC0-6, AUC0-12 and AUC6-12
 #' @param partialConc Point estimated concentration (Ex:c(1,4) for concentration after 1 and 4 h)
 #' @keywords nca.cal
@@ -2172,7 +2170,7 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #'@examples test<-nca.cal(data=data,n_lambda = 3, id = "id", time = "TAD", dv = "dv",dose
 
 nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
-                   dv = "dv", partialAUC = c(0,20, 2, 14), partialConc = c(4, 5))
+                   dv = "dv", partialAUC =NULL, partialConc =NULL)
 {
   dat1<-data
   dat1$id<-dat1[,id]
@@ -2247,11 +2245,11 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
     test1$n_lambda <- n_lambda
     test1$Clast_hat <- with(test1, exp(-Lambda * that + interc))
   head(dat3)
-      test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
-                    summarize, intercc = lm(log(dvtm) ~ time)$coef[1],
-                    Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1, R2c = summary(lm(log(dvtm) ~
-                                                                                    time))$r.squared, HLc = (log(2)/lm(log(dvtm) ~
-                                                                                                                         time)$coef[2]) * -1, thatc = max(time))
+test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
+                summarize, intercc = lm(log(dvtm) ~ time)$coef[1],
+                Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1, R2c = summary(lm(log(dvtm) ~
+                                                                              time))$r.squared, HLc = (log(2)/lm(log(dvtm) ~
+                 time)$coef[2]) * -1, thatc = max(time))
     test1a$n_lambdac <- n_lambda
     test1a$Clast_hatc <- with(test1a, exp(-Lambdac * thatc +
                                             intercc))
@@ -2265,10 +2263,20 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
 
   dat2$time1 <- dat2$time
 
-  max <- ddply(dat2[, c("uid", "dv", "time", "time1")], .(uid),
-               summarize, Cmax = max(dv), Tmax = time1[dv == max(dv)],
-               Cmin = min(dv[time >= time[dv == max(dv)]]), Tlast = max(time1),
-               Clast = dv[time == max(time)])
+  min(dat2$dv[dat2$time >= dat2$time[dat2$dv == max(dat2$dv)]])
+  time[dv == max(dv)]
+
+    max <- addvar(dat2,"uid","dv","min(x)","yes","Cmin")
+    max<-left_join(max,addvar(dat2,"uid","dv","max(x)","no","Cmax"))
+    max<-left_join(max,addvar(dat2,"uid","time1","max(x)","no","Tlast"))
+    clast<-max[max$time1==max$Tlast,c(id,dv)];names(clast)[2]<-"Clast"
+    max<-lhmutate(max[max[,dv]==max$Cmax,c(id,"time1","Cmin","Cmax","Tlast")],"time1=Tmax")
+    max<-left_join(max,clast)
+
+    # ddply(dat2[, c("uid", "dv", "time", "time1")], .(uid),
+    #            summarize, Cmax = max(dv), Tmax = time1[dv == max(dv)],
+    #            Cmin = min(dv), Tlast = max(time1),
+    #            Clast = dv[time == max(time)])
   maxa <- ddply(dat2, .(uid), summarize, Clastc = dvtm[time ==
                                                          max(time)])
   head(dat1)
@@ -2300,8 +2308,7 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
     test <- plyr::join(test, aucpart)
   }
   test$interc <- test$that <- NULL
-  test
-}
+  }
 
 ##nca_EHL
 #' Derive Effective Half-life and Accumulation Ratio
