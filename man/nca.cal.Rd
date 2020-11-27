@@ -8,10 +8,8 @@ nca.cal(
   data = data,
   n_lambda = 3,
   id = "id",
-  time = "time",
+  time = "TAD",
   dv = "dv",
-  dose = "amt",
-  multiple.dose = "flag",
   partialAUC = c(0, 20, 2, 14),
   partialConc = c(4, 5)
 )
@@ -27,13 +25,13 @@ nca.cal(
 
 \item{dv}{Concentration}
 
-\item{dose}{Dose administered as vector. Required to estimate CL and Vss}
-
 \item{partialAUC}{Time interval for partial AUC. Ex: c(0,6,0,12,6,12) for AUC0-6, AUC0-12 and AUC6-12}
 
 \item{partialConc}{Point estimated concentration (Ex:c(1,4) for concentration after 1 and 4 h)}
 
 \item{dosing.regimen}{PK profile profile flag (ex: single, sd, md ,ss).As vector or numeric. Note that only one prefile per dose is to be analyzed.}
+
+\item{dose}{Dose administered as vector. Required to estimate CL and Vss}
 }
 \description{
 nca.cal()

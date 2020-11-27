@@ -2180,36 +2180,47 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #'@examples ="amt",multiple.dose="flag",partialAUC=c(0,20,2,14),partialConc=c(4,5))
 
 
-nca.cal<-function (data=data,n_lambda = 3, id = "id", time = "time", dv = "dv",dose="amt",multiple.dose="flag",
-                   partialAUC=c(0,20,2,14),partialConc=c(4,5))
-{
-  dat <- data
-  dat$time <- dat[, time]
-  dat[, "tad"] <- NULL
-  dat$id <- dat[, id]
-  dat$dv <- dat[, dv]
-  dat$dose <- dat[, dose]
-  dos<-nodup(dat[,c(id,"dose",time,multiple.dose)],c(id,"dose",multiple.dose),"all")
-  dos$time1<-dos$time
-  dos$uid<-paste0(dos$id,"-",dos$time,"-OCC")
-  dos$OCC<-paste0(dos$time)
-  dat1<-dplyr::left_join(dat[,names(dat)!="dose"],dos)
-  for(i in c("time1","uid","dose","OCC")){
-  dat1<-locf2(dat1,i,"id")
-  }
-dat1$tad<-with(dat1,time-time1);dat1$tad[dat1$tad<0]<-0
-dat<-dat1
-  dat <- dat[order(dat$uid, dat$tad), ]
-  idss <- nodup(dat, c("uid","id", "dose","OCC"), "var")
-  dat$dvtm <- dat$dv * dat$time
-  datauc <- dat
-  auclast <- AUC(datauc, time = time, id = "uid", dv = dv)
-  names(auclast) <- c("uid", "AUClast")
-  auclast <- plyr::join(auclast, idss)
-  aucmlast <- AUC(datauc, time = time, id = "uid", dv = "dvtm")
-  names(aucmlast) <- c("uid", "AUMClast")
-  aucmlast <- plyr::join(aucmlast, idss)
 
+nca.cal<-function (data = data, n_lambda = 3, id = "id", time = "TAD",
+                   dv = "dv", partialAUC = c(0,20, 2, 14), partialConc = c(4, 5))
+{
+  # dat <- data
+  # dat$time <- dat[, time]
+  # #dat[, "tad"] <- NULL
+  # dat$id <- dat[, id]
+  # dat$dv <- dat[, dv]
+  # dat$dose <- dat[, dose]
+  # dos <- nodup(dat[, c(id, "dose", "time", multiple.dose)], c(id,
+  #                                                           "dose", multiple.dose), "all")
+  # dos$time1 <- dos$time
+  # dos$uid <- paste0(dos$id, "-", dos$time, "-OCC")
+  # dos$OCC <- paste0(dos$time)
+  # dat1 <- dplyr::left_join(dat[, names(dat) != "dose"], dos)
+  # for (i in c("time1", "uid", "dose", "OCC")) {
+  #   dat1 <- locf2(dat1, i, "id")
+  # }
+
+  dat1<-data#$tad <- with(dat1,time - time1)
+  dat1$id<-dat1[,id]
+  dat1$time<-dat1[,time]
+  dat1$dv<-dat1[,dv]
+  dat1$uid<-dat1[,id]
+
+  dat1$tad<-dat1[,time]
+  dat1$tad[dat1$tad < 0] <- 0
+  dat <- dat1
+  dat <- dat[order(dat[,id], dat$tad), ]
+  #idss <- nodup(dat, c("uid", "id", "dose", "OCC"), "var")
+  dat$dvtm <- dat[,dv] * dat[,time]
+  datauc <- dat
+
+  auclast <- AUC(datauc, time = time, id = id, dv = dv)
+
+  names(auclast) <- c(id, "AUClast")
+  #auclast <- plyr::join(auclast, idss)
+  aucmlast <- AUC(datauc, time = time, id = id, dv = "dvtm")
+  names(aucmlast) <- c(id, "AUMClast")
+  #aucmlast <- plyr::join(aucmlast, idss)
   dat$tad1 <- dat$tad
   aucpart <- NULL
   if (!is.null(partialAUC)) {
@@ -2218,86 +2229,90 @@ dat<-dat1
       tm1 <- partialAUC[z]
       tm2 <- partialAUC[z + 1]
       auc <- AUC(dat[dat[, "tad1"] >= tm1 & dat[, "tad1"] <=
-                       tm2, ], time = "tad1", id = "uid", dv = dv)
-      names(auc) <- c("uid", paste0("AUC", tm1, "-", tm2))
+                       tm2, ], time = "tad1", id = id, dv = dv)
+      names(auc) <- c(id, paste0("AUC", tm1, "-", tm2))
       if (z == 1) {
         aucpart <- rbind(aucpart, auc)
-      } else {
+      }      else {
         aucpart[, paste0("AUC", tm1, "-", tm2)] <- auc[,
                                                        2]
       }
     }
-    aucpart <- dplyr::left_join(aucpart, idss)
-    aucpart$idss <- NULL
+    #aucpart <- dplyr::left_join(aucpart, idss)
+    #aucpart$idss <- NULL
     aucpart
-  } else {
+  }  else {
     aucpart <- NULL
   }
-
   Cpart <- NULL
   if (!is.null(partialConc)) {
     nauc <- length(partialConc)
     for (z in 1:length(partialConc)) {
       tm1 <- partialConc[z]
-      partc <- dat[dat[, "tad1"] == tm1, c("uid", "dv")]
-      names(partc) <- c("uid", paste0("C", tm1))
+      partc <- dat[dat[, "tad1"] == tm1, c(id, dv)]
+      names(partc) <- c(id, paste0("C", tm1))
+
       if (z == 1) {
         Cpart <- rbind(Cpart, partc)
-      } else {
-        Cpart[, paste0("C", tm1)] <- partc[, 2]
+      }      else {
+        Cpart<-left_join(Cpart, partc)
       }
     }
-    Cpart
-    Cpart <- dplyr::left_join(Cpart, idss)
-    Cpart$idss <- NULL
-    Cpart
-  }else {
+    #Cpart
+    #Cpart <- dplyr::left_join(Cpart, idss)
+    #Cpart$idss <- NULL
+    #Cpart
+  } else {
     Cpart <- NULL
   }
-
   if (!is.null(n_lambda)) {
+    range(dat$time)
     dat1 <- dat
-    dat1$time<-dat1$tad
+    dat1$time <- dat1$tad
     dat1$tmp <- seq(nrow(dat1))
-    dat1 <- addvar(dat1, "uid", "tmp", "max(x)", "yes",
-                   "tmp2")
+    dat1 <- addvar(dat1, id, "tmp", "max(x)", "yes", "tmp2")
     head(dat1)
     dat1$tmp <- dat1$tmp2 - dat1$tmp
     dat1 <- dat1[dat1$tmp < n_lambda, ]
     str(dat1)
-    dat1[, c("uid", "time", "dv")]
+
     test1 <- ddply(dat1[, c("uid", "time", "dv")], .(uid),
-                   summarize, interc = lm(log(dv) ~ time)$coef[1], Lambda = lm(log(dv) ~ time)$coef[2] * -1, R2 = summary(lm(log(dv) ~ time))$r.squared, HL = (log(2)/lm(log(dv) ~ time)$coef[2]) *  -1, that = max(time))
+                   summarize, interc = lm(log(dv) ~ time)$coef[1], Lambda = lm(log(dv) ~
+                                                                                 time)$coef[2] * -1, R2 = summary(lm(log(dv) ~
+                                                                                                                       time))$r.squared, HL = (log(2)/lm(log(dv) ~ time)$coef[2]) *
+                     -1, that = max(time))
     test1$n_lambda <- n_lambda
     test1$Clast_hat <- with(test1, exp(-Lambda * that + interc))
-    test1a <- ddply(dat1[, c("uid", "time", "dvtm")], .(uid),
+    test1a <- ddply(dat1[, c("uid", "time", "dv","dvtm")], .(uid),
                     summarize, intercc = lm(log(dvtm) ~ time)$coef[1],
-                    Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1,
-                    R2c = summary(lm(log(dvtm) ~ time))$r.squared,
-                    HLc = (log(2)/lm(log(dvtm) ~ time)$coef[2]) * -1,
-                    thatc = max(time))
+                    Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1, R2c = summary(lm(log(dvtm) ~
+                                                                                    time))$r.squared, HLc = (log(2)/lm(log(dvtm) ~
+                                                                                                                         time)$coef[2]) * -1, thatc = max(time))
     test1a$n_lambdac <- n_lambda
     test1a$Clast_hatc <- with(test1a, exp(-Lambdac * thatc +
                                             intercc))
-  }else {
+  }  else {
     test1 <- NULL
   }
   if (TRUE %in% c(test1$HL < 0)) {
     test1$Warning.HL.Negative = ifelse(test1$HL, "yes", "")
   }
-  dat$time1<-dat$time
-  max <- ddply(dat[, c("uid", "dv", "time", "time1")], .(uid),
+
+
+  dat1$time1 <- dat1$time
+
+  max <- ddply(dat1[, c("uid", "dv", "time", "time1")], .(uid),
                summarize, Cmax = max(dv), Tmax = time1[dv == max(dv)],
                Cmin = min(dv[time >= time[dv == max(dv)]]), Tlast = max(dat$time1),
                Clast = dv[time == max(time)])
-  maxa <- ddply(dat, .(uid), summarize, Clastc = dvtm[time ==
+  maxa <- ddply(dat1, .(uid), summarize, Clastc = dvtm[time ==
                                                          max(time)])
-  head(dat)
-  test <- plyr::join(max, idss)
-  test <- plyr::join(test, maxa)
+  head(dat1)
+  #test <- plyr::join(max, idss)
+  test <- plyr::join(max, maxa)
   test <- plyr::join(test, auclast)
   test <- plyr::join(test, aucmlast)
-if (!is.null(n_lambda)) {
+  if (!is.null(n_lambda)) {
     test <- join(test, test1)
     test <- join(test, test1a)
     test$AUCinf_obs <- abs(as.numeric(as.character(test$AUClast)) +
@@ -2311,7 +2326,7 @@ if (!is.null(n_lambda)) {
     test$MRTlast <- test$AUMClast/test$AUClast
     test$MRTobs <- test$AUMCinf_obs/test$AUCinf_obs
     test$MRTpred <- test$AUMCinf_pred/test$AUCinf_pred
-  }else {
+  }  else {
     test$MRTlast <- test$AUMClast/test$AUClast
   }
   if (!is.null(Cpart)) {
@@ -2320,27 +2335,26 @@ if (!is.null(n_lambda)) {
   if (!is.null(aucpart)) {
     test <- plyr::join(test, aucpart)
   }
-test$uid  <- test$interc <- test$that <- NULL
-  n <- names(test)
-  n <- n[!n %in% c("id", "OCC")]
-  test <- test[, c("id", "OCC", n)]
-if ("AUCinf_pred" %in% names(test) & is.numeric(test$dose)) {
-    test$CLobs <- with(test, dose/AUCinf_obs)
-    test$CLpred <- with(test, dose/AUCinf_pred)
-    test$Vss_obs <- with(test, CLobs * AUMCinf_obs)
-    test$Vss_pred <- with(test, CLpred * AUMCinf_pred)
-    test <- test[, !names(test) %in% c("Lambdac", "R2c",
-                                       "HLc", "thatc", "n_lambdac", "Clast_hatc", "intercc")]
-    names(test)[names(test) == "HL"] <- "HL_Lambda_z"
-  }else {
-    test$CLobs <- "Dose required"
-    test$CLpred <- "Dose required"
-    test$Vss_obs <- "Dose required"
-    test$Vss_pred <- "Dose required"
-  }
-test
+  test$interc <- test$that <- NULL
+  #n <- names(test)
+  #n <- n[!n %in% c("id", "OCC")]
+  #test <- test[, c("id", "OCC", n)]
+  # if ("AUCinf_pred" %in% names(test) & is.numeric(test$dose)) {
+  #   test$CLobs <- with(test, dose/AUCinf_obs)
+  #   test$CLpred <- with(test, dose/AUCinf_pred)
+  #   test$Vss_obs <- with(test, CLobs * AUMCinf_obs)
+  #   test$Vss_pred <- with(test, CLpred * AUMCinf_pred)
+  #   test <- test[, !names(test) %in% c("Lambdac", "R2c",
+  #                                      "HLc", "thatc", "n_lambdac", "Clast_hatc", "intercc")]
+  #   names(test)[names(test) == "HL"] <- "HL_Lambda_z"
+  # }  else {
+  #   test$CLobs <- "Dose required"
+  #   test$CLpred <- "Dose required"
+  #   test$Vss_obs <- "Dose required"
+  #   test$Vss_pred <- "Dose required"
+  # }
+  test
 }
-
 
 ##nca_EHL
 #' Derive Effective Half-life and Accumulation Ratio
