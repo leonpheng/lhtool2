@@ -2179,12 +2179,10 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #'@examples test<-nca.cal(data=data,n_lambda = 3, id = "id", time = "time", dv = "dv",dose
 #'@examples ="amt",multiple.dose="flag",partialAUC=c(0,20,2,14),partialConc=c(4,5))
 
-
-
 nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
                    dv = "dv", partialAUC = c(0,20, 2, 14), partialConc = c(4, 5))
 {
-   dat1<-data#$tad <- with(dat1,time - time1)
+  dat1<-data
   dat1$id<-dat1[,id]
   dat1$time<-dat1[,time]
   dat1$dv<-dat1[,dv]
@@ -2192,24 +2190,23 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
 
   dat1$tad<-dat1[,time]
   dat1$tad[dat1$tad < 0] <- 0
-  dat <- dat1
-  dat <- dat[order(dat[,id], dat$tad), ]
-  #idss <- nodup(dat, c("uid", "id", "dose", "OCC"), "var")
-  dat$dvtm <- dat[,dv] * dat[,time]
-  datauc <- dat
+  dat2 <- dat1
+  dat2 <- dat2[order(dat2[,id], dat2$tad), ]
+  dat2$dvtm <- dat2[,dv] * dat2[,time]
 
+  datauc <- dat2
   auclast <- AUC(datauc, time = time, id = id, dv = dv)
   names(auclast) <- c(id, "AUClast")
   aucmlast <- AUC(datauc, time = time, id = id, dv = "dvtm")
   names(aucmlast) <- c(id, "AUMClast")
-  dat$tad1 <- dat$tad
+  dat2$tad1 <- dat2$tad
   aucpart <- NULL
   if (!is.null(partialAUC)) {
     nauc <- length(partialAUC)/2
     for (z in seq(1, length(partialAUC), 2)) {
       tm1 <- partialAUC[z]
       tm2 <- partialAUC[z + 1]
-      auc <- AUC(dat[dat[, "tad1"] >= tm1 & dat[, "tad1"] <=
+      auc <- AUC(dat2[dat2[, "tad1"] >= tm1 & dat2[, "tad1"] <=
                        tm2, ], time = "tad1", id = id, dv = dv)
       names(auc) <- c(id, paste0("AUC", tm1, "-", tm2))
       if (z == 1) {
@@ -2228,7 +2225,7 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
     nauc <- length(partialConc)
     for (z in 1:length(partialConc)) {
       tm1 <- partialConc[z]
-      partc <- dat[dat[, "tad1"] == tm1, c(id, dv)]
+      partc <- dat2[dat2[, "tad1"] == tm1, c(id, dv)]
       names(partc) <- c(id, paste0("C", tm1))
 
       if (z == 1) {
@@ -2243,23 +2240,21 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
 
 
   if (!is.null(n_lambda)) {
-    dat1<-dat
-    dat1$time <- dat1$tad
-    dat1$tmp <- seq(nrow(dat1))
-    dat1 <- addvar(dat1, id, "tmp", "max(x)", "yes", "tmp2")
-    head(dat1)
-    dat1$tmp <- dat1$tmp2 - dat1$tmp
-    dat1 <- dat1[dat1$tmp < n_lambda, ]
-    str(dat1)
-
-    test1 <- ddply(dat1[, c("uid", "time", "dv")], .(uid),
+    dat3<-dat2
+    dat3$time <- dat3$tad
+    dat3$tmp <- seq(nrow(dat3))
+    dat3 <- addvar(dat3, id, "tmp", "max(x)", "yes", "tmp2")
+    head(dat3)
+    dat3$tmp <- dat3$tmp2 - dat3$tmp
+    dat3 <- dat3[dat3$tmp < n_lambda, ]
+    test1 <- ddply(dat3[, c("uid", "time", "dv")], .(uid),
                    summarize, interc = lm(log(dv) ~ time)$coef[1], Lambda = lm(log(dv) ~
                                                                                  time)$coef[2] * -1, R2 = summary(lm(log(dv) ~
                                                                                                                        time))$r.squared, HL = (log(2)/lm(log(dv) ~ time)$coef[2]) *
                      -1, that = max(time))
     test1$n_lambda <- n_lambda
     test1$Clast_hat <- with(test1, exp(-Lambda * that + interc))
-    test1a <- ddply(dat1[, c("uid", "time", "dv","dvtm")], .(uid),
+    test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
                     summarize, intercc = lm(log(dvtm) ~ time)$coef[1],
                     Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1, R2c = summary(lm(log(dvtm) ~
                                                                                     time))$r.squared, HLc = (log(2)/lm(log(dvtm) ~
