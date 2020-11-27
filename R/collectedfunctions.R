@@ -165,7 +165,7 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
 #' @export
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
-#'@examples
+
 
 lhtab2<-function (data =nodup(dat,"ID","all"), sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST"),
                   stats = c("length(x[!is.na(x)])=N","length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean","median(x,na.rm=T)=Median","quantile(x,0.5,na.rm=T)=50thPI","mean(x,na.rm=T)=Mean","cv(x)=CV%","min(x)=Min","max(x)=Max","geocv(x)=GeoCV%"), stat.group = list(c("N", " (","Nmiss", ")"),c("Mean"," (","CV%",")"), c("Median"," [","Min",", ","Max","]"),c("GeoMean"," (","GeoCV%",")")),render = "flextable", overall = "yes",format="stacked")
@@ -2246,7 +2246,8 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
                      -1, that = max(time))
     test1$n_lambda <- n_lambda
     test1$Clast_hat <- with(test1, exp(-Lambda * that + interc))
-    test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
+  head(dat3)
+      test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
                     summarize, intercc = lm(log(dvtm) ~ time)$coef[1],
                     Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1, R2c = summary(lm(log(dvtm) ~
                                                                                     time))$r.squared, HLc = (log(2)/lm(log(dvtm) ~
@@ -2262,13 +2263,13 @@ nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
   }
 
 
-  dat1$time1 <- dat1$time
+  dat2$time1 <- dat2$time
 
-  max <- ddply(dat1[, c("uid", "dv", "time", "time1")], .(uid),
+  max <- ddply(dat2[, c("uid", "dv", "time", "time1")], .(uid),
                summarize, Cmax = max(dv), Tmax = time1[dv == max(dv)],
-               Cmin = min(dv[time >= time[dv == max(dv)]]), Tlast = max(dat1$time1),
+               Cmin = min(dv[time >= time[dv == max(dv)]]), Tlast = max(time1),
                Clast = dv[time == max(time)])
-  maxa <- ddply(dat1, .(uid), summarize, Clastc = dvtm[time ==
+  maxa <- ddply(dat2, .(uid), summarize, Clastc = dvtm[time ==
                                                          max(time)])
   head(dat1)
   #test <- plyr::join(max, idss)
