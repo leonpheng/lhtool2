@@ -2308,6 +2308,7 @@ test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
     test <- plyr::join(test, aucpart)
   }
   test$interc <- test$that <- NULL
+  test
   }
 
 ##nca_EHL
