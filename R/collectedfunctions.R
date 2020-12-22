@@ -394,7 +394,7 @@ lhtab1<-function (data = df, sort.by = c("study", "form"), cont =NULL,
     dcat<-dcat[order(dcat$sort),]
     catheader <- nodup(dcat[, c(sort.by, "sort")], "sort",
                        "all")
-    #t11 <- lhtool::lhcattab(dcat, cat, "sort")
+    t11 <- lhtool::lhcattab(dcat, cat, "sort")
     #head(t11)
     t11<-t11[,c("var","value",catheader$sort,"overall")]
     total<-addvar(dcat,"sort",cat,"length(x)","no","tot")
