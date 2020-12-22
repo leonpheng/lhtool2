@@ -7,7 +7,7 @@
 lhtab1(
   data = df,
   sort.by = c("study", "form"),
-  cont = cont,
+  cont = NULL,
   cat = cat,
   stats = "stat1",
   fun = "fun1",
