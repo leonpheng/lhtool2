@@ -709,7 +709,9 @@ lhmutate<-function(data,mutate){
 #' @export
 #' @examples
 #' lhwide()
+#'
 lhwide<-function(data,wide.data,wide.vector){
+  data<-data[,c(names(data)[!names(data)%in%c(wide.data,wide.vector)],wide.vector,wide.data)]
   b <- function(x) {}
   x1<-paste(paste(names(data)[!names(data)%in%c(wide.data,wide.vector)],collapse="+"),"~",wide.vector)
   body(b) <- parse(text = x1)

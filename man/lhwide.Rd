@@ -17,5 +17,6 @@ Reshape wide
 }
 \examples{
 lhwide()
+
 }
 \keyword{lhwide()}
