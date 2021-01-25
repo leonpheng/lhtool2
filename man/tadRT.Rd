@@ -10,7 +10,8 @@ tadRT(
   date = "DATE",
   time = "CTIME",
   EVID = "EVID",
-  tz = "UTC"
+  tz = "UTC",
+  format = "\%Y-\%m-\%d \%H:\%M"
 )
 }
 \arguments{
