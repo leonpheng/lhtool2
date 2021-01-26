@@ -1,3 +1,24 @@
+#' CHECK TIME VARYING OR DUPLICATE
+#'
+#' Verify if vector is varying or duplicate
+#' @param data data frame
+#' @param by Fixed or sorted vector (s)
+#' @param var Vector (s) to be verified
+#' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
+#' @export
+#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
+#'@examples print(tab1,"Demog.docx")
+#'@examples
+lhtime_var<-function(data=dat1,by="ID",var=c("BBILI","BILI")){
+  tab<-NULL
+  for(i in var){
+    x<-nrow(dup2(nodup(data,c(by,i),"var"),by,"all"))
+    z<-data.frame(variable=paste0(by[1],"~",i),Multiple=ifelse(x==0,"No","Yes"))
+    tab<-rbind(tab,z)# BEGFR duplicate for this ID 282
+  }
+  tab}
+
+
 #' Make Flexible table
 #'
 #' Generate descriptive statistic of continuous variable with style
