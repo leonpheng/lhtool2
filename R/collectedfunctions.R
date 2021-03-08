@@ -1,3 +1,26 @@
+#' Create define or data specification
+#'
+#' Verify if vector is varying or duplicate
+#' @param lab data specification c(variable name;;label;;unit)
+#' @keywords lh_data_spec
+#' @export
+#'@examples lh_data_spec(lab)
+
+lh_data_spec<-function(lab=c("a;;testa;;mg","b;;testb;;ug","c;;testc;; ")){
+  def<-NULL
+  for(i in 1:length(lab)){
+    unit<-gsub(".*;;","",lab[i])
+    label<-gsub(paste0(";;",unit),"",lab[i])
+    label<-gsub(".;;","",label)
+    varn<-gsub(paste0(";;",unit),"",lab[i])
+    varn<-gsub(";;.*","",varn)
+    def<-rbind(def,data.frame(variable=varn,label=label,unit=unit))
+  }
+  def
+}
+
+
+
 #' CHECK TIME VARYING OR DUPLICATE
 #'
 #' Verify if vector is varying or duplicate
