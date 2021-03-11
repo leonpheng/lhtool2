@@ -11,7 +11,7 @@ lh_data_spec<-function(lab=c("a;;testa;;mg","b;;testb;;ug","c;;testc;; ")){
   for(i in 1:length(lab)){
     unit<-gsub(".*;;","",lab[i])
     label<-gsub(paste0(";;",unit),"",lab[i])
-    label<-gsub(".;;","",label)
+    label<-gsub(".*;;","",label)
     varn<-gsub(paste0(";;",unit),"",lab[i])
     varn<-gsub(";;.*","",varn)
     def<-rbind(def,data.frame(variable=varn,label=label,unit=unit))
