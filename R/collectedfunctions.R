@@ -6,14 +6,14 @@
 #' @export
 #'@examples lh_data_spec(lab)
 
-lh_data_spec<-function(lab=c("a;;testa;;mg","b;;testb;;ug","c;;testc;; ")){
+lh_data_spec<-function(lab=c("code<>define<>unit","b<>test>=b<>ug","c<>test<c;b;a<> ")){
   def<-NULL
   for(i in 1:length(lab)){
-    unit<-gsub(".*;;","",lab[i])
-    label<-gsub(paste0(";;",unit),"",lab[i])
-    label<-gsub(".*;;","",label)
-    varn<-gsub(paste0(";;",unit),"",lab[i])
-    varn<-gsub(";;.*","",varn)
+    unit<-gsub(".*<>","",lab[i])
+    label<-gsub(paste0("<>",unit),"",lab[i])
+    label<-gsub(".*<>","",label)
+    varn<-gsub(paste0("<>",unit),"",lab[i])
+    varn<-gsub("<>.*","",varn)
     def<-rbind(def,data.frame(variable=varn,label=label,unit=unit))
   }
   def
@@ -32,7 +32,7 @@ lh_data_spec<-function(lab=c("a;;testa;;mg","b;;testb;;ug","c;;testc;; ")){
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
 #'@examples
-lhtime_var<-function(data=dat1,by="ID",var=c("BBILI","BILI")){
+lhtime_var<-function(data,by="ID",var=c("BBILI","BILI")){
   tab<-NULL
   for(i in var){
     x<-nrow(dup2(nodup(data,c(by,i),"var"),by,"all"))
@@ -211,7 +211,7 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
 #'@examples print(tab1,"Demog.docx")
 
 
-lhtab2<-function (data =nodup(dat,"ID","all"), sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST"),
+lhtab2<-function (data, sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST"),
                   stats = c("length(x[!is.na(x)])=N","length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean","median(x,na.rm=T)=Median","quantile(x,0.5,na.rm=T)=50thPI","mean(x,na.rm=T)=Mean","cv(x)=CV%","min(x)=Min","max(x)=Max","geocv(x)=GeoCV%"), stat.group = list(c("N", " (","Nmiss", ")"),c("Mean"," (","CV%",")"), c("Median"," [","Min",", ","Max","]"),c("GeoMean"," (","GeoCV%",")")),render = "flextable", overall = "yes",format="stacked")
 
 {
@@ -358,8 +358,8 @@ lhtab2<-function (data =nodup(dat,"ID","all"), sort.by = c("STUDYID","SEXC"), co
 #'@examples print(tab1,"Demog.docx")
 #'@examples
 
-lhtab1<-function (data = df, sort.by = c("study", "form"), cont =NULL,
-                  cat = cat, stats = "stat1", fun = "fun1", overall = "yes",
+lhtab1<-function (data , sort.by = c("study", "form"), cont =NULL,
+                  cat = c("Sex","Race"), stats = "stat1", fun = "fun1", overall = "yes",
                   render = "flex", transpose = F)
 {
   N = "length(x[!is.na(x)])=N"
@@ -382,8 +382,10 @@ lhtab1<-function (data = df, sort.by = c("study", "form"), cont =NULL,
             QT025, QT975, CI95, CI05, QT05, QT95)
   fun1 = c("MEAN", " (", "CV", ")\n ", "MEDIAN", " [", "MIN",
            ", ", "MAX", "]")
+
   fun2 = c("MEAN", " (", "CV", ")\n ", "MEDIAN", " [", "MIN",
            ", ", "MAX", "]\n", "GEOM", " (", "GEOCV", ")")
+
   if (stats == "stat1") {
     comp.stats = stat1
   } else {
@@ -406,7 +408,9 @@ lhtab1<-function (data = df, sort.by = c("study", "form"), cont =NULL,
   }  else {
     data3 <- data
   }
+
   if (!is.null(cont)) {
+
     t1 <- addvar2(data3, sort = sort.by, cont, comp.stats)
     s2 <- sub(".*)=", "", stat1)
     t1$sum = ""
@@ -429,6 +433,7 @@ lhtab1<-function (data = df, sort.by = c("study", "form"), cont =NULL,
   } else {
     t2 = NULL
   }
+
   if (!is.null(cat)) {
     dcat <- data
     dcat$sort <- ""
@@ -688,7 +693,7 @@ lhcut<-function(data,var="AGE",breaks=c(20,40,60),labels="fancy",right=F,newvar=
 #' @export
 #' @examples
 
-lhfactor<-function(data=test,leader="AGEcat",follower="catt"){
+lhfactor<-function(data,leader="AGEcat",follower="catt"){
   lab<-nodup(data,c(leader,follower),"var");lab<-lab[order(lab[,leader]),follower]
   data<-reflag(data,follower,lab)
 }
@@ -2242,7 +2247,7 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 #' @export
 #'@examples test<-nca.cal(data=data,n_lambda = 3, id = "id", time = "TAD", dv = "dv",dose
 
-nca.cal<-function (data = df, n_lambda = 3, id = "id", time = "TAD",
+nca.cal<-function (data, n_lambda = 3, id = "id", time = "TAD",
                    dv = "dv", partialAUC =NULL, partialConc =NULL)
 {
   dat1<-data

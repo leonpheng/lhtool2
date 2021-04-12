@@ -5,7 +5,7 @@
 \title{Descriptive Statistics Continuous with Style}
 \usage{
 lhtab2(
-  data = nodup(dat, "ID", "all"),
+  data,
   sort.by = c("STUDYID", "SEXC"),
   cont = c("ALT", "BAST", "AST"),
   stats = c("length(x[!is.na(x)])=N", "length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean",

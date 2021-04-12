@@ -5,7 +5,7 @@
 \title{Derive Common NCA parameters using single and multiple profiles}
 \usage{
 nca.cal(
-  data = df,
+  data,
   n_lambda = 3,
   id = "id",
   time = "TAD",

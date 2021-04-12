@@ -5,10 +5,10 @@
 \title{Descriptive Statistics Continuous and Discrete}
 \usage{
 lhtab1(
-  data = df,
+  data,
   sort.by = c("study", "form"),
   cont = NULL,
-  cat = cat,
+  cat = c("Sex", "Race"),
   stats = "stat1",
   fun = "fun1",
   overall = "yes",

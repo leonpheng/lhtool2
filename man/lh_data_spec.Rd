@@ -4,7 +4,9 @@
 \alias{lh_data_spec}
 \title{Create define or data specification}
 \usage{
-lh_data_spec(lab = c("a;;testa;;mg", "b;;testb;;ug", "c;;testc;; "))
+lh_data_spec(
+  lab = c("code<>define<>unit", "b<>test>=b<>ug", "c<>test<c;b;a<> ")
+)
 }
 \arguments{
 \item{lab}{data specification c(variable name;;label;;unit)}

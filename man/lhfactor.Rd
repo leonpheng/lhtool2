@@ -4,7 +4,7 @@
 \alias{lhfactor}
 \title{Change factor level of a variable using matched level of another variable in the same dataset}
 \usage{
-lhfactor(data = test, leader = "AGEcat", follower = "catt")
+lhfactor(data, leader = "AGEcat", follower = "catt")
 }
 \arguments{
 \item{data}{Data frame}

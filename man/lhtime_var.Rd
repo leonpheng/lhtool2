@@ -4,7 +4,7 @@
 \alias{lhtime_var}
 \title{CHECK TIME VARYING OR DUPLICATE}
 \usage{
-lhtime_var(data = dat1, by = "ID", var = c("BBILI", "BILI"))
+lhtime_var(data, by = "ID", var = c("BBILI", "BILI"))
 }
 \arguments{
 \item{data}{data frame}
