@@ -12,7 +12,4 @@ cv(x)
 \description{
 cv Table function
 }
-\examples{
-cv()
-}
 \keyword{cv}

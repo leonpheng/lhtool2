@@ -14,7 +14,4 @@ one(data, var)
 \description{
 one.
 }
-\examples{
-one()
-}
 \keyword{one}

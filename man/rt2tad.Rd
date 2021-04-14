@@ -18,7 +18,4 @@ rt2tad(data, id = "USUBJID", time = "RTIME", evid = "EVID")
 \description{
 This function allows you to derive Time after dose from Time after first dose.
 }
-\examples{
-rt2tad()
-}
 \keyword{rt2tad}

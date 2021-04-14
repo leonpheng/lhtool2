@@ -16,7 +16,4 @@ m6(data, id, evid, mdv, blq.flag, time, dv, lloq)
 \description{
 This function allows you to create data with BLQ using M6 method.
 }
-\examples{
-tad_addl()
-}
 \keyword{m6}

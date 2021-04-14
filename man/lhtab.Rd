@@ -22,7 +22,4 @@ lhtab(data, vh, value, ord = NULL, save.name = NULL, output = "csv")
 \description{
 Make simple table. Use data frame created by addvar2
 }
-\examples{
-lhtab()
-}
 \keyword{lhtab()}

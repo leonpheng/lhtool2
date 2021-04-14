@@ -12,7 +12,4 @@ hl2cpt(data, cl, cl2, v, v2, output)
 \description{
 This function allows you to derive micro constants and HL.
 }
-\examples{
-hl2cpt(pkdat1,"cl","cl2","v","v2","all")
-}
 \keyword{hl2cpt}

@@ -14,7 +14,4 @@ nmiss(x)
 nmiss Table function
 internal use.
 }
-\examples{
-nmiss()
-}
 \keyword{nmiss}

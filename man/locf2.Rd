@@ -18,7 +18,4 @@ locf2(data, by = "ID", var = "TIME", locb = T)
 \description{
 LOCF LOCB function
 }
-\examples{
-locf2()
-}
 \keyword{locb2}

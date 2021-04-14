@@ -14,7 +14,4 @@ ciup(x)
 ciup Table function
 internal use.
 }
-\examples{
-ciup()
-}
 \keyword{ciup}

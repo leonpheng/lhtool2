@@ -12,7 +12,4 @@ txt(c)
 \description{
 Clone expression function for adding special formats and symbol to plots.
 }
-\examples{
-txt()
-}
 \keyword{txt()}

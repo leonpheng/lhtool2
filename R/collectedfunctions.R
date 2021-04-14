@@ -2,11 +2,11 @@
 #'
 #' Verify if vector is varying or duplicate
 #' @param lab data specification c(variable name;;label;;unit)
-#' @keywords lh_data_spec
+#' @keywords lh.def
 #' @export
-#'@examples lh_data_spec(lab)
+#'@examples lh.def(lab)
 
-lh_data_spec<-function(lab=c("code<>define<>unit","b<>test>=b<>ug","c<>test<c;b;a<> ")){
+lh.def<-function(lab=c("code<>define<>unit","b<>test>=b<>ug","c<>test<c;b;a<> ")){
   def<-NULL
   for(i in 1:length(lab)){
     unit<-gsub(".*<>","",lab[i])
@@ -31,7 +31,7 @@ lh_data_spec<-function(lab=c("code<>define<>unit","b<>test>=b<>ug","c<>test<c;b;
 #' @export
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
-#'@examples
+
 lhtime_var<-function(data,by="ID",var=c("BBILI","BILI")){
   tab<-NULL
   for(i in var){
@@ -50,7 +50,7 @@ lhtime_var<-function(data,by="ID",var=c("BBILI","BILI")){
 #' @export
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
-#'@examples
+
 
 lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL,
           merge.all = "yes", size = 12, empty = NULL, cf = NULL, border = NULL,
@@ -356,7 +356,7 @@ lhtab2<-function (data, sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST
 #' @export
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
-#'@examples
+
 
 lhtab1<-function (data , sort.by = c("study", "form"), cont =NULL,
                   cat = c("Sex","Race"), stats = "stat1", fun = "fun1", overall = "yes",
@@ -659,7 +659,7 @@ print(varn1)
 #'  @param newvar vector name of the categorical. If default, the var with suffix"cat" will be used as default name
 #' @keywords lhcut()
 #' @export
-#' @examples
+
 
 lhcut<-function(data,var="AGE",breaks=c(20,40,60),labels="fancy",right=F,newvar="default"){
   brk=c(min(data[,var]),breaks,max(data[,var])^2)
@@ -691,7 +691,7 @@ lhcut<-function(data,var="AGE",breaks=c(20,40,60),labels="fancy",right=F,newvar=
 #' @param follower follower Variable
 #' @keywords lhfactor()
 #' @export
-#' @examples
+
 
 lhfactor<-function(data,leader="AGEcat",follower="catt"){
   lab<-nodup(data,c(leader,follower),"var");lab<-lab[order(lab[,leader]),follower]
@@ -707,7 +707,7 @@ lhfactor<-function(data,leader="AGEcat",follower="catt"){
 #' @param combine.var Variable name, c(var1,var2). var1 will be stacked over var 2
 #' @keywords stackvar()
 #' @export
-#' @examples
+
 stackvar<-function(data,combine.var=c("xxx","variable")){
   z=data
   z$dum <- seq(nrow(z))
@@ -732,7 +732,7 @@ stackvar<-function(data,combine.var=c("xxx","variable")){
 #' @param mutate Vector to be mutated ex. "xxx=yyy" for renaming xxx as yyy
 #' @keywords lhmutate()
 #' @export
-#' @examples
+
 lhmutate<-function(data,mutate){
   keep<-sub("=.*","",mutate)%in%names(data)
   imp<-sub(".*=","",mutate)[keep]
@@ -756,9 +756,8 @@ lhmutate<-function(data,mutate){
 #' @param data Dataset
 #' @keywords lhwide()
 #' @export
-#' @examples
-#' lhwide()
-#'
+#' @examples lhwide()
+
 lhwide<-function(data,wide.data,wide.vector){
   data<-data[,c(names(data)[!names(data)%in%c(wide.data,wide.vector)],wide.vector,wide.data)]
   b <- function(x) {}
@@ -773,8 +772,8 @@ lhwide<-function(data,wide.data,wide.vector){
 #'
 #' @keywords lhlong()
 #' @export
-#' @examples
-#' lhlong()
+#' @examples lhlong()
+
 lhlong<-function(data,long.vector){
   z1<-reshape2::melt(data,names(data)[!names(data)%in%long.vector])
 }
@@ -785,8 +784,8 @@ lhlong<-function(data,long.vector){
 #' @param dat1,dat2 Dataset 1 and 2"
 #' @keywords findiff()
 #' @export
-#' @examples
-#' findiff()
+#' @examples findiff()
+
 
 findiff<-function(dat1,dat2){
  # stopifnot(nrow(dat1)==nrow(dat2))
@@ -817,8 +816,7 @@ findiff<-function(dat1,dat2){
 #' @param type could be "full", "left","right" or "inner"
 #' @keywords lhjoin()
 #' @export
-#' @examples
-#' lhjoin()
+
 lhjoin<-function(dat1,by1=NULL,dat2,by2=NULL,type="full"){
   invar<-intersect(names(dat1),names(dat2))
   if(is.null(by1)){
@@ -870,8 +868,7 @@ lhjoin<-function(dat1,by1=NULL,dat2,by2=NULL,type="full"){
 #' @param var Order by variables. ex: ":Trt,:Agegr"
 #' @keywords lhorder()
 #' @export
-#' @examples
-#' lhorder()
+
 
 lhorder<-function(dat,var){
   data<-dat
@@ -894,8 +891,7 @@ lhorder<-function(dat,var){
 #' @param output output="csv" for csv output, else output will be in FlexTable format
 #' @keywords lhtab()
 #' @export
-#' @examples
-#' lhtab()
+
 
 lhtab<-function (data, vh, value, ord = NULL, save.name = NULL, output = "csv")
 {
@@ -1006,8 +1002,6 @@ lhtab<-function (data, vh, value, ord = NULL, save.name = NULL, output = "csv")
 #' @param c text. Example: c("Concentration mg L","-1::s"," AUC::u"," Delta::i","moles::e"). s=subscript, u=underline, Delta= capital greek delta letter, i= italic, e=superscript
 #' @keywords txt()
 #' @export
-#' @examples
-#' txt()
 
 txt<-function(c){
   z1<-""
@@ -1038,8 +1032,7 @@ txt<-function(c){
 #' @param packages pre-define packages list.
 #' @keywords install.pack
 #' @export
-#' @examples
-#' install.pack()
+
 
 install.pack<-function(...){
   packages <- c("SASxport", "reshape", "Hmisc", "tidyr","ReporteRs","plyr","downloader")
@@ -1053,8 +1046,7 @@ install.pack<-function(...){
 #'
 #' @keywords lhrbind
 #' @export
-#' @examples
-#' lhrbind()
+
 
 lhrbind<-function (dat1, dat2, na.replace = NA, all.character = T)
 {
@@ -1076,8 +1068,7 @@ lhrbind<-function (dat1, dat2, na.replace = NA, all.character = T)
 #'
 #' @keywords lhcbind
 #' @export
-#' @examples
-#' lhcbind()
+
 
 lhcbind<-function(dat1,dat2){
   dat1=as.data.frame(dat1)
@@ -1110,8 +1101,7 @@ lhcbind<-function(dat1,dat2){
 #' @param span LOESS stiffness
 #' @keywords lhloess
 #' @export
-#' @examples
-#' lhloess()
+
 
 
 lhloess<-function(data,x,y,by,span=1){
@@ -1147,8 +1137,7 @@ lhloess<-function(data,x,y,by,span=1){
 #' @param dose.expand If "yes", all dosing rows in ADDL will be outputed
 #' @keywords tad
 #' @export
-#' @examples
-#' tad_addl()
+
 
 tad_addl<-function (data,id="USUBJID", ii="II", addl="ADDL", rtime="RTIME", evid="EVID", dose.expand = "yes",cdate="DATE",ctime="CTIME")
 {
@@ -1226,8 +1215,7 @@ tad_addl<-function (data,id="USUBJID", ii="II", addl="ADDL", rtime="RTIME", evid
 #' @param evid EVID vector
 #' @keywords m6
 #' @export
-#' @examples
-#' tad_addl()
+
 m6<-function(data,id,evid,mdv,blq.flag,time,dv,lloq){
   dat<-data
   #id="id";time="RTIME";mdv="mdv";evid="evid";blq.flag="blqf";dv="dv";lloq=0.01
@@ -1270,8 +1258,7 @@ m4$cum<-m4$cum1<- m4$good<-m4$good1<-m4$good2<-m4$good3<-NULL
 #' @param newvar Create new vector
 #' @keywords reflag
 #' @export
-#' @examples
-#' reflag(dat,var="SEX",c("M","F"),c("Male","Female"),"SEXCH"))
+
 reflag<-function (dat, var, orignal.flag, new.flag=NULL,newvar=NULL,to.factor=T,missing=c("",".","NA",NA))
 {
   if(is.null(new.flag)){
@@ -1310,8 +1297,7 @@ reflag<-function (dat, var, orignal.flag, new.flag=NULL,newvar=NULL,to.factor=T,
 #' @param name column name of derived variable
 #' @keywords addvar
 #' @export
-#' @examples
-#' addvar()
+
 addvar<-function(dat,sort,var,fun,add.to.data="yes",name=NULL){
   d<-dat
   a<-fun
@@ -1334,8 +1320,7 @@ addvar<-function(dat,sort,var,fun,add.to.data="yes",name=NULL){
 #'
 #' @keywords addvar
 #' @export
-#' @examples
-#' addvar()
+
 
 addvar2<-function (dat, sort=c("SEX"), var="Cmax", fun="mean(x)=Mean", rounding = "sigfig(x,3)")
 {
@@ -1395,8 +1380,7 @@ addvar2<-function (dat, sort=c("SEX"), var="Cmax", fun="mean(x)=Mean", rounding 
 #' @param name column name of derived variable
 #' @keywords addtime
 #' @export
-#' @examples
-#' addtime()
+
 
 addtime<-function(datetime,timehour,format="%Y-%m-%d %H:%M",tz="GMT"){
   output<-substring(strptime(datetime,format=format,tz=tz)+timehour*60*60,1,16)
@@ -1414,8 +1398,7 @@ addtime<-function(datetime,timehour,format="%Y-%m-%d %H:%M",tz="GMT"){
 #' @param evid evid
 #' @keywords rt2tad
 #' @export
-#' @examples
-#' rt2tad()
+
 rt2tad<-function(data,id="USUBJID",time="RTIME",evid="EVID"){
   data$cumsum<-unlist(tapply(data[,evid],list(data[,id]),cumsum))
   nrow(data)
@@ -1441,8 +1424,7 @@ rt2tad<-function(data,id="USUBJID",time="RTIME",evid="EVID"){
 #' @param varname column name
 #' @keywords nmid
 #' @export
-#' @examples
-#' nmid()
+
 nmid<-function(data,id="USUBJID",varname="NMID"){
   id=id;varname=varname
   data<-data
@@ -1465,8 +1447,7 @@ nmid<-function(data,id="USUBJID",varname="NMID"){
 #' @param form2 date/time format 2
 #' @keywords diftm
 #' @export
-#' @examples
-#' diftm()
+
 diftm<-function(tm1,tm2,unit="hour",form1="%Y-%m-%d %H:%M",form2="%Y-%m-%d %H:%M",tz="GMT"){
 dat<- as.numeric(difftime(strptime(tm1,format=form1,tz=tz),strptime(tm2,format=form2,tz=tz), units=unit))
  dat}
@@ -1482,8 +1463,7 @@ dat<- as.numeric(difftime(strptime(tm1,format=form1,tz=tz),strptime(tm2,format=f
 #' @param form2 new date/time format
 #' @keywords format_time
 #' @export
-#' @examples
-#' format_time()
+
 
 format_time<-function(dttm,form1,form2="%Y-%m-%d %H:%M",tz="GMT"){
   strftime(strptime(dttm,format=form1,tz=tz),format=form2,tz=tz)
@@ -1499,8 +1479,7 @@ format_time<-function(dttm,form1,form2="%Y-%m-%d %H:%M",tz="GMT"){
 #' @param class class ("char" or "num")
 #' @keywords chclass
 #' @export
-#' @examples
-#' chclass()
+
 chclass<-function(data,var,class="char"){
    for(i in var){
     if (class=="num"){
@@ -1518,8 +1497,7 @@ chclass<-function(data,var,class="char"){
 #' @param var variable
 #' @keywords one
 #' @export
-#' @examples
-#' one()
+
 one<-function(data,var){
   for(i in var){
     print(i)
@@ -1536,8 +1514,7 @@ one<-function(data,var){
 #' @param all if all="all", all columns in data will be kept (ex:all=c("ID","DV"))
 #' @keywords nodup
 #' @export
-#' @examples
-#' nodup()
+
 nodup<-function(data,var,all,item){
   if(all=="all"){d1<-data[!duplicated(data[,var]),names(data)]}else{
     if(all=="var"){d1<-data[!duplicated(data[,var]),var]}else{
@@ -1554,8 +1531,7 @@ nodup<-function(data,var,all,item){
 #' @param remove if remove="yes", duplicates will be removed)
 #' @keywords duprow
 #' @export
-#' @examples
-#' duprow()
+
 duprow<-function(data,var=NULL,remove=NULL){
   flag="flag"
   data[,flag]<-""
@@ -1584,8 +1560,7 @@ duprow<-function(data,var=NULL,remove=NULL){
 #' @param EVID evid variable (evid>0 for dose)
 #' @keywords tadRT
 #' @export
-#' @examples
-#' tadRT()
+
 tadRT<-function (data, id="ID", date="DATE", time="CTIME", EVID="EVID", tz = "UTC",format="%Y-%m-%d %H:%M")
 {
   locf <- function(x) {
@@ -1652,8 +1627,7 @@ tadRT<-function (data, id="ID", date="DATE", time="CTIME", EVID="EVID", tz = "UT
 #' @param locb carry backward
 #' @keywords locb2
 #' @export
-#' @examples
-#' locf2()
+
 locf2<-function (data, by="ID", var="TIME", locb = T)
 {
   locf <- function(x) {
@@ -1687,8 +1661,7 @@ locf2<-function (data, by="ID", var="TIME", locb = T)
 #' @param data data
 #' @keywords hl1cpt
 #' @export
-#' @examples
-#' hl1cpt()
+
 hl1cpt<-function(data,cl,v,output){
 all<-c("HL","k")
   ifelse(output=="all",output<-all,output)
@@ -1711,9 +1684,7 @@ all<-c("HL","k")
 #' @param data data
 #' @keywords hl2cpt
 #' @export
-#' @examples
-#' hl2cpt(pkdat1,"cl","cl2","v","v2","all")
-#
+
 hl2cpt<-function(data,cl,cl2,v,v2,output){
   all<-c("HLa","HLb","alfa","beta","k","k12","k21")
   ifelse(output=="all",output<-all,output)
@@ -1737,9 +1708,7 @@ datf<-data.frame(k=k,k12=k12,k21=k21,alfa=alfa,beta=beta1,HLa=alfaHL,HLb=betaHL)
 #' @param data data
 #' @keywords hl3cpt
 #' @export
-#' @examples
-#' hl3cpt(pkdat1,"cl","cl2",,"cl3","v","v2","v3","all")
-#
+
 hl3cpt<-function(data,Cl,Cl2,Cl3,V,V2,V3,output){
   all<-c("HLa","HLb","HLg","A","B","C","alpha","beta","gama")
   ifelse(output=="all",output<-all,output)
@@ -1778,8 +1747,7 @@ hl3cpt<-function(data,Cl,Cl2,Cl3,V,V2,V3,output){
 #' This function allows you to round value as per Excel method.
 #' @keywords cround
 #' @export
-#' @examples
-#' cround1()
+
 cround1= function(x,n,asnum=T){
   vorz = sign(x)
   z = abs(x)*10^n
@@ -1800,8 +1768,7 @@ output
 #' @param y number of significant figure
 #' @keywords rounding
 #' @export
-#' @examples
-#' cround()
+
 cround<-function (z, y)
 {
   if(length(z)>1){
@@ -1821,8 +1788,7 @@ cround<-function (z, y)
 #' This function allows you to round value in significant figure.
 #' @keywords sigfig
 #' @export
-#' @examples
-#' sigfig1()
+
 sigfig1<-function (x, y)
 {
   sround = function(x, n) {
@@ -1856,8 +1822,7 @@ sigfig1<-function (x, y)
 #' @param y number of significant figure
 #' @keywords sigfig
 #' @export
-#' @examples
-#' sigfig()
+
 sigfig<-function (z, y)
 {
   if(length(z)>1){
@@ -1880,8 +1845,7 @@ sigfig<-function (z, y)
 #' @param select display selected variables only
 #' @keywords dup1
 #' @export
-#' @examples
-#' dup1()
+
 dup1<-function(data,var,all,select){
   d1<-data[duplicated(data[,var]),]
   if(all=="all"){d1<-d1}else{
@@ -1900,8 +1864,7 @@ dup1<-function(data,var,all,select){
 #' @param select display selected variables only
 #' @keywords dup2
 #' @export
-#' @examples
-#' dup2()
+
 dup2<-function(data,var,all,select){
   d1<-data
   d1$dum<-""
@@ -1921,8 +1884,7 @@ dup2<-function(data,var,all,select){
 #' @param data data
 #' @keywords bround
 #' @export
-#' @examples
-#' bround()
+
 bround<-function(data,var,rtype="sigfig",dec=3){
   data<-chclass(data,var,"num")
   for(i in var){
@@ -1938,9 +1900,6 @@ bround<-function(data,var,rtype="sigfig",dec=3){
 #' @param x data
 #' @keywords geom
 #' @export
-#' @examples
-#' geom()
-
 
 geom <- function(x) {
   exp(mean(log(x[x > 0]), na.rm=TRUE))
@@ -1950,8 +1909,6 @@ geom <- function(x) {
 #' @param x data
 #' @keywords geocv
 #' @export
-#' @examples
-#' geocv()
 
 geocv <- function(x) {
   100*sqrt(exp(var(log(x[x > 0]), na.rm=TRUE)) - 1)
@@ -1961,29 +1918,16 @@ geocv <- function(x) {
 #' @param x data
 #' @keywords cv
 #' @export
-#' @examples
-#' cv()
-
 cv <- function(x) {
   abs(sd(x,na.rm=TRUE)/mean(x,na.rm=TRUE)*100)
 }
 
-#########
-# mean<-"mean(x,na.rm=T)=mean"
-# sd<-"sd(x,na.rm=T)=sd"
-# cv<-"cv(x)=cv"
-# qt05<-"quantile(x,0.05,na.rm=TRUE)=qt05"
-# qt95<-"quantile(x,0.95,na.rm=TRUE)=qt05"
-
-#per95<-function(x){quantile(x,percentile,na.rm=TRUE)}
 
 #' se Table function
 #' internal use.
 #' @param x data
 #' @keywords se
 #' @export
-#' @examples
-#' se()
 
 se<-function(x){sd(x,na.rm=TRUE)/(length(x))^0.5}
 
@@ -1993,8 +1937,6 @@ se<-function(x){sd(x,na.rm=TRUE)/(length(x))^0.5}
 #' @param x data
 #' @keywords generic
 #' @export
-#' @examples
-#' cilow()
 
 cilow<-function(x){mean(x,na.rm=TRUE)-((sd(x,na.rm=TRUE)/(length(x))^0.5)*qt(0.975,df=length(x)-1))}    #1.96)}
 
@@ -2003,8 +1945,7 @@ cilow<-function(x){mean(x,na.rm=TRUE)-((sd(x,na.rm=TRUE)/(length(x))^0.5)*qt(0.9
 #' @param x data
 #' @keywords ciup
 #' @export
-#' @examples
-#' ciup()
+
 ciup<-function(x){mean(x,na.rm=TRUE)+((sd(x,na.rm=TRUE)/(length(x))^0.5)*qt(0.975,df=length(x)-1))}
 
 #' nmiss Table function
@@ -2012,8 +1953,7 @@ ciup<-function(x){mean(x,na.rm=TRUE)+((sd(x,na.rm=TRUE)/(length(x))^0.5)*qt(0.97
 #' @param x data
 #' @keywords nmiss
 #' @export
-#' @examples
-#' nmiss()
+
 nmiss<-function(x){length(x[is.na(x)])}
 
 
@@ -2023,7 +1963,6 @@ nmiss<-function(x){length(x[is.na(x)])}
 #' internal use
 #' @keywords roundbatch
 #' @export
-#' @examples
 
 roundbatch<-function(data,variable,toround,nb){
   head(data)
@@ -2135,7 +2074,7 @@ lhcattab<-function (data, var, by)
 #' @keywords ind.tab
 #' @export
 #' @examples ind.tab(data=dat,id="NMID",by=c("study"))
-#'
+
 indiv.tab<-function(data,id,by,variables,rtype="sigfig",dec=3){
   id<-id#
   data<-data[,c(id,by,variables)]#[!duplicated(data$id),]

@@ -14,7 +14,4 @@ se(x)
 se Table function
 internal use.
 }
-\examples{
-se()
-}
 \keyword{se}

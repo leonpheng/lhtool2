@@ -9,7 +9,4 @@ cround1(x, n, asnum = T)
 \description{
 This function allows you to round value as per Excel method.
 }
-\examples{
-cround1()
-}
 \keyword{cround}

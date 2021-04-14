@@ -20,7 +20,4 @@ lhloess(data, x, y, by, span = 1)
 \description{
 Compute the LOESS data for ploting.
 }
-\examples{
-lhloess()
-}
 \keyword{lhloess}

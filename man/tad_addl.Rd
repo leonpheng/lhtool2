@@ -36,7 +36,4 @@ tad_addl(
 \description{
 This function allows you to derive time after dose from ADDL.
 }
-\examples{
-tad_addl()
-}
 \keyword{tad}

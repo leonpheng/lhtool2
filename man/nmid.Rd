@@ -16,7 +16,4 @@ nmid(data, id = "USUBJID", varname = "NMID")
 \description{
 This function allows you to create NMID.
 }
-\examples{
-nmid()
-}
 \keyword{nmid}

@@ -16,7 +16,4 @@ nodup(data, var, all, item)
 \description{
 This function allows you to remove duplicates.
 }
-\examples{
-nodup()
-}
 \keyword{nodup}

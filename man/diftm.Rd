@@ -25,7 +25,4 @@ diftm(
 \description{
 This function allows you to compute the delta (time1-time2).
 }
-\examples{
-diftm()
-}
 \keyword{diftm}

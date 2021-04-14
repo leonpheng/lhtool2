@@ -12,7 +12,4 @@ bround(data, var, rtype = "sigfig", dec = 3)
 \description{
 bround Table function
 }
-\examples{
-bround()
-}
 \keyword{bround}

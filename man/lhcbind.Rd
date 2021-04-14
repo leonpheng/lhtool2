@@ -12,7 +12,4 @@ lhcbind(dat1, dat2)
 \description{
 C bind 2 data frames regardless number of row length.
 }
-\examples{
-lhcbind()
-}
 \keyword{lhcbind}

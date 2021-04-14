@@ -18,7 +18,4 @@ lhjoin(dat1, by1 = NULL, dat2, by2 = NULL, type = "full")
 lhjoin funtion
 Join two datasets and print report of joining procedure
 }
-\examples{
-lhjoin()
-}
 \keyword{lhjoin()}

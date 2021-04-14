@@ -24,6 +24,5 @@ Listing of individual data and descriptove stats
 }
 \examples{
 ind.tab(data=dat,id="NMID",by=c("study"))
-
 }
 \keyword{ind.tab}

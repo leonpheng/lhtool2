@@ -28,7 +28,4 @@ reflag(
 \description{
 This function allows you to change variable name (ex: "M" to "Male").
 }
-\examples{
-reflag(dat,var="SEX",c("M","F"),c("Male","Female"),"SEXCH"))
-}
 \keyword{reflag}

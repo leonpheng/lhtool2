@@ -22,7 +22,4 @@ addvar(dat, sort, var, fun, add.to.data = "yes", name = NULL)
 \description{
 This function allows you to add derived variable (ex: add mean value by ID).
 }
-\examples{
-addvar()
-}
 \keyword{addvar}

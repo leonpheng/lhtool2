@@ -24,7 +24,4 @@ addvar2(
 \description{
 This function allows you to add derived variable (ex: add mean value by ID).
 }
-\examples{
-addvar()
-}
 \keyword{addvar}

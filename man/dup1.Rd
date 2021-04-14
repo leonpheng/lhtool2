@@ -16,7 +16,4 @@ dup1(data, var, all, select)
 \description{
 This function allows you to filter duplicated rows but only show unique row
 }
-\examples{
-dup1()
-}
 \keyword{dup1}

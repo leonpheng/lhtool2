@@ -12,7 +12,4 @@ hl3cpt(data, Cl, Cl2, Cl3, V, V2, V3, output)
 \description{
 This function allows you to derive micro constants and HL.
 }
-\examples{
-hl3cpt(pkdat1,"cl","cl2",,"cl3","v","v2","v3","all")
-}
 \keyword{hl3cpt}

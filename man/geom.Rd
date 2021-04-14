@@ -12,7 +12,4 @@ geom(x)
 \description{
 geom Table function
 }
-\examples{
-geom()
-}
 \keyword{geom}

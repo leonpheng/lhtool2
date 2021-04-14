@@ -12,7 +12,4 @@ geocv(x)
 \description{
 geocv Table function
 }
-\examples{
-geocv()
-}
 \keyword{geocv}

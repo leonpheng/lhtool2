@@ -12,7 +12,4 @@ lhrbind(dat1, dat2, na.replace = NA, all.character = T)
 \description{
 r bind 2 data frames regardless number of columns.
 }
-\examples{
-lhrbind()
-}
 \keyword{lhrbind}

@@ -16,7 +16,4 @@ chclass(data, var, class = "char")
 \description{
 This function allows you to change variable class ("num" or "char").
 }
-\examples{
-chclass()
-}
 \keyword{chclass}

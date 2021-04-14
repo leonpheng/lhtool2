@@ -28,7 +28,4 @@ tadRT(
 \description{
 This function allows you to derive TAD and RTIME from calendar date/time.
 }
-\examples{
-tadRT()
-}
 \keyword{tadRT}

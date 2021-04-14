@@ -14,7 +14,4 @@ lhorder(dat, var)
 \description{
 Make simple table. Use data frame created by addvar2
 }
-\examples{
-lhorder()
-}
 \keyword{lhorder()}

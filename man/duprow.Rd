@@ -16,7 +16,4 @@ duprow(data, var = NULL, remove = NULL)
 \description{
 This function allows you to check duplicates.
 }
-\examples{
-duprow()
-}
 \keyword{duprow}

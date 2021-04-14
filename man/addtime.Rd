@@ -22,7 +22,4 @@ addtime(datetime, timehour, format = "\%Y-\%m-\%d \%H:\%M", tz = "GMT")
 \description{
 This function allows you to add derived variable (ex: add mean value by ID).
 }
-\examples{
-addtime()
-}
 \keyword{addtime}

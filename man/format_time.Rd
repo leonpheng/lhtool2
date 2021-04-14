@@ -18,7 +18,4 @@ format_time(dttm, form1, form2 = "\%Y-\%m-\%d \%H:\%M", tz = "GMT")
 \description{
 This function allows you to change the date/time format.
 }
-\examples{
-format_time()
-}
 \keyword{format_time}

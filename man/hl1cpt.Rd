@@ -12,7 +12,4 @@ hl1cpt(data, cl, v, output)
 \description{
 This function allows you to derive TAD and RTIME from calendar date/time.
 }
-\examples{
-hl1cpt()
-}
 \keyword{hl1cpt}

@@ -14,7 +14,4 @@ sigfig(z, y)
 \description{
 This function allows you to round value in significant figure.
 }
-\examples{
-sigfig()
-}
 \keyword{sigfig}

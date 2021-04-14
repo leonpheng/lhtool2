@@ -12,7 +12,4 @@ install.pack(...)
 \description{
 To install require packages. Use ipak function to install desired packages.
 }
-\examples{
-install.pack()
-}
 \keyword{install.pack}

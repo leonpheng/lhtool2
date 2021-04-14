@@ -14,7 +14,4 @@ cround(z, y)
 \description{
 This function allows you to round value as in Excel.
 }
-\examples{
-cround()
-}
 \keyword{rounding}
