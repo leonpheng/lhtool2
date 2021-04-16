@@ -7,10 +7,11 @@
 tadRT(
   data,
   id = "ID",
-  date = "DATE",
-  time = "CTIME",
-  EVID = "EVID",
-  tz = "UTC",
+  dttm = NULL,
+  cdate = NULL,
+  ctime = NULL,
+  evid = "EVID",
+  tz = "GMT",
   format = "\%Y-\%m-\%d \%H:\%M"
 )
 }
@@ -23,9 +24,9 @@ tadRT(
 
 \item{time}{time variable  "%H:%M")}
 
-\item{EVID}{evid variable (evid>0 for dose)}
+\item{EVID}{evid variable}
 }
 \description{
-This function allows you to derive TAD and RTIME from calendar date/time.
+Derive TAD and RTIME from calendar date and time or dttm
 }
 \keyword{tadRT}

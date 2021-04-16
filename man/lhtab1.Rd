@@ -27,7 +27,7 @@ lhtab1(
 
 \item{stats}{statistic functions. stat1 contained most of basic statistic function (mean, median up to CI95). User can define personal list of function (ex: c("length(x)/mean(x)=RT"))}
 
-\item{fun}{define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")}
+\item{fun}{define the output}
 
 \item{overall}{if the overall stats required then overall="yes"}
 

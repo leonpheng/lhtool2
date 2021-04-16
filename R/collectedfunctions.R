@@ -201,7 +201,7 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
 #' @param cont list of continuous variables
 #' @param cat list of categorical variables
 #' @param stats statistic functions. stat1 contained most of basic statistic function (mean, median up to CI95). User can define personal list of function (ex: c("length(x)/mean(x)=RT"))
-#' @param fun define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
+#' @param fun define the output
 #' @param overall if the overall stats required then overall="yes"
 #' @param render the output format as flexible table "flex", as "csv". Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))
 #' @param format two formats available, stacked or not
@@ -348,7 +348,7 @@ lhtab2<-function (data, sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST
 #' @param cont list of continuous variables
 #' @param cat list of categorical variables
 #' @param stats statistic functions. stat1 contained most of basic statistic function (mean, median up to CI95). User can define personal list of function (ex: c("length(x)/mean(x)=RT"))
-#' @param fun define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")
+#' @param fun define the output
 #' @param overall if the overall stats required then overall="yes"
 #' @param render the output format as flexible table "flex", as "csv", or word document ("word"). Note that officer package is required for the word format and save the output as docx (ex: print(doc,"table1.docx))
 #' @param transpose when transpose is TRUE, the output will be in docx containing both continuous and categorical covariate
@@ -817,7 +817,7 @@ findiff<-function(dat1,dat2){
 #' @keywords lhjoin()
 #' @export
 
-lhjoin<-function(dat1,by1=NULL,dat2,by2=NULL,type="full"){
+lh.join<-function(dat1,by1=NULL,dat2,by2=NULL,type="full"){
   invar<-intersect(names(dat1),names(dat2))
   if(is.null(by1)){
     by1=invar}else{
@@ -826,7 +826,7 @@ lhjoin<-function(dat1,by1=NULL,dat2,by2=NULL,type="full"){
     by2=invar
   }else{
     by2=by2
-    names(dat2)[names(dat2)%in%invar]<-paste0("df2_",names(dat2)[names(dat2)%in%invar])
+    #names(dat2)[names(dat2)%in%invar]<-paste0("df2_",names(dat2)[names(dat2)%in%invar])
   }
 
   if(length(by1)>1){
@@ -843,6 +843,8 @@ lhjoin<-function(dat1,by1=NULL,dat2,by2=NULL,type="full"){
       dat2[,"dum"]<-paste(dat2[,"dum"],dat2[,by2[i]],sep="-")
     }}else{dat2[,"dum"]<-dat2[,by2[1]]}
 
+  if(type=="left"){
+    dat2<-nodup(dat2,by2,"all")}else{dat2<-dat2}
   dat<-plyr::join(dat1,dat2,by="dum",type=type)
 
   report<-data.frame(nrow_data1=nrow(dat1),
@@ -856,7 +858,7 @@ lhjoin<-function(dat1,by1=NULL,dat2,by2=NULL,type="full"){
     zz<-lhcbind(x,y)
     report<-lhcbind(report,zz)
   }
-  print(report)
+  print(head(report))
   dat}
 
 
@@ -1549,19 +1551,19 @@ duprow<-function(data,var=NULL,remove=NULL){
 
 
 ########Compute Rtime and tad#########
-#-------------------------
+
 #' Derive TAD and RTIME
 #'
-#' This function allows you to derive TAD and RTIME from calendar date/time.
+#' Derive TAD and RTIME from calendar date and time or dttm
 #' @param data data
 #' @param id subject id
 #' @param date date variable "%Y-%m-%d"
 #' @param time time variable  "%H:%M")
-#' @param EVID evid variable (evid>0 for dose)
+#' @param EVID evid variable
 #' @keywords tadRT
 #' @export
 
-tadRT<-function (data, id="ID", date="DATE", time="CTIME", EVID="EVID", tz = "UTC",format="%Y-%m-%d %H:%M")
+tadRT<-function (data, id="ID",dttm=NULL ,cdate=NULL, ctime=NULL, evid="EVID", tz ="GMT",format="%Y-%m-%d %H:%M")
 {
   locf <- function(x) {
     good <- !is.na(x)
@@ -1571,30 +1573,37 @@ tadRT<-function (data, id="ID", date="DATE", time="CTIME", EVID="EVID", tz = "UT
     last.good.position[last.good.position == 0] <- NA
     x[last.good.position]
   }
-  data$DTTM <- data$TAD <- data$RTIME <- NULL
-  data$DTTM <- as.character(paste(data[, date], data[, time],
-                                  sep = " "))
-  data <- chclass(data, c(date, time), "char")
-  data$tadtm <- NA
-  data <- data[order(data[, id], as.Date(data[, date]), data[,
-                                                             time]), ]
+  data$TAD <- data$RTIME <- NULL
+
+  if(!is.null(dttm)){
+    data$DTTM <- as.character(data[,dttm])
+    data[,dttm]<-NULL
+    data <- data[order(data[, id],data$DTTM),]
+    data$tadtm <- NA}else{
+    data <- chclass(data, c(cdate, ctime), "char")
+    data$DTTM <- as.character(paste(data[, cdate], data[, ctime],
+                                       sep = " "))
+ data$tadtm <- NA
+ data <- data[order(data[, id],data$DTTM), ]
+ }
+
   head(data)
-  dtm <- data[data[, EVID] > 0, ]
+  dtm <- data[data[, evid] > 0, ]
   rtime <- dtm[!duplicated(dtm[, id]), c(id, "DTTM")]
   names(rtime)[2] <- "FDDTM"
-  nodose <- data[data[, EVID] == 0, ]
-  dose <- data[data[, EVID] > 0, ]
+  nodose <- data[data[, evid] == 0, ]
+  dose <- data[data[, evid] > 0, ]
   dose$tadtm <- as.character(dose$DTTM)
   data <- rbind(dose, nodose)
   data$tadtm <- as.character(data$tadtm)
   head(data)
+
   data$DTTM <- strftime(strptime(data$DTTM, format = format,
                                  tz = tz), format = format, tz = tz)
   data <- data[order(data[, id], data$DTTM), ]
   data$WT1 <- unlist(tapply(data$tadtm, data[, id], locf))
   data$tadtm <- rev(locf(rev(data$WT1)))
-  data <- data[order(data[, id], as.Date(data[, date]), data[,
-                                                             time]), ]
+  data <- data[order(data[, id],data$DTTM), ]
   head(data)
   data$DTTM <- strftime(strptime(data$DTTM, format = format,
                                  tz = tz), format = format, tz = tz)
@@ -1610,8 +1619,7 @@ tadRT<-function (data, id="ID", date="DATE", time="CTIME", EVID="EVID", tz = "UT
   data$WT1 <- NULL
   data$tadtm <- NULL
   data$FDDTM <- NULL
-  data <- data[order(data[, id], as.Date(data[, date]), data[,
-                                                             time]), ]
+  data <- data[order(data[, id], data$DTTM), ]
   data$RTIME <- round(data$RTIME, 4)
   data$TAD <- round(data$TAD, 4)
   data

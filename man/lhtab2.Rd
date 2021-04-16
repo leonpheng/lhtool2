@@ -35,7 +35,7 @@ lhtab2(
 
 \item{cat}{list of categorical variables}
 
-\item{fun}{define the output ex: fun1=c("MEAN"," (","CV",")\n ","MEDIAN"," [","MIN",", ", "MAX","]")}
+\item{fun}{define the output}
 }
 \description{
 Generate descriptive statistic of continuous variable with style
