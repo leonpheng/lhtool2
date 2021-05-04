@@ -1141,11 +1141,17 @@ lhloess<-function(data,x,y,by,span=1){
 #' @export
 
 
-tad_addl<-function (data,id="USUBJID", ii="II", addl="ADDL", rtime="RTIME", evid="EVID", dose.expand = "yes",cdate="DATE",ctime="CTIME")
+tad_addl<-function (data, id = "USUBJID", ii = "II", addl = "ADDL",
+                    rtime = "RTIME", evid = "EVID", dose.expand = "yes",
+                    cdate = "DATE", ctime = "CTIME")
 {
   data <- chclass(data, c(rtime, evid, addl, ii), "num")
-  if(!is.null(cdate)&!is.null(ctime)){data[,"datetime"]<-paste(data[,cdate],data[,ctime])}else{data}
-
+  if (!is.null(cdate) & !is.null(ctime)) {
+    data[, "datetime"] <- paste(data[, cdate], data[,
+                                                    ctime])
+  }else {
+    data
+  }
   data[, addl][is.na(data[, addl])] <- 0
   data[, ii][is.na(data[, ii])] <- 0
   data[, "TAD"] <- data[, "tad"] <- NULL
@@ -1160,35 +1166,38 @@ tad_addl<-function (data,id="USUBJID", ii="II", addl="ADDL", rtime="RTIME", evid
     dat1 <- dat0[i, ]
     if (dat1[, addl] == 0) {
       dat2 <- dat1
-    } else {
-      dat2 <- as.data.frame(matrix(ncol = ncol(dat1), nrow = dat1[,addl] + 1))
+    }else {
+      dat2 <- as.data.frame(matrix(ncol = ncol(dat1), nrow = dat1[,
+                                                                  addl] + 1))
       names(dat2) <- names(dat1)
       dat2[, names(dat2)] <- dat1
       dat2$dum <- seq(0, nrow(dat2) - 1, 1)
       dat2[, rtime] <- dat2[, rtime] + (dat2[, ii] * dat2$dum)
       dat2$dum <- NULL
     }
-    if(!is.null(dat2[,"datetime"])){
-      f0<-dat2$RTIME[1]
-      dat2[,"datetime"]<-addtime(dat2[,"datetime"],dat2[,rtime]-f0)
-    }else{dat2}
-    setdiff(names(datr),names(dat2))
-    dat2$exseq<-i
+    if (!is.null(dat2[, "datetime"])) {
+      f0 <- dat2$RTIME[1]
+      dat2[, "datetime"] <- addtime(dat2[, "datetime"],
+                                    dat2[, rtime] - f0)
+    } else {
+      dat2
+    }
+    setdiff(names(datr), names(dat2))
+    dat2$exseq <- i
     datr <- rbind(datr, dat2)
   }
-
-
   datr <- nodup(datr, names(datr), "all")
   datr[, addl] <- datr[, ii] <- 0
   setdiff(names(datr), names(datp))
-  if(nrow(datp)!=0){
-    datp$exseq<-(-99)
+  if (nrow(datp) != 0) {
+    datp$exseq <- (-99)
     datp$loc1 <- NA
     datp$lhdose <- "no"
-  }else{datp<-NULL}
+  } else {
+    datp <- NULL
+  }
   datr$loc1 <- datr[, rtime]
   datr$lhdose <- "yes"
-
   datp1 <- rbind(datp, datr)
   datp1 <- datp1[order(datp1[, id], datp1[, rtime]), ]
   head(datp1)
@@ -1196,17 +1205,17 @@ tad_addl<-function (data,id="USUBJID", ii="II", addl="ADDL", rtime="RTIME", evid
   datp1$TAD <- datp1[, rtime] - datp1$loc1
   datp1$TAD[datp1$TAD < 0] <- 0
   range(datp1$TAD)
+  datp1
   if (dose.expand != "yes") {
     d1 <- datp1[datp1$lhdose == "no", ]
-    d1$loc1 <- d1$lhdose <- NULL
+    d1$loc1 <- d1$lhdose<-d1$exseq <- NULL
     data <- rbind(d1, dose)
     data <- data[order(data[, id], data[, rtime]), ]
   } else {
-    data <- datp1[, !names(datp1) %in% c("loc1", "lhdose")]
+    data <- datp1[, !names(datp1) %in% c("loc1", "lhdose","exseq")]
   }
   data
 }
-
 
 ###########
 #' BLQ M6 Method
