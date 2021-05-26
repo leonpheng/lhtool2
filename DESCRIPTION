@@ -1,5 +1,5 @@
 Package: lhtool2
-Title: What the Package Does (One Line, Title Case)
+Title: Collection of functions
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Leon",
@@ -7,5 +7,11 @@ Authors@R:
            role = c("aut", "cre"),
            email = "lhpheng@example.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
+Imports:
+   flextable,
+   dplyr,
+   plyr,
+   stringr,
+   officer		   
 Description: What the package does (one paragraph).
 RoxygenNote: 7.1.1

@@ -6,19 +6,18 @@
 #' @export
 #'@examples lh.def(lab)
 
-lh.def<-function(lab=c("code<>define<>unit","b<>test>=b<>ug","c<>test<c;b;a<> ")){
-  def<-NULL
-  for(i in 1:length(lab)){
-    unit<-gsub(".*<>","",lab[i])
-    label<-gsub(paste0("<>",unit),"",lab[i])
-    label<-gsub(".*<>","",label)
-    varn<-gsub(paste0("<>",unit),"",lab[i])
-    varn<-gsub("<>.*","",varn)
-    def<-rbind(def,data.frame(variable=varn,label=label,unit=unit))
+lh.def<-function (lab = c("code;;define;;unit", "b;;test>=b;;ug",
+                          "c;;test<c;b;a;; "))
+{
+  def <- NULL
+  for (i in 1:length(lab)) {
+    splt<-strsplit(lab[i], ";;")[[1]]
+    def <- rbind(def, data.frame(Variable = splt[1], Description = splt[2],
+                                 Unit = splt[3]))
   }
+  def$Unit[is.na(def$Unit)]<-""
   def
 }
-
 
 
 #' CHECK TIME VARYING OR DUPLICATE
@@ -1103,7 +1102,6 @@ lhcbind<-function(dat1,dat2){
 #' @param span LOESS stiffness
 #' @keywords lhloess
 #' @export
-
 
 
 lhloess<-function(data,x,y,by,span=1){
