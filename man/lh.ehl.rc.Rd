@@ -23,8 +23,6 @@ lh.ehl.rc(data, AUCsd = "AUCsd", AUCss = "AUCss", TAU = 24)
 Require AUC of first dose, AUCtau and tau
 }
 \examples{
-t<-lhwide(test[,c("id","OCC","AUClast")],"AUClast","OCC")
-names(t)<-c("id","AUCsd","AUCss")
-lh.ehl.rc(data=t,AUCsd="AUCsd",AUCss="AUCss",TAU=24)
+
 }
-\keyword{lh.ehl.rc()}
+\keyword{lh.ehl.rc}

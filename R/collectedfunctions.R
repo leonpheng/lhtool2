@@ -46,7 +46,7 @@ if(!is.null(df)&is.null(template)){
   if(!is.null(txt)){
     if(length(txt)==2){
       style1<-paste("heading",txt[2])
-    doc<-body_add_par(doc,txt[1],style=style1)}else{doc<-body_add_par(doc,txt[1])}
+    doc<-body_add_par(doc,txt[1],style=style1)}else{doc<-body_add_par(doc,txt[1])}}
 if(!is.null(img)){
   doc<-body_add_img(doc,img,width=6,height=6)}
   if(!is.null(fig)){
