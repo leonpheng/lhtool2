@@ -1,3 +1,61 @@
+#' Create word doc
+#'
+#'
+#' @param template Document template if available, provide full path and template file name
+#' @param df  Data frame will be converted by flextable table
+#' @param tab Table created by flextable
+#' @param txt Text or paragraph. For heading 1, 2 or 3 text c("text",1, 2 or 3)
+#' @param img Plots saved as png. Enter the full path and file name
+#' @param fig Plot created by ggplot
+#'
+#' @keywords wdoc
+#' @export
+#'@examples df<-data.frame(x=2,z=4)
+#'@examples ft<-flextable(df)
+#'@examples library(ggplot2)
+#'@examples p<-ggplot(df,aes(x=x,y=z))+
+#'@examples  geom_point()
+#'
+#'@examples doc<-NULL
+#'@examples doc<-wdoc()
+#'@examples doc<-wdoc(txt=c("this is a test",1))
+#'@examples doc<-wdoc(df=df)
+#'@examples doc<-wdoc(tab=ft)
+#'@examples doc<-wdoc(fig=p)
+#'@examples print(doc,"test.docx")
+#'
+
+wdoc<-function(template=NULL,df=NULL,tab=NULL,txt=NULL,img=NULL,fig=NULL){
+  library(officer)
+  library(flextable)
+  if(is.null(df)&is.null(tab)&is.null(txt)&is.null(img)&is.null(fig)){
+    if(is.null(template)){
+    doc<-read_docx()
+    }else{doc<-officer::read_docx(template)}}else{
+
+if(!is.null(tab)){
+    ftab<-width(tab, width=0.2)
+    doc<-body_add_flextable(doc,tab)
+  }
+
+if(!is.null(df)&is.null(template)){
+    ftab<-flextable(df)
+    ftab<-width(ftab, width=0.2)
+    doc<-body_add_flextable(doc,ftab)}
+
+  if(!is.null(txt)){
+    if(length(txt)==2)
+      style1<-paste("heading",txt[2])
+    doc<-body_add_par(doc,txt[1],style=style1)}else{doc<-body_add_par(doc,txt[1])}
+if(!is.null(img)){
+  doc<-body_add_img(doc,img,width=6,height=6)}
+  if(!is.null(fig)){
+    doc<-body_add_gg(doc,fig,width=6,height=6)}}
+  doc
+}
+
+
+
 #' Create define or data specification
 #'
 #' Verify if vector is varying or duplicate
