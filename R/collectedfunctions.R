@@ -44,7 +44,7 @@ if(!is.null(df)&is.null(template)){
     doc<-body_add_flextable(doc,ftab)}
 
   if(!is.null(txt)){
-    if(length(txt)==2)
+    if(length(txt)==2){
       style1<-paste("heading",txt[2])
     doc<-body_add_par(doc,txt[1],style=style1)}else{doc<-body_add_par(doc,txt[1])}
 if(!is.null(img)){
@@ -1690,7 +1690,7 @@ datf
 #' @export
 
 hl3cpt<-function(Cl,Cl2,Cl3,V,V2,V3){
-  #all<-c("HLa","HLb","HLg","A","B","C","alpha","beta","gama")
+
   k<-Cl/V
   k12<-Cl2/V
   k21<-V*k12/V2
@@ -1704,9 +1704,9 @@ hl3cpt<-function(Cl,Cl2,Cl3,V,V2,V3){
   r1<-sqrt((-1)*p^3/27)
   r2<-2*(r1^(1/3))
   phi<-acos(-1*q/(2*r1))/3
-  gama<-(-1)*((cos(phi)*r2)-(a2/3))             # gama instead of alpha: Formula error found in Ref. Dubois A. et al., "Mathematical Expressions of the Pharmacokinetic and Pharmacodynamic Models implemented in the PFIM"
-  alpha<-(-1)*(cos(phi+(2*pi/3))*r2-a2/3)       # alpha instead of beta: Formula error found in Ref. Dubois A. et al., "Mathematical Expressions of the Pharmacokinetic and Pharmacodynamic Models implemented in the PFIM"
-  beta<-(-1)*(cos(phi+(4*pi/3))*r2-a2/3)        # beta instead of gamma: Formula error found in Ref. Dubois A. et al., "Mathematical Expressions of the Pharmacokinetic and Pharmacodynamic Models implemented in the PFIM"
+  gama<-(-1)*((cos(phi)*r2)-(a2/3))
+  alpha<-(-1)*(cos(phi+(2*pi/3))*r2-a2/3)
+  beta<-(-1)*(cos(phi+(4*pi/3))*r2-a2/3)
   alfaHL<-log(2)/alpha
   betaHL<-log(2)/beta
   gamaHL<-log(2)/gama
@@ -2305,7 +2305,7 @@ test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
   test
   }
 
-##nca_EHL
+
 #' Derive Effective Half-life and Accumulation Ratio
 #'
 #' Require AUC of first dose, AUCtau and tau
@@ -2315,18 +2315,12 @@ test1a <- ddply(dat3[, c("uid", "time", "dv","dvtm")], .(uid),
 #' @param AUCss AUCtau SS
 #' @param OCC Identifier of SD and SS
 #' @param TAU Dosing iterval
-#' @keywords lh.ehl.rc()
+#' @keywords lh.ehl.rc
 #' @export
-#' @examples t<-lhwide(test[,c("id","OCC","AUClast")],"AUClast","OCC")
-#' @examples names(t)<-c("id","AUCsd","AUCss")
-#' @examples lh.ehl.rc(data=t,AUCsd="AUCsd",AUCss="AUCss",TAU=24)
-
+#' @examples
+#'
 lh.ehl.rc<-function(data,AUCsd="AUCsd",AUCss="AUCss",TAU=24){
   data$Rc <- with(data, AUCss/AUCsd)
   data$EHL <- with(data, log(2) * TAU/(log(Rc/(Rc - 1))))
   data$TAU<-TAU
-data
-  }
-
-
-###########################
+  data}
