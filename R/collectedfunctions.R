@@ -6,18 +6,18 @@
 #'@param  plain1 Slide with title c("zzz-yyy","Title") and single ggplot figure (C25/C75/C100), image (P25/P75/P100) or table (TAB). Sizes are 25%,75% and 100%.
 #'@param  plain2 Slide with title c("zzz-yyy","Title") and combination of figure (Text or paragraph. For heading 1, 2 or 3 text c("text,1, 2 or 3)
 
-#'@keywords ppt
+#'@keywords pptdoc
 #'@export
 #'@examples pres<-NULL
-#'@examples pres<-ppt()
-#'@examples pres<-ppt(cover=c("zzz","yyy","rrr")))
-#'@examples pres<-ppt(plain1=list())
-#'@examples pres<-ppt(plain2=list())
-#'@examples pres<-ppt(plain2=list())
+#'@examples pres<-pptdoc()
+#'@examples pres<-pptdoc(cover=c("zzz","yyy","rrr")))
+#'@examples pres<-pptdoc(plain1=list())
+#'@examples pres<-pptdoc(plain2=list())
+#'@examples pres<-pptdoc(plain2=list())
 #'@examples print(pres,"test..pptx")
 
 
-ppt<-function(template="C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",cover=NULL,plain1=NULL,plain2=NULL){
+pptdoc<-function(template="C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",cover=NULL,plain1=NULL,plain2=NULL){
   library(officer)
   library(flextable)
 
