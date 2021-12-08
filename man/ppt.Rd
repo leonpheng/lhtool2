@@ -24,11 +24,12 @@ ppt(
 Create Power point
 }
 \examples{
+pres<-NULL
 pres<-ppt()
-pres<-ppt(cover=c("title","authors","project number"))
-pres<-ppt(plain1=list(c("title","Title"),c("p","C100"));; p is ggplot
-pres<-ppt(plain2=list(c("title","Title"),c("p","CL"),c("t","TABR"),c("interpretation","TXT"));;t is table in flextable or data frame, L=left, R=right
-pres<-ppt(plain1=list(c("title","Title"),c("t","TAB"))
-print(pres,"testing.pptx")
+pres<-ppt(cover=c("zzz","yyy","rrr")))
+pres<-ppt(plain1=list())
+pres<-ppt(plain2=list())
+pres<-ppt(plain2=list())
+print(pres,"test..pptx")
 }
 \keyword{ppt}
