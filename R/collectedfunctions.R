@@ -1,3 +1,99 @@
+
+#' Create Power point
+#'
+#'
+#' @param template Required typical template by Leon
+#' @param cover  Cover slide c("Title","Authors","Project No or Date").
+#' @param plain1 Slide with title c("zzz-yyy","Title") and single ggplot figure (C25/C75/C100), image (P25/P75/P100) or table (TAB). Sizes are 25%,75% and 100%.
+#' @param plain2 Slide with title c("zzz-yyy","Title") and combination of figure (Text or paragraph. For heading 1, 2 or 3 text c("text",1, 2 or 3)
+
+#'
+#' @keywords ppt
+#' @export
+#'@examples dat<-data.frame(x=c(1:10),y=sqrt(1:10))
+#'@examplest t<-lhtab2(dat,"x","y")
+#'@examplest t<-width(t,width=0.2)
+#'@examplest library(ggplot2)
+#'@examplesp p<-ggplot(dat,aes(x=x,y=y))+geom_point();ggsave("C:/Users/lpheng/Desktop/Templates and Documents/test.png",p)
+#'@examples  pres<-ppt()
+#'@examples  pres<-ppt(cover=c("testing","Mr. X","Date"))
+#'@examples  pres<-ppt(plain1=list(c("TESTING","Title"),c("I'm testing","TXTB"),c("p","C75")))
+#'@examples  pres<-ppt(plain2=list(c("TESTING","Title"),c("I'm testing","TXT"),c("p","CL"),c("C:/Users/lpheng/Desktop/Templates and Documents/test.png","PR")))
+#'@examples print(pres,target = "C:/Users/lpheng/Desktop/Templates and Documents/testing.pptx")
+#'
+#'
+ppt<-function(template="C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",cover=NULL,plain1=NULL,plain2=NULL){
+  library(officer)
+  library(flextable)
+
+  if(is.null(c(cover,plain1,plain2))){
+  pres <-read_pptx(template)
+  pres<-pres%>%remove_slide(index=1)
+  }
+
+  officer::layout_properties(pres)
+  if(!is.null(cover)){
+    pres<-pres%>%
+      add_slide(layout = "Cover", master = "certara officer")%>%
+      ph_with(value = cover[1],
+              location = ph_location_label(ph_label = "Title"))%>%
+      ph_with(value = cover[2],
+              location = ph_location_label(ph_label = "Authors"))%>%
+      ph_with(value = cover[3],
+              location = ph_location_label(ph_label = "Project"))}
+
+  if(!is.null(plain1)&is.null(c(cover,plain2))){
+    pres<-pres%>%add_slide(layout = "Plain1", master = "certara officer")
+    for(x in 1:length(plain1)){
+    if("Title"%in%plain1[[x]][2]){
+    pres<-ph_with(pres,value =plain1[[x]][1],location = ph_location_label(ph_label ="Title"))
+    }else{
+    if(plain1[[x]][2]%in%c("TXTB","TXTL","TXTT")){
+    pres<-ph_with(pres,value =plain1[[x]][1],location = ph_location_label(ph_label=plain1[[x]][2]))
+    }else{
+    if(plain1[[x]][2]%in%c("C25","C75","C100")){
+                      a=plain1[[x]][1]
+                        p=eval(parse(text=a))
+                        pres<-ph_with(pres,value =p,location = ph_location_label(ph_label =plain1[[x]][2]))
+    }else{
+      if(plain1[[x]][2]%in%c("P25","P75","P100")){
+        pres<-ph_with(pres,value =plain1[[x]][1],location = ph_location_label(ph_label =plain1[[x]][2]))
+      }else{
+        if(plain1[[x]][2]%in%c("TAB")){
+          a=plain1[[x]][1]
+          t=eval(parse(text=a))
+          pres<-ph_with(pres,value =t,location = ph_location_label(ph_label =plain1[[x]][2]))
+    }
+      }}}}
+    }}
+
+    if(!is.null(plain2)){
+      pres<-pres%>%add_slide(layout = "Plain2", master = "certara officer")
+      for(x in 1:length(plain2)){
+        if("Title"%in%plain2[[x]][2]){
+          pres<-ph_with(pres,value =plain2[[x]][1],location = ph_location_label(ph_label ="Title"))
+        }else{
+          if(plain2[[x]][2]%in%c("TXT")){
+            pres<-ph_with(pres,value =plain2[[x]][1],location = ph_location_label(ph_label=plain2[[x]][2]))
+          }else{
+            if(plain2[[x]][2]%in%c("CR","CL")){
+              a=plain2[[x]][1]
+              p=eval(parse(text=a))
+              pres<-ph_with(pres,value =p,location = ph_location_label(ph_label =plain2[[x]][2]))
+            }else{
+              if(plain2[[x]][2]%in%c("PR","PL")){
+                pres<-ph_with(pres,value =plain2[[x]][1],location = ph_location_label(ph_label =plain2[[x]][2]))
+              }else{
+                if(plain2[[x]][2]%in%c("TABR","TABL")){
+                  a=plain2[[x]][1]
+                  t=eval(parse(text=a))
+                  pres<-ph_with(pres,value =t,location = ph_location_label(ph_label =plain2[[x]][2]))
+                }
+              }}}}
+      }}
+pres
+}
+
 #' Create word doc
 #'
 #'
@@ -500,7 +596,7 @@ lhtab1<-function (data , sort.by = c("study", "form"), cont =NULL,
     dcat<-dcat[order(dcat$sort),]
     catheader <- nodup(dcat[, c(sort.by, "sort")], "sort",
                        "all")
-    t11 <- lhtool::lhcattab(dcat, cat, "sort")
+    t11 <- lhcattab(dcat, cat, "sort")
     #head(t11)
     t11<-t11[,c("var","value",catheader$sort,"overall")]
     total<-addvar(dcat,"sort",cat,"length(x)","no","tot")
