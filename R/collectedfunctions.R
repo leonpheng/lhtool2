@@ -3,8 +3,8 @@
 #'
 #'@param  template Required typical template by Leon
 #'@param  cover  Cover slide c("Title","Authors","Project No or Date").
-#'@param  plain1 Slide with title c("zzz-yyy","Title") and single ggplot figure (C25/C75/C100), image (P25/P75/P100) or table (TAB). Sizes are 25%,75% and 100%.
-#'@param  plain2 Slide with title c("zzz-yyy","Title") and combination of figure (Text or paragraph. For heading 1, 2 or 3 text c("text,1, 2 or 3)
+#'@param  plain1 Slide with single item
+#'@param  plain2 Slide with two items
 
 #'@keywords pptdoc
 #'@export
