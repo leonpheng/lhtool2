@@ -11,8 +11,8 @@
 #'
 #'@examples pres<-ppt()
 #'@examples pres<-ppt(cover=c("title","authors","project number"))
-#'@examples pres<-ppt(plain1=list(c("title","Title"),c("p","C100"))# p is ggplot
-#'@examples pres<-ppt(plain2=list(c("title","Title"),c("p","CL"),c("t","TABR"),c("interpretation","TXT")) #t is table in flextable or data frame, L=left, R=right
+#'@examples pres<-ppt(plain1=list(c("title","Title"),c("p","C100"));; p is ggplot
+#'@examples pres<-ppt(plain2=list(c("title","Title"),c("p","CL"),c("t","TABR"),c("interpretation","TXT"));;t is table in flextable or data frame, L=left, R=right
 #'@examples pres<-ppt(plain1=list(c("title","Title"),c("t","TAB"))
 #'@examples print(pres,"testing.pptx")
 
