@@ -1,25 +1,21 @@
 #' Create Power point
 #'
 #'
-#' @param template Required typical template by Leon
-#' @param  cover  Cover slide c("Title","Authors","Project No or Date").
-#' @param  plain1 Slide with title c("zzz-yyy","Title") and single ggplot figure (C25/C75/C100), image (P25/P75/P100) or table (TAB).
-#' @param  Sizes are 25%,75% and 100%.
-#' @param  plain2 Slide with title c("zzz-yyy","Title") and combination of figure (Text or paragraph. For heading 1, 2 or 3 text
-#' @param         c("text,1, 2 or 3)
-#' @keywords ppt(..)
-#' @export
-#'@examples  dat<-data.frame(x=c(1:10),y=sqrt(1:10))
-#'@examples  t<-lhtab2(dat,"x","y")
-#'@examples  t<-width(t,width=0.2)
-#'@examples  library(ggplot2)
-#'@examples  p<-ggplot(dat,aes(x=x,y=y))+geom_point();ggsave("C:/Users/lpheng/Desktop/Templates and Documents/test.png",p)
-#'@examples  pres<-ppt()
-#'@examples  pres<-ppt(cover=c("testing","Mr. X","Date"))
-#'@examples  pres<-ppt(plain1=list(c("TESTING","Title"),c("I'm testing","TXTB"),c("p","C75")))##Size: (C25/C75/C100),(P25/P75/P100)
-#'@examples  "TXTB","TXTT", TXTL" for B=bottom, T=top, L=left
-#'@examples  pres<-ppt(plain2=list(c("TESTING","Title"),c("I'm testing","TXT"),c("p","CL"),c("C:/Users/lpheng/Desktop/Templates and #'@examples  Documents/test.png","PR")))##(CR/CL),(PR/PL),(TABR,TABL) R for right and L for lefte
-#'@examples  print(pres,target = "C:/Users/lpheng/Desktop/Templates and Documents/testing.pptx")
+#'@param  template Required typical template by Leon
+#'@param  cover  Cover slide c("Title","Authors","Project No or Date").
+#'@param  plain1 Slide with title c("zzz-yyy","Title") and single ggplot figure (C25/C75/C100), image (P25/P75/P100) or table (TAB). Sizes are 25%,75% and 100%.
+#'@param  plain2 Slide with title c("zzz-yyy","Title") and combination of figure (Text or paragraph. For heading 1, 2 or 3 text c("text,1, 2 or 3)
+
+#'@keywords ppt
+#'@export
+#'
+#'@examples pres<-ppt()
+#'@examples pres<-ppt(cover=c("title","authors","project number"))
+#'@examples pres<-ppt(plain1=list(c("title","Title"),c("p","C100"))# p is ggplot
+#'@examples pres<-ppt(plain2=list(c("title","Title"),c("p","CL"),c("t","TABR"),c("interpretation","TXT")) #t is table in flextable or data frame, L=left, R=right
+#'@examples pres<-ppt(plain1=list(c("title","Title"),c("t","TAB"))
+#'@examples print(pres,"testing.pptx")
+
 
 ppt<-function(template="C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",cover=NULL,plain1=NULL,plain2=NULL){
   library(officer)
