@@ -8,13 +8,7 @@
 
 #'@keywords pptdoc
 #'@export
-#'@examples pres<-NULL
-#'@examples pres<-pptdoc()
-#'@examples pres<-pptdoc(cover=c("zzz","yyy","rrr")))
-#'@examples pres<-pptdoc(plain1=list())
-#'@examples pres<-pptdoc(plain2=list())
-#'@examples pres<-pptdoc(plain2=list())
-#'@examples print(pres,"test..pptx")
+
 
 
 pptdoc<-function(template="C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",cover=NULL,plain1=NULL,plain2=NULL){

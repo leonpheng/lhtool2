@@ -23,13 +23,4 @@ pptdoc(
 \description{
 Create Power point
 }
-\examples{
-pres<-NULL
-pres<-pptdoc()
-pres<-pptdoc(cover=c("zzz","yyy","rrr")))
-pres<-pptdoc(plain1=list())
-pres<-pptdoc(plain2=list())
-pres<-pptdoc(plain2=list())
-print(pres,"test..pptx")
-}
 \keyword{pptdoc}
