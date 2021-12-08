@@ -16,21 +16,27 @@ ppt(
 
 \item{cover}{Cover slide c("Title","Authors","Project No or Date").}
 
-\item{plain1}{Slide with title c("zzz-yyy","Title") and single ggplot figure (C25/C75/C100), image (P25/P75/P100) or table (TAB). Sizes are 25%,75% and 100%.}
+\item{plain1}{Slide with title c("zzz-yyy","Title") and single ggplot figure (C25/C75/C100), image (P25/P75/P100) or table (TAB).}
 
-\item{plain2}{Slide with title c("zzz-yyy","Title") and combination of figure (Text or paragraph. For heading 1, 2 or 3 text c("text",1, 2 or 3)}
+\item{plain2}{Slide with title c("zzz-yyy","Title") and combination of figure (Text or paragraph. For heading 1, 2 or 3 text}
+
+\item{Sizes}{are 25%,75% and 100%.}
+
+\item{c("text, 1, }{2 or 3)}
 }
 \description{
 Create Power point
 }
 \examples{
-dat<-data.frame(x=c(1:10),y=sqrt(1:10))
+ dat<-data.frame(x=c(1:10),y=sqrt(1:10))
+ t<-lhtab2(dat,"x","y")
+ t<-width(t,width=0.2)
+ library(ggplot2)
+ p<-ggplot(dat,aes(x=x,y=y))+geom_point();ggsave("C:/Users/lpheng/Desktop/Templates and Documents/test.png",p)
  pres<-ppt()
  pres<-ppt(cover=c("testing","Mr. X","Date"))
- pres<-ppt(plain1=list(c("TESTING","Title"),c("I'm testing","TXTB"),c("p","C75")))
- pres<-ppt(plain2=list(c("TESTING","Title"),c("I'm testing","TXT"),c("p","CL"),c("C:/Users/lpheng/Desktop/Templates and Documents/test.png","PR")))
-print(pres,target = "C:/Users/lpheng/Desktop/Templates and Documents/testing.pptx")
-
-
+ pres<-ppt(plain1=list(c("TESTING","Title"),c("I'm testing","TXTB"),c("p","C75")))##Size: (C25/C75/C100),(P25/P75/P100)
+ pres<-ppt(plain2=list(c("TESTING","Title"),c("I'm testing","TXT"),c("p","CL"),c("C:/Users/lpheng/Desktop/Templates and #'@examples  Documents/test.png","PR")))##(CR/CL),(PR/PL),(TABR,TABL) R for right and L for lefte
+ print(pres,target = "C:/Users/lpheng/Desktop/Templates and Documents/testing.pptx")
 }
-\keyword{ppt}
+\keyword{ppt(..)}
