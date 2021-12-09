@@ -9,6 +9,7 @@
 #'@keywords pptdoc
 #'@export
 ppt.function<-function(...){
+  print(
 pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",
                   cover = NULL, plain1 = NULL, plain2 = NULL)
 {
@@ -93,7 +94,8 @@ pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/te
     }
   }
   pres
-}
+})
+
 }
 
 
