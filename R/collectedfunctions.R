@@ -41,8 +41,8 @@ pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/te
           if (plain1[[x]][2] %in% c("C25", "C75",
                                     "C100")) {
             a = plain1[[x]][1]
-            p = eval(parse(text = a))
-            pres <- ph_with(pres, value = p, location = ph_location_label(ph_label = plain1[[x]][2]))
+            insert.plot = eval(parse(text = a))
+            pres <- ph_with(pres, value =insert.plot, location = ph_location_label(ph_label = plain1[[x]][2]))
           }          else {
             if (plain1[[x]][2] %in% c("P25", "P75",
                                       "P100")) {
@@ -51,8 +51,8 @@ pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/te
             }            else {
               if (plain1[[x]][2] %in% c("TAB")) {
                 a = plain1[[x]][1]
-                t = eval(parse(text = a))
-                pres <- ph_with(pres, value =t, location = ph_location_label(ph_label = plain1[[x]][2]))
+                insert.table = eval(parse(text = a))
+                pres <- ph_with(pres, value =insert.table, location = ph_location_label(ph_label = plain1[[x]][2]))
               }
             }
           }
@@ -73,8 +73,8 @@ pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/te
         }        else {
           if (plain2[[x]][2] %in% c("CR", "CL")) {
             a = plain2[[x]][1]
-            p = eval(parse(text = a))
-            pres <- ph_with(pres, value = p, location = ph_location_label(ph_label = plain2[[x]][2]))
+            insert.plot = eval(parse(text = a))
+            pres <- ph_with(pres, value =insert.plot, location = ph_location_label(ph_label = plain2[[x]][2]))
           }          else {
             if (plain2[[x]][2] %in% c("PR", "PL")) {
               pres <- ph_with(pres, value = plain2[[x]][1],
@@ -83,8 +83,8 @@ pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/te
               if (plain2[[x]][2] %in% c("TABR",
                                         "TABL")) {
                 a = plain2[[x]][1]
-                t = eval(parse(text = a))
-                pres <- ph_with(pres, value =t, location = ph_location_label(ph_label = plain2[[x]][2]))
+                insert.table= eval(parse(text = a))
+                pres <- ph_with(pres,value =insert.table, location = ph_location_label(ph_label = plain2[[x]][2]))
               }
             }
           }
