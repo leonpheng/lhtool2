@@ -9,79 +9,92 @@
 #'@keywords pptdoc
 #'@export
 
-
-
-pptdoc<-function(template="C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",cover=NULL,plain1=NULL,plain2=NULL){
+pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/templateforofficer.pptx",
+                  cover = NULL, plain1 = NULL, plain2 = NULL)
+{
   library(officer)
   library(flextable)
-
-  if(is.null(c(cover,plain1,plain2))){
-  pres <-read_pptx(template)
-  pres<-pres%>%remove_slide(index=1)
+  if (is.null(c(cover, plain1, plain2))) {
+    pres <- read_pptx(template)
+    pres <- pres %>% remove_slide(index = 1)
   }
-
   officer::layout_properties(pres)
-  if(!is.null(cover)){
-    pres<-pres%>%
-      add_slide(layout = "Cover", master = "certara officer")%>%
-      ph_with(value = cover[1],
-              location = ph_location_label(ph_label = "Title"))%>%
-      ph_with(value = cover[2],
-              location = ph_location_label(ph_label = "Authors"))%>%
-      ph_with(value = cover[3],
-              location = ph_location_label(ph_label = "Project"))}
-
-  if(!is.null(plain1)&is.null(c(cover,plain2))){
-    pres<-pres%>%add_slide(layout = "Plain1", master = "certara officer")
-    for(x in 1:length(plain1)){
-    if("Title"%in%plain1[[x]][2]){
-    pres<-ph_with(pres,value =plain1[[x]][1],location = ph_location_label(ph_label ="Title"))
-    }else{
-    if(plain1[[x]][2]%in%c("TXTB","TXTL","TXTT")){
-    pres<-ph_with(pres,value =plain1[[x]][1],location = ph_location_label(ph_label=plain1[[x]][2]))
-    }else{
-    if(plain1[[x]][2]%in%c("C25","C75","C100")){
-                      a=plain1[[x]][1]
-                        p=eval(parse(text=a))
-                        pres<-ph_with(pres,value =p,location = ph_location_label(ph_label =plain1[[x]][2]))
-    }else{
-      if(plain1[[x]][2]%in%c("P25","P75","P100")){
-        pres<-ph_with(pres,value =plain1[[x]][1],location = ph_location_label(ph_label =plain1[[x]][2]))
-      }else{
-        if(plain1[[x]][2]%in%c("TAB")){
-          a=plain1[[x]][1]
-          t=eval(parse(text=a))
-          pres<-ph_with(pres,value =t,location = ph_location_label(ph_label =plain1[[x]][2]))
+  if (!is.null(cover)) {
+    pres <- pres %>% add_slide(layout = "Cover", master = "certara officer") %>%
+      ph_with(value = cover[1], location = ph_location_label(ph_label = "Title")) %>%
+      ph_with(value = cover[2], location = ph_location_label(ph_label = "Authors")) %>%
+      ph_with(value = cover[3], location = ph_location_label(ph_label = "Project"))
+  }
+  if (!is.null(plain1) & is.null(c(cover, plain2))) {
+    pres <- pres %>% add_slide(layout = "Plain1", master = "certara officer")
+    for (x in 1:length(plain1)) {
+      if ("Title" %in% plain1[[x]][2]) {
+        pres <- ph_with(pres, value = plain1[[x]][1],
+                        location = ph_location_label(ph_label = "Title"))
+      }      else {
+        if (plain1[[x]][2] %in% c("TXTB", "TXTL",
+                                  "TXTT")) {
+          pres <- ph_with(pres, value = plain1[[x]][1],
+                          location = ph_location_label(ph_label = plain1[[x]][2]))
+        }        else {
+          if (plain1[[x]][2] %in% c("C25", "C75",
+                                    "C100")) {
+            a = plain1[[x]][1]
+            p = eval(parse(text = a))
+            pres <- ph_with(pres, value = p, location = ph_location_label(ph_label = plain1[[x]][2]))
+          }          else {
+            if (plain1[[x]][2] %in% c("P25", "P75",
+                                      "P100")) {
+              pres <- ph_with(pres, value = plain1[[x]][1],
+                              location = ph_location_label(ph_label = plain1[[x]][2]))
+            }            else {
+              if (plain1[[x]][2] %in% c("TAB")) {
+                a = plain1[[x]][1]
+                t = eval(parse(text = a))
+                pres <- ph_with(pres, value = t, location = ph_location_label(ph_label = plain1[[x]][2]))
+              }
+            }
+          }
+        }
+      }
     }
-      }}}}
-    }}
-
-    if(!is.null(plain2)){
-      pres<-pres%>%add_slide(layout = "Plain2", master = "certara officer")
-      for(x in 1:length(plain2)){
-        if("Title"%in%plain2[[x]][2]){
-          pres<-ph_with(pres,value =plain2[[x]][1],location = ph_location_label(ph_label ="Title"))
-        }else{
-          if(plain2[[x]][2]%in%c("TXT")){
-            pres<-ph_with(pres,value =plain2[[x]][1],location = ph_location_label(ph_label=plain2[[x]][2]))
-          }else{
-            if(plain2[[x]][2]%in%c("CR","CL")){
-              a=plain2[[x]][1]
-              p=eval(parse(text=a))
-              pres<-ph_with(pres,value =p,location = ph_location_label(ph_label =plain2[[x]][2]))
-            }else{
-              if(plain2[[x]][2]%in%c("PR","PL")){
-                pres<-ph_with(pres,value =plain2[[x]][1],location = ph_location_label(ph_label =plain2[[x]][2]))
-              }else{
-                if(plain2[[x]][2]%in%c("TABR","TABL")){
-                  a=plain2[[x]][1]
-                  t=eval(parse(text=a))
-                  pres<-ph_with(pres,value =t,location = ph_location_label(ph_label =plain2[[x]][2]))
-                }
-              }}}}
-      }}
-pres
+  }
+  if (!is.null(plain2)& is.null(c(cover, plain1))) {
+    pres <- pres %>% add_slide(layout = "Plain2", master = "certara officer")
+    for (x in 1:length(plain2)) {
+      if ("Title" %in% plain2[[x]][2]) {
+        pres <- ph_with(pres, value = plain2[[x]][1],
+                        location = ph_location_label(ph_label = "Title"))
+      }      else {
+        if (plain2[[x]][2] %in% c("TXT")) {
+          pres <- ph_with(pres, value = plain2[[x]][1],
+                          location = ph_location_label(ph_label = plain2[[x]][2]))
+        }        else {
+          if (plain2[[x]][2] %in% c("CR", "CL")) {
+            a = plain2[[x]][1]
+            p = eval(parse(text = a))
+            pres <- ph_with(pres, value = p, location = ph_location_label(ph_label = plain2[[x]][2]))
+          }          else {
+            if (plain2[[x]][2] %in% c("PR", "PL")) {
+              pres <- ph_with(pres, value = plain2[[x]][1],
+                              location = ph_location_label(ph_label = plain2[[x]][2]))
+            }            else {
+              if (plain2[[x]][2] %in% c("TABR",
+                                        "TABL")) {
+                a = plain2[[x]][1]
+                t = eval(parse(text = a))
+                pres <- ph_with(pres, value = t, location = ph_location_label(ph_label = plain2[[x]][2]))
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  pres
 }
+
+
 
 #' Create word doc
 #'
