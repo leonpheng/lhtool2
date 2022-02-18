@@ -1,3 +1,50 @@
+#' Create ADDL DATA
+#'
+#'
+#'@param  data Data frame.
+#'@param  id  subject id
+#'@param  time Time after first dose
+#'@param  last.dose.time This could be minimum last PK time. Required to compute the ADDL of the last dose
+#'@param  ii Dose interval vector
+
+#'@keywords addl
+#'@export
+
+addl<-function(data=dat,id="id",time="time",last.dose.time="last.dose.time",ii=24,note="use only dose data with evid=1."){
+  maxt<-data
+  all<-NULL
+  for(i in unique(maxt[,id])){
+    d<-maxt[maxt[,id]==i,]
+    n1<-NULL
+    for(j in 1:nrow(d)){
+      if(j==nrow(d)){
+        n<-d[j,last.dose.time]-d[j,time]
+        if(n<0){
+          n<-0
+        }else{n<-n}
+      }else{
+        n<-d[j+1,time]- d[j,time]}
+      n1<-c(n1,n)
+    }
+    d$x1<-n1
+    d$maxt<-NULL
+    d1<-d
+    if(is.numeric(ii)){
+      d1$II<-ii
+    }else{d1$II<-d1[,ii];d1[,ii]<-NULL}
+
+    d1$ADDL<-ceiling(d1$x1/d1$II)-1
+    d1$ADDL[d1$ADDL<0]<-0
+    d1$II[d1$ADDL==0]<-0
+    d2<-d1[order(d1[,id],d1[,time]),]
+
+    d2$x1<-NULL
+    all<-rbind(all,d2)
+  }
+
+  all<-all[order(all[,id],all[,time]),]
+}
+
 #' Create Power point
 #'
 #'
