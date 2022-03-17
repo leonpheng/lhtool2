@@ -8,10 +8,11 @@ nca.cal(
   data,
   n_lambda = 3,
   id = "id",
-  time = "TAD",
+  time = "time",
   dv = "dv",
   partialAUC = NULL,
-  partialConc = NULL
+  partialConc = NULL,
+  full = F
 )
 }
 \arguments{
@@ -21,18 +22,20 @@ nca.cal(
 
 \item{id}{unique subject identifier}
 
-\item{time}{Sampling time after dose (TAD)}
+\item{time}{Sampling time}
 
 \item{dv}{Concentration}
 
-\item{partialAUC}{Time interval for partial AUC. Ex: c(0,6,0,12,6,12) for AUC0-6, AUC0-12 and AUC6-12}
+\item{partialAUC}{Time interval for partial AUC. Ex: 0,6,0,12,6,12 for AUC0-6, AUC0-12 and AUC6-12}
 
-\item{partialConc}{Point estimated concentration (Ex:c(1,4) for concentration after 1 and 4 h)}
+\item{partialConc}{Point estimated concentration Ex:1,4 for concentration after 1 and 4 h)}
+
+\item{plots}{plog, plin, or plot}
 }
 \description{
 nca.cal()
 }
 \examples{
-test<-nca.cal(data=data,n_lambda = 3, id = "id", time = "TAD", dv = "dv",dose
+test<-nca.cal(data=d,id="id",partialAUC =c(0,12,12,24),partialConc =c(1,2),time = "time",dv = "conc")
 }
 \keyword{nca.cal}
