@@ -10,7 +10,8 @@ addl(
   time = "time",
   last.dose.time = "last.dose.time",
   ii = 24,
-  note = "use only dose data with evid=1."
+  note = "use only dose data with evid=1.",
+  tol = 0.3
 )
 }
 \arguments{

@@ -10,39 +10,45 @@
 #'@keywords addl
 #'@export
 
-addl<-function(data=dat,id="id",time="time",last.dose.time="last.dose.time",ii=24,note="use only dose data with evid=1."){
-  maxt<-data
-  all<-NULL
-  for(i in unique(maxt[,id])){
-    d<-maxt[maxt[,id]==i,]
-    n1<-NULL
-    for(j in 1:nrow(d)){
-      if(j==nrow(d)){
-        n<-d[j,last.dose.time]-d[j,time]
-        if(n<0){
-          n<-0
-        }else{n<-n}
-      }else{
-        n<-d[j+1,time]- d[j,time]}
-      n1<-c(n1,n)
+addl<-function (data = dat, id = "id", time = "time", last.dose.time = "last.dose.time",
+                ii = 24, note = "use only dose data with evid=1.",tol=0.3)
+{
+  maxt <- data
+  all <- NULL
+  for (i in unique(maxt[, id])) {
+    d <- maxt[maxt[, id] == i, ]
+    n1 <- NULL
+    for (j in 1:nrow(d)) {
+      if (j == nrow(d)) {
+        n <- d[j, last.dose.time] - d[j, time]
+        if (n < 0) {
+          n <- 0
+        } else {
+          n <- n
+        }
+      }else {
+        n <- d[j + 1, time] - d[j, time]
+        if(!(abs((ceiling(n/ii)-1)*ii+d[j, time]-d[j + 1, time])/ii>tol)){n<-n-ii}else{n=n}
+      }
+      n1 <- c(n1, n)
     }
-    d$x1<-n1
-    d$maxt<-NULL
-    d1<-d
-    if(is.numeric(ii)){
-      d1$II<-ii
-    }else{d1$II<-d1[,ii];d1[,ii]<-NULL}
-
-    d1$ADDL<-ceiling(d1$x1/d1$II)-1
-    d1$ADDL[d1$ADDL<0]<-0
-    d1$II[d1$ADDL==0]<-0
-    d2<-d1[order(d1[,id],d1[,time]),]
-
-    d2$x1<-NULL
-    all<-rbind(all,d2)
+    d$x1 <- n1
+    d$maxt <- NULL
+    d1 <- d
+    if (is.numeric(ii)) {
+      d1$II <- ii
+    } else {
+      d1$II <- d1[, ii]
+      d1[, ii] <- NULL
+    }
+    d1$ADDL <- ceiling(d1$x1/d1$II) - 1
+    d1$ADDL[d1$ADDL < 0] <- 0
+    d1$II[d1$ADDL == 0] <- 0
+    d2 <- d1[order(d1[, id], d1[, time]), ]
+    d2$x1 <- NULL
+    all <- rbind(all, d2)
   }
-
-  all<-all[order(all[,id],all[,time]),]
+  all <- all[order(all[, id], all[, time]), ]
 }
 
 #' Create Power point
@@ -158,51 +164,63 @@ pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/te
 #'
 #' @keywords wdoc
 #' @export
-#'@examples df<-data.frame(x=2,z=4)
-#'@examples ft<-flextable(df)
-#'@examples library(ggplot2)
-#'@examples p<-ggplot(df,aes(x=x,y=z))+
-#'@examples  geom_point()
-#'
-#'@examples doc<-NULL
-#'@examples doc<-wdoc()
-#'@examples doc<-wdoc(txt=c("this is a test",1))
-#'@examples doc<-wdoc(df=df)
-#'@examples doc<-wdoc(tab=ft)
-#'@examples doc<-wdoc(fig=p)
-#'@examples print(doc,"test.docx")
+#'@examples "Create documet by listing the functions txt(text),tab(flextable table),df(data frame to table),fig(ggplot figure),img(image).
+#'@examples EX: doc<-wdoc(); doc<-wdoc(list(txt=c('your text', optional heading number),fig=ggplot fig,img=c(path/filename.png,width,height));print(doc,filename.docx)"
 #'
 
-wdoc<-function(template=NULL,df=NULL,tab=NULL,txt=NULL,img=NULL,fig=NULL){
+wdoc<-function(template=NULL,start=list(NULL)){
   library(officer)
   library(flextable)
-  if(is.null(df)&is.null(tab)&is.null(txt)&is.null(img)&is.null(fig)){
+
+txt<-c("Create documet by listing the functions below",
+"txt(text)",
+"tab(flextable table)",
+"df(data frame to table)",
+"fig(ggplot figure)",
+"img(image)",
+"EX:",
+"doc<-wdoc()",
+"doc<-wdoc(list(txt=c('your text', optional heading number),fig=ggplot fig,img=c(path/filename.png,width,height));print(doc,filename.docx)")
+
+  if(is.null(start[[1]])){
     if(is.null(template)){
-    doc<-read_docx()
-    }else{doc<-officer::read_docx(template)}}else{
+      doc<-read_docx()
+      print(txt)
+    }else{
+      doc<-officer::read_docx(template)
+      print(txt)
+    }}else{
 
-if(!is.null(tab)){
-    ftab<-width(tab, width=0.2)
-    doc<-body_add_flextable(doc,tab)
-  }
+      for(i in 1:length(start)){
 
-if(!is.null(df)&is.null(template)){
-    ftab<-flextable(df)
-    ftab<-width(ftab, width=0.2)
-    doc<-body_add_flextable(doc,ftab)}
-
-  if(!is.null(txt)){
-    if(length(txt)==2){
-      style1<-paste("heading",txt[2])
-    doc<-body_add_par(doc,txt[1],style=style1)}else{doc<-body_add_par(doc,txt[1])}}
-if(!is.null(img)){
-  doc<-body_add_img(doc,img,width=6,height=6)}
-  if(!is.null(fig)){
-    doc<-body_add_gg(doc,fig,width=6,height=6)}}
+        if(unique(start[[i]]%in%start[i]$tab)){
+          ftab<-width(start[[i]], width=0.2)
+          doc<-body_add_flextable(doc,start[[i]])
+          doc<-body_add_par(doc,"")}
+        if(unique(start[[i]]%in%start[i]$df)){
+          ftab<-flextable(start[[i]])
+          ftab<-width(ftab, width=0.2)
+          doc<-body_add_flextable(doc,ftab)
+          doc<-body_add_par(doc,"")}
+        if(unique(start[[i]]%in%start[i]$txt)){
+          if(length(start[[i]])==2){
+            style1<-paste("heading",start[[i]][2])
+            doc<-body_add_par(doc,start[[i]][1],style=style1)
+            doc<-body_add_par(doc,"")
+          }else{
+            doc<-body_add_par(doc,start[[i]][1])
+            doc<-body_add_par(doc,"")
+          }}
+        if(unique(start[[i]]%in%start[i]$img)){
+          doc<-body_add_img(doc,unlist(start[[i]][1]),width=as.numeric(unlist(start[[i]][2])),height=as.numeric(unlist(start[[i]][3])))
+          doc<-body_add_par(doc,"")}
+if(unique(start[[i]]%in%start[i]$fig)){
+          doc<-body_add_gg(doc,value=start$fig)
+          doc<-body_add_par(doc,"")}
+      }
+    }
   doc
 }
-
-
 
 #' Create define or data specification
 #'
@@ -1566,7 +1584,7 @@ nmid<-function(data,id="USUBJID",varname="NMID"){
   data$ord<-seq(1,nrow(data),1)
   idat<-data.frame(id=unique(data[,id]),varname=seq(1,length(unique(data[,id])),1))
   names(idat)<-c(id,varname)
-  data<-merge(data,idat)
+  data<-dplyr::left_join(data,idat)
   data<-data[order(data[,varname],data$ord),]
   data$ord<-NULL
   data
@@ -1739,7 +1757,7 @@ tadRT<-function (data, id="ID",dttm=NULL ,cdate=NULL, ctime=NULL, evid="EVID", t
   data$TAD <- as.numeric(difftime(strptime(data$tadtm, format = format,
                                            tz = tz), strptime(data$DTTM, format = format,
                                                               tz = tz), units = "hour")) * (-1)
-  data <- merge(data, rtime, all.x = T)
+  data <- plyr::merge(data, rtime, all.x = T)
   data$RTIME <- as.numeric(difftime(strptime(data$DTTM, format = format,
                                              tz = tz), strptime(data$FDDTM, format = format,
                                                                 tz = tz), units = "hour"))

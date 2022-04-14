@@ -4,14 +4,7 @@
 \alias{wdoc}
 \title{Create word doc}
 \usage{
-wdoc(
-  template = NULL,
-  df = NULL,
-  tab = NULL,
-  txt = NULL,
-  img = NULL,
-  fig = NULL
-)
+wdoc(template = NULL, start = list(NULL))
 }
 \arguments{
 \item{template}{Document template if available, provide full path and template file name}
@@ -28,21 +21,5 @@ wdoc(
 }
 \description{
 Create word doc
-}
-\examples{
-df<-data.frame(x=2,z=4)
-ft<-flextable(df)
-library(ggplot2)
-p<-ggplot(df,aes(x=x,y=z))+
- geom_point()
-
-doc<-NULL
-doc<-wdoc()
-doc<-wdoc(txt=c("this is a test",1))
-doc<-wdoc(df=df)
-doc<-wdoc(tab=ft)
-doc<-wdoc(fig=p)
-print(doc,"test.docx")
-
 }
 \keyword{wdoc}
