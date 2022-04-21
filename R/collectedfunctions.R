@@ -2348,13 +2348,6 @@ dat1$tad<-dat1$time-dat1$fdt;dat1$fdt<-NULL
   dat2 <- dat1
 dat2 <- dat2[order(dat2[,id], dat2$tad), ]
 dat2$dvtm <- dat2[,dv] * dat2[,time]
-
-plog<-ggplot(d,aes(x=time,y=conc,group=factor(id)))+
-geom_line(aes(col=factor(id)))+scale_y_log10()+theme_bw()
-plin<-ggplot(d,aes(x=time,y=conc,group=factor(id)))+
-  geom_line(aes(col=factor(id)))+theme_bw()
-ploglin<-ggpubr::ggarrange(plin,plog,ncol = 2, nrow =1 , common.legend = TRUE, legend = "bottom")
-print(ploglin)
 datauc <- dat2
   auclast <- AUC(datauc, time ="tad", id ="id", dv ="dv")
   names(auclast) <- c(id, "AUClast")
