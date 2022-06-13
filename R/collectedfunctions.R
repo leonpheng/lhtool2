@@ -2207,79 +2207,98 @@ lhcattab<-function (data, var, by)
 
 #' Individual table with descriptive statse
 #'
-#' Listing of individual data and descriptove stats
+#' Listing of individual data and descriptive stats
 #' @param data datset or data frame (ex:data=PKdatat)
 #' @param id unique identifier
-#' @param by  Stratification variable (ex: by="study")
+#' @param by Stratification variable (ex: by="study")
 #' @param variables Specify sorting variable to be displayed vertically. (ex: colby=by or colby="var")
 #' @param rtype rounding type. (sigfig by default)
 #' @param dec round decimal or number of significant figures
 #' @keywords ind.tab
 #' @export
-#' @examples ind.tab(data=dat,id="NMID",by=c("study"))
+#' @examples lhtab3(data=dat,id="NMID",by=c("study"))
 
-indiv.tab<-function(data,id,by,variables,rtype="sigfig",dec=3){
-  id<-id#
-  data<-data[,c(id,by,variables)]#[!duplicated(data$id),]
-  strat1<-by#c("phase")# mandatory
-  convar<-variables #mandatory
-  d1<-data[,c(id,strat1,convar)]
-  d1<-chclass(d1,convar,"num")
-  head(d1)
+lhtab3<-function(data=d,id="animal",by=c("antibody_name","dose_mpk"),horiz="time_point",var.list="conc",round="sifig",dec=3,heading=1,stat.eq=NULL,stat.list=NULL){
+doc<-read_docx()
+for(tt in seq(var.list)){
+  var<-var.list[tt]
+z<-data[,c(id,by,horiz,var)]
+kvar<-sort(unique(z[,horiz]))
 
-  t1<-NULL
-  for(i in unique(d1[,strat1])){
-    d0<-d1[d1[,strat1]%in%i,]
-    l<-stats::reshape(d0,
-               varying = c(convar),
-               v.names = "score",
-               timevar = "subj",
-               times = c(convar),
-               #new.row.names = 1:1000,
-               direction = "long")
-    head(l)
-    l$id<-NULL
-    str(l)
-    st<-plyr::ddply(l,c(by,"subj"),summarise,
-              N=round(length(score),0),
-              Nmiss=round(length(score[is.na(score)]),0),
-              Means=sigfig(mean(score,na.rm=T),3),
-              SD=sigfig(sd(score,na.rm=T),3),
-              cv=sigfig(cv(score),3),
-              Median=sigfig(median(score,na.rm=T),3),
-              Minimum=sigfig(min(score,na.rm=T),3),
-              Maximum=sigfig(max(score,na.rm=T),3),
-              GeoMean=sigfig(Gmean(score),3),
-              GeoCV=sigfig(Gcv(score),3))
-    keep<-names(st[,3:length(names(st))])
-    l1<-stats::reshape(st,
-                varying = c(keep),
-                v.names = "Stats",
-                timevar = "Results",
-                times = c(keep),
-                #new.row.names = 1:1000,
-                direction = "long")
-    l1$id<-NULL
+z$ui<-""
+for(i in by){
+  if(i==by[length(by)]){
+      z$ui<-paste0(z[,i],z$ui)}else{
+        z$ui<-paste0(z$ui,"xxx",z[,i])}}
+  k<-nodup(z,c(by,"ui"),"var")
 
-    w<-stats::reshape(l1,
-               timevar = "subj",
-               idvar = c(strat1, "Results"),
-               direction = "wide")
-    names(w)<-gsub("Stats.","",names(w))
-    head(d0)
-    x1<-setdiff(names(d0),names(w))
-    x2<-setdiff(names(w),names(d0))
-    w[,x1]<-""
-    d0[,x2]<-""
-    d0<-d0[,c(id,strat1,x2,convar)]
-    #d0<-chclass(d0,convar,"num")
-    if(!is.null(rtype)){
-      d0<-bround(d0,convar,rtype=rtype,dec=dec)}
-    t<-rbind(d0,w)
-    t<-t[,c(id,strat1,x2,convar)]
-    t1<-rbind(t1,t)
+  indiv<-data[,c(id,by,horiz,var)]
+  if(round=="sifig"){
+    indiv[,var]<-sigfig(indiv[,var],dec)
   }
-  t1
+  if(round=="round"){
+    indiv[,var]<-round(indiv[,var],dec)
+  }
+  d2<-lhwide(indiv,var,horiz)
+
+  head(d2)
+
+  d2$ui<-""
+  for(i in by){
+    if(i==by[length(by)]){
+      d2$ui<-paste0(d2[,i],d2$ui)}else{
+        d2$ui<-paste0(d2$ui,"xxx",d2[,i])}}
+
+  if(is.null(stat.eq)){
+    stat.eq=c("length(x[!is.na(x)])=N","sd(x)=SD",
+              "length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean",
+              "median(x,na.rm=T)=Median", "quantile(x,0.5,na.rm=T)=50thPI",
+              "mean(x,na.rm=T)=Mean", "cv(x)=CV%", "min(x)=Minimum",
+              "max(x)=Maximum", "geocv(x)=GeoCV%")
+  }
+
+  if(is.null(stat.list)){
+    stat.list=list(c("N"," (", "Nmiss", ")"),
+                   c("Mean"),
+                   c("CV%"),
+                   c("Median"),
+                   c(" [", "Minimum",", ", "Maximum", "]"),
+                   c("GeoMean"),
+                   c("GeoCV%"))
+  }
+
+  style1 <- paste("heading",heading)
+  style2 <- paste("heading",(heading+1))
+
+
+  doc<-body_add_par(doc,var,style=style1)
+  sum<-z
+  for(i in 1:nrow(k)){
+    d5<-d2[d2$ui==k$ui[i],]
+    d3<-sum[sum$ui==k$ui[i],]
+    d4<-lhtab2(d3,horiz,var,overall=NULL,render ="csv",stat.group=stat.list,stats=stat.eq)
+    d4<-d4[!row.names(d4)%in%c(1),]
+    d4[1,]<-"Statistics"
+
+    d4[,by]<-d3[,by]
+    d5$ui<-NULL
+    d4[,c(id,by)]<-d4[,"lab"]
+    d4$lab<-NULL
+
+    d6<-lhrbind(d5,d4)
+    kvar<-as.character(kvar[kvar%in%names(d6)])
+    kid<-names(d6)[!names(d6)%in%kvar]
+    d6<-d6[,c(kid,kvar)]
+    txt1<-gsub("xxx"," ",k$ui[i])
+    t<-flextable(d6) %>% merge_h()%>% merge_v(j=c(id,by))%>% theme_box()%>%width(width=0.6)%>%align(align="center")
+
+    doc<-body_add_par(doc,txt1,style2)%>%
+      body_add_flextable(t,split=T)%>%
+      body_add_break()%>%
+      body_end_section_landscape()
+  }
+ }
+doc
 }
 
 #' Calculate AUC Using the Trapezoidal Method
