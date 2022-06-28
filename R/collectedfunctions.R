@@ -1707,8 +1707,8 @@ duprow<-function(data,var=NULL,remove=NULL){
 #' @param EVID evid variable
 #' @keywords tadRT
 #' @export
-
-tadRT<-function (data, id="ID",dttm=NULL ,cdate=NULL, ctime=NULL, evid="EVID", tz ="GMT",format="%Y-%m-%d %H:%M")
+tadRT<-function (data, id = "ID", dttm = NULL, cdate = NULL, ctime = NULL,
+                 evid = "EVID", tz = "GMT", format = "%Y-%m-%d %H:%M")
 {
   locf <- function(x) {
     good <- !is.na(x)
@@ -1719,19 +1719,18 @@ tadRT<-function (data, id="ID",dttm=NULL ,cdate=NULL, ctime=NULL, evid="EVID", t
     x[last.good.position]
   }
   data$TAD <- data$RTIME <- NULL
-
-  if(!is.null(dttm)){
-    data$DTTM <- as.character(data[,dttm])
-    data[,dttm]<-NULL
-    data <- data[order(data[, id],data$DTTM),]
-    data$tadtm <- NA}else{
+  if (!is.null(dttm)) {
+    data$DTTM <- as.character(data[, dttm])
+    data[, dttm] <- NULL
+    data <- data[order(data[, id], data$DTTM), ]
+    data$tadtm <- NA
+  } else {
     data <- chclass(data, c(cdate, ctime), "char")
-    data$DTTM <- as.character(paste(data[, cdate], data[, ctime],
-                                       sep = " "))
- data$tadtm <- NA
- data <- data[order(data[, id],data$DTTM), ]
- }
-
+    data$DTTM <- as.character(paste(data[, cdate], data[,
+                                                        ctime], sep = " "))
+    data$tadtm <- NA
+    data <- data[order(data[, id], data$DTTM), ]
+  }
   head(data)
   dtm <- data[data[, evid] > 0, ]
   rtime <- dtm[!duplicated(dtm[, id]), c(id, "DTTM")]
@@ -1742,25 +1741,24 @@ tadRT<-function (data, id="ID",dttm=NULL ,cdate=NULL, ctime=NULL, evid="EVID", t
   data <- rbind(dose, nodose)
   data$tadtm <- as.character(data$tadtm)
   head(data)
-
   data$DTTM <- strftime(strptime(data$DTTM, format = format,
                                  tz = tz), format = format, tz = tz)
   data <- data[order(data[, id], data$DTTM), ]
   data$WT1 <- unlist(tapply(data$tadtm, data[, id], locf))
   data$tadtm <- rev(locf(rev(data$WT1)))
-  data <- data[order(data[, id],data$DTTM), ]
+  data <- data[order(data[, id], data$DTTM), ]
   head(data)
   data$DTTM <- strftime(strptime(data$DTTM, format = format,
                                  tz = tz), format = format, tz = tz)
   data$tadtm <- strftime(strptime(data$tadtm, format = format,
                                   tz = tz), format = format, tz = tz)
   data$TAD <- as.numeric(difftime(strptime(data$tadtm, format = format,
-                                           tz = tz), strptime(data$DTTM, format = format,
-                                                              tz = tz), units = "hour")) * (-1)
-  data <- plyr::merge(data, rtime, all.x = T)
+                                           tz = tz), strptime(data$DTTM, format = format, tz = tz),
+                                  units = "hour")) * (-1)
+  data <- left_join(data, rtime, all.x = T)
   data$RTIME <- as.numeric(difftime(strptime(data$DTTM, format = format,
-                                             tz = tz), strptime(data$FDDTM, format = format,
-                                                                tz = tz), units = "hour"))
+                                             tz = tz), strptime(data$FDDTM, format = format, tz = tz),
+                                    units = "hour"))
   data$WT1 <- NULL
   data$tadtm <- NULL
   data$FDDTM <- NULL
@@ -1769,7 +1767,6 @@ tadRT<-function (data, id="ID",dttm=NULL ,cdate=NULL, ctime=NULL, evid="EVID", t
   data$TAD <- round(data$TAD, 4)
   data
 }
-
 
 #' LOCF and LOCB
 #'
