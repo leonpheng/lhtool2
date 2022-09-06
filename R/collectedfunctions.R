@@ -433,7 +433,6 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
 
-
 lhtab2<-function (data, sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST"),
                   stats = c("length(x[!is.na(x)])=N","length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean","median(x,na.rm=T)=Median","quantile(x,0.5,na.rm=T)=50thPI","mean(x,na.rm=T)=Mean","cv(x)=CV%","min(x)=Min","max(x)=Max","geocv(x)=GeoCV%"), stat.group = list(c("N", " (","Nmiss", ")"),c("Mean"," (","CV%",")"), c("Median"," [","Min",", ","Max","]"),c("GeoMean"," (","GeoCV%",")")),render = "flextable", overall = "yes",format="stacked")
 
@@ -449,9 +448,6 @@ lhtab2<-function (data, sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST
   }
 
   data3<-chclass(data3,cont,"num")
-
-  sort(unique(data$HEPIMPC))
-
 
   t1 <- addvar2(data3, sort = sort.by, cont, stats)
 
@@ -501,7 +497,7 @@ lhtab2<-function (data, sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST
   for(iii in sort.by){
     sby$sort<-paste0(sby$sort,"-",sby[,iii])
   }
-  t4<-left_join(t3,sby)
+  t4<-dplyr::left_join(t3,sby)
   s1<-sort(unique(t4[,sort.by[1]]))
 
   t4<-reflag(t4,sort.by[1],c(as.character(s1[s1!="Overall"]),"Overall"))
@@ -1264,7 +1260,7 @@ lhloess<-function(data,x,y,by,span=1){
     dat<-rbind(dat,tmp)
   }
   #data$x<-data$y<-data$by<-NULL
-  data<-join(data,dat)
+  data<-plyr::join(data,dat)
 }
 
 
@@ -1508,7 +1504,7 @@ addvar2<-function (dat, sort=c("SEX"), var="Cmax", fun="mean(x)=Mean", rounding 
       tmp1 <- tmp
     }
     else {
-      tmp1 <- join(tmp1, tmp)
+      tmp1 <- plyr::join(tmp1, tmp)
     }
   }
   a <- rounding
@@ -2467,8 +2463,8 @@ dat2$time1 <- dat2$time
 
 #Derive lambda dependent parameters
 if (!is.null(n_lambda)) {
-    test <- join(test, test1)
-    test <- join(test, test1a)
+    test <- plyr::join(test, test1)
+    test <- plyr::join(test, test1a)
     test$AUCinf_obs <- abs(as.numeric(as.character(test$AUClast)) +
                              test$Clast/test$Lambda)
     test$AUMCinf_obs <- abs(as.numeric(as.character(test$AUMClast)) +
