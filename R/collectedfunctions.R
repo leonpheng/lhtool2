@@ -280,8 +280,8 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
           align = "center")
 {
   library(flextable)
-  library(dplyr)
-  library(plyr)
+  #library(dplyr)
+  #library(plyr)
   library(stringr)
   library(officer)
   b <- function(x) {
@@ -1246,7 +1246,7 @@ lhcbind<-function(dat1,dat2){
 
 
 lhloess<-function(data,x,y,by,span=1){
-  library(plyr)
+  #library(plyr)
   data$x=data[,x]
   data$y=data[,y]
   data$by=data[,by]
@@ -2345,7 +2345,7 @@ AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
 nca.cal<-function (data, n_lambda = 3, id = "id", time = "time",
                    dv = "dv", partialAUC =NULL, partialConc =NULL,full=F)
 {
-  library(plyr)
+  #library(plyr)
   library(ggplot2)
   dat1<-data
   dat1$id<-dat1[,id]
