@@ -22,7 +22,4 @@ lh.ehl.rc(data, AUCsd = "AUCsd", AUCss = "AUCss", TAU = 24)
 \description{
 Require AUC of first dose, AUCtau and tau
 }
-\examples{
-
-}
 \keyword{lh.ehl.rc}

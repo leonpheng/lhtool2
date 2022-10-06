@@ -1,3 +1,29 @@
+#' Dummy functions for code template 
+#'
+#'
+#'@param  dummy Data frame. Note, it's not a working function but codes could be used. See tips.plot in lhplot as well for other templates.
+#'@keywords dummy.fun
+#'@export
+
+dummy.fun<-function(dummy){
+  
+  flextable.ex<-t1%>%
+    compose(i = i, j =j,part ="body",value = as_paragraph("AUC",as_sub("0-28days")," (\U03BCg.day/mL)"))%>%
+    compose(i=1,j=1, part = "header",value = as_paragraph("Parameter"))%>%
+    compose(i = 2, j =2, part = "header",value = as_paragraph("Dose 100 mg"))%>%
+    compose(i = 1, j =1, part = "body",value = as_paragraph("AUC",as_sup("0-21days")," (\U03BCg.day/mL)"))
+  
+  plot.sub.sup<-"ylab(expression(C^2~[max][doublequot,doublequot][inf]~doublequot(??g/mL)doublequot))"
+  
+  greek.unicode<-c("Greek unicode slash and U03 then B1=alpha, B2=beta,B3=gamma, 
+                   B4=delta, B5=epsilon, B7=eta, B8=tetha, BA=kappa, 
+                   BB=lambda,BC=mu, 
+                   C1=rho, C3=sigma, 
+                   C4=tau, C9=omega")
+  
+}
+
+
 #' Create ADDL DATA
 #'
 #'
