@@ -1,11 +1,12 @@
+
 #' Dummy functions for code template 
 #'
 #'
-#'@param  dummy Data frame. Note, it's not a working function but codes could be used. See tips.plot in lhplot as well for other templates.
-#'@keywords dummy.fun
+#'@param  dummy Data frame. Note, it's not a working function but codes could be used. 
+#'@keywords lh_tips
 #'@export
 
-dummy.fun<-function(dummy){
+lh_tips<-function(dummy="dummy"){
   
   flextable.ex<-t1%>%
     compose(i = i, j =j,part ="body",value = as_paragraph("AUC",as_sub("0-28days")," (\U03BCg.day/mL)"))%>%
@@ -20,6 +21,74 @@ dummy.fun<-function(dummy){
                    BB=lambda,BC=mu, 
                    C1=rho, C3=sigma, 
                    C4=tau, C9=omega")
+  flextable_save<-c("save_as_docx", "save_as_html with flextable package")
+
+rmarkdown_template<-function(dummy="dummy"){
+  # ---
+  #   title: "Exposure-Response Modeling and Simulation of Apitegromab in Spinal Muscular Atrophy Patients (RRK-PMX-APITEGROMAB-3225)"
+  # author: "Leon Pheng"
+  # date: "`r format(Sys.time(), '%a %b %d %Y %X')`"
+  # output:
+  #   html_document:
+  #   code_folding: hide
+  # df_print: paged
+  # fig_caption: yes
+  # fig_height: 12
+  # fig_width: 12
+  # number_sections: yes
+  # theme: united
+  # toc: yes
+  # toc_float: yes
+  # self_contained: TRUE
+  # word_document:
+  #   toc: yes
+  # editor_options:
+  #   chunk_output_type: console
+  # ---
+  #   
+  #   
+  # ```{r setup, include=FALSE}
+  # knitr::opts_chunk$set(echo=T, results='asis', warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.path="Figures/")
+  # ```
+  # 
+  # ```{r, echo=FALSE}
+  # 
+  #library(plotly);library(ggplot2);library(table1);library(tidyverse);library(readxl)
+  #library(knitr);library(plyr);library(lhtool2)
+  # 
+  # ```
+  # 
+  # # Add R command
+  # 
+  # ```{r, echo=FALSE,include=FALSE}
+  # 
+  # ```
+  # 
+  # # Table data frame
+  # 
+  # ```{r, echo=FALSE} 
+  # d<-read.csv("./typical.csv")
+  # kable(d)
+  # ```
+  # 
+  # # Display tabulation {.tabset}
+  # 
+  # # Inserting png  
+  # 
+  # ![](./output/GOF_all.png)
+  # 
+  # 
+  # # Insert pdf 
+  # 
+  # ![](equations.pdf){width=100% height=400}
+  # 
+  # 
+  # # Insert another html doc
+  # 
+  # ```{r, echo=FALSE}
+  # htmltools::includeHTML("./demo.html")
+  # ```
+}  
   
 }
 
