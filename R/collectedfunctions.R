@@ -1,29 +1,12 @@
-
-#' Dummy functions for code template 
+#' Dummy functions for Rmarkdown 
 #'
 #'
 #'@param  dummy Data frame. Note, it's not a working function but codes could be used. 
-#'@keywords lh_tips
+#'@keywords lh_rmd_tem
 #'@export
+#'
 
-lh_tips<-function(dummy="dummy"){
-  
-  flextable.ex<-t1%>%
-    compose(i = i, j =j,part ="body",value = as_paragraph("AUC",as_sub("0-28days")," (\U03BCg.day/mL)"))%>%
-    compose(i=1,j=1, part = "header",value = as_paragraph("Parameter"))%>%
-    compose(i = 2, j =2, part = "header",value = as_paragraph("Dose 100 mg"))%>%
-    compose(i = 1, j =1, part = "body",value = as_paragraph("AUC",as_sup("0-21days")," (\U03BCg.day/mL)"))
-  
-  plot.sub.sup<-"ylab(expression(C^2~[max][doublequot,doublequot][inf]~doublequot(??g/mL)doublequot))"
-  
-  greek.unicode<-c("Greek unicode slash and U03 then B1=alpha, B2=beta,B3=gamma, 
-                   B4=delta, B5=epsilon, B7=eta, B8=tetha, BA=kappa, 
-                   BB=lambda,BC=mu, 
-                   C1=rho, C3=sigma, 
-                   C4=tau, C9=omega")
-  flextable_save<-c("save_as_docx", "save_as_html with flextable package")
-
-rmarkdown_template<-function(dummy="dummy"){
+lh_rmd_tem<-function(dummy="dummy"){
   # ---
   #   title: "Exposure-Response Modeling and Simulation of Apitegromab in Spinal Muscular Atrophy Patients (RRK-PMX-APITEGROMAB-3225)"
   # author: "Leon Pheng"
@@ -89,6 +72,33 @@ rmarkdown_template<-function(dummy="dummy"){
   # htmltools::includeHTML("./demo.html")
   # ```
 }  
+
+
+#' Dummy functions for code template 
+#'
+#'
+#'@param  dummy Data frame. Note, it's not a working function but codes could be used. 
+#'@keywords lh_tips
+#'@export
+
+lh_tips<-function(dummy="dummy"){
+  
+  flextable.ex<-t1%>%
+    compose(i = i, j =j,part ="body",value = as_paragraph("AUC",as_sub("0-28days")," (\U03BCg.day/mL)"))%>%
+    compose(i=1,j=1, part = "header",value = as_paragraph("Parameter"))%>%
+    compose(i = 2, j =2, part = "header",value = as_paragraph("Dose 100 mg"))%>%
+    compose(i = 1, j =1, part = "body",value = as_paragraph("AUC",as_sup("0-21days")," (\U03BCg.day/mL)"))
+  
+  plot.sub.sup<-"ylab(expression(C^2~[max][doublequot,doublequot][inf]~doublequot(??g/mL)doublequot))"
+  
+  greek.unicode<-c("Greek unicode slash and U03 then B1=alpha, B2=beta,B3=gamma, 
+                   B4=delta, B5=epsilon, B7=eta, B8=tetha, BA=kappa, 
+                   BB=lambda,BC=mu, 
+                   C1=rho, C3=sigma, 
+                   C4=tau, C9=omega")
+  flextable_save<-c("save_as_docx", "save_as_html with flextable package")
+
+
   
 }
 
