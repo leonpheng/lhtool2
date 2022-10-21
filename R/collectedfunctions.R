@@ -1,141 +1,14 @@
-#' Dummy functions for Rmarkdown 
+#' Open template from source 
 #'
 #'
-#'@param  dummy Data frame. Note, it's not a working function but codes could be used. 
-#'@keywords lh_rmd_tem
+#'@param  script script name
+#'@param  path source path
+#'@keywords lh_template
 #'@export
-#'@examples   ---
-#'@examples   title: "Exposure-Response Modeling and Simulation of Apitegromab in Spinal Muscular Atrophy Patients (RRK-PMX-APITEGROMAB-3225)"
-#'@examples   author: "Leon Pheng"
-#'@examples   date: "`r format(Sys.time(), '%a %b %d %Y %X')`"
-#'@examples   output:
-#'@examples     html_document:
-#'@examples     code_folding: hide
-#'@examples   df_print: paged
-#'@examples   fig_caption: yes
-#'@examples   fig_height: 12
-#'@examples   fig_width: 12
-#'@examples   number_sections: yes
-#'@examples   theme: united
-#'@examples   toc: yes
-#'@examples   toc_float: yes
-#'@examples   self_contained: TRUE
-#'@examples   word_document:
-#'@examples     toc: yes
-#'@examples   editor_options:
-#'@examples     chunk_output_type: console
-#'@examples   ---
-#'@examples     
-#'@examples     
-#'@examples     ```{r setup, include=FALSE}
-#'@examples   knitr::opts_chunk$set(echo=T, results='asis', warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.path="Figures/")
-#'@examples   ```
-#'@examples   
-#'@examples   ```{r, echo=FALSE}
-#'@examples   
-#'@examples   library(plotly);library(ggplot2);library(table1);library(tidyverse);library(readxl)
-#'@examples   library(knitr);library(plyr);library(lhtool2)
-#'@examples   
-#'@examples   ```
-#'@examples   
-#'@examples   # Add R command
-#'@examples   
-#'@examples   ```{r, echo=FALSE,include=FALSE}
-#'@examples   
-#'@examples   ```
-#'@examples   
-#'@examples   # Table data frame
-#'@examples   
-#'@examples   ```{r, echo=FALSE}
-#'@examples   d<-read.csv("./typical.csv")
-#'@examples   kable(d)
-#'@examples   ```
-#'@examples   
-#'@examples   # Display tabulation {.tabset}
-#'@examples   
-#'@examples   # Inserting png
-#'@examples   
-#'@examples   ![](./output/GOF_all.png)
-#'@examples   
-#'@examples   
-#'@examples   # Insert pdf
-#'@examples   
-#'@examples   ![](equations.pdf){width=100% height=400}
-#'@examples   
-#'@examples   
-#'@examples   # Insert another html doc
-#'@examples   
-#'@examples   ```{r, echo=FALSE}
-#'@examples   htmltools::includeHTML("./demo.html")
-#'@examples   ```
 
-lh_rmd_tem<-function(dummy="dummy"){
-  # ---
-  #   title: "Exposure-Response Modeling and Simulation of Apitegromab in Spinal Muscular Atrophy Patients (RRK-PMX-APITEGROMAB-3225)"
-  # author: "Leon Pheng"
-  # date: "`r format(Sys.time(), '%a %b %d %Y %X')`"
-  # output:
-  #   html_document:
-  #   code_folding: hide
-  # df_print: paged
-  # fig_caption: yes
-  # fig_height: 12
-  # fig_width: 12
-  # number_sections: yes
-  # theme: united
-  # toc: yes
-  # toc_float: yes
-  # self_contained: TRUE
-  # word_document:
-  #   toc: yes
-  # editor_options:
-  #   chunk_output_type: console
-  # ---
-  # 
-  # 
-  # ```{r setup, include=FALSE}
-  # knitr::opts_chunk$set(echo=T, results='asis', warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.path="Figures/")
-  # ```
-  # 
-  # ```{r, echo=FALSE}
-  # 
-  # library(plotly);library(ggplot2);library(table1);library(tidyverse);library(readxl)
-  # library(knitr);library(plyr);library(lhtool2)
-  # 
-  # ```
-  # 
-  # # Add R command
-  # 
-  # ```{r, echo=FALSE,include=FALSE}
-  # 
-  # ```
-  # 
-  # # Table data frame
-  # 
-  # ```{r, echo=FALSE}
-  # d<-read.csv("./typical.csv")
-  # kable(d)
-  # ```
-  # 
-  # # Display tabulation {.tabset}
-  # 
-  # # Inserting png
-  # 
-  # ![](./output/GOF_all.png)
-  # 
-  # 
-  # # Insert pdf
-  # 
-  # ![](equations.pdf){width=100% height=400}
-  # 
-  # 
-  # # Insert another html doc
-  # 
-  # ```{r, echo=FALSE}
-  # htmltools::includeHTML("./demo.html")
-  # ```
+lh_template<-function(script="rmd.rmd",path="C:/Users/lpheng/OneDrive - Certara/Desktop/packdev"){
+  file.edit(paste0(path,"/",script))
 }  
-
 
 #' Dummy functions for code template 
 #'
