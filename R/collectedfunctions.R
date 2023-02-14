@@ -2433,8 +2433,8 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
     nauc <- length(partialConc)
     for (z in 1:length(partialConc)) {
       tm1 <- partialConc[z]
-      partc <- dat2[dat2[, "tad1"] == tm1, c(id, dv)]
-      names(partc) <- c(id, paste0("C", tm1))
+      partc <- dat2[dat2[, "tad1"] == tm1, c("id", dv)]
+      names(partc) <- c("id", paste0("C", tm1))
       if (z == 1) {
         Cpart <- rbind(Cpart, partc)
       }
@@ -2488,7 +2488,7 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
   max <- lhmutate(max[max[, dv] == max$Cmax, c("id", "time1", 
                                                "Cmin", "Cmax", "Tlast")], "time1=Tmax")
   max <- left_join(max, clast)
-  maxa <- ddply(dat2, .(id), summarize, Clastc = dvtm[time == 
+  maxa <- plyr::ddply(dat2, .(id), summarize, Clastc = dvtm[time == 
                                                         max(time)])
   head(dat1)
   test <- plyr::join(max, maxa)
@@ -2527,6 +2527,7 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
   }  else {
     test <- test
   }
+  test[,id]<-test[,"id"];test$id<-NULL
   test
 }
 
