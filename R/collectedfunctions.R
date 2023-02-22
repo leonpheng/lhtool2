@@ -1,3 +1,56 @@
+
+#' Find the closest df2 value (or date) to df1 value
+#'
+#'@param  df1 fixed vector
+#'@param  df2 relative vector 
+#'@param  direction  keep df2 value equal to or smaller than df1 value (<) 
+#'@param  diff  output differences between df1 and the closest df2
+#'@keywords lh_proximity
+#'@export
+
+lh_proximity<-function(df1=df1,df2=df2,direction="<"){
+  dat<-data.frame(df1,df2=NA,diff=NA)
+  for(i in 1:length(df1)){
+    if(direction=="<"){
+      dat[i,"df2"]<-as.character(min(df2[abs(df2-df1[i])==min(abs(df2-df1[i]))]))}
+    
+    if(direction==">"){
+      dat[i,"df2"]<-as.character(max(df2[abs(df2-df1[i])==min(abs(df2-df1[i]))]))}
+    dat[i,"diff"]<-min(abs(df2-df1[i]))
+  }  
+  dat  
+}
+
+
+
+
+#' Compute duration below and above target
+#'
+#'@param  data input data
+#'@param  time time 
+#'@param  dv  dependent variable
+#'@param  y.cutoff  cutoff value
+#'@param  id  unique subject identifier
+#'@param  caryover  variable in data to be carried over with the output
+#'@keywords lh_duration
+#'@export
+
+lh_duration<-function(data=simd,time="TIME",dv="CONC",y.cutoff=80,id="ID",caryover=c("DOSEN")){
+  x1<-NULL
+  for(i in unique(data[,id])){
+    x<-data[data[,id]==i,]
+    x<-x[order(-(x[,time])),]
+    x$dtime=c(x[-nrow(x),time]-x[-1,time],0)
+    x$dur_below=sum(x$dtime[x[,dv]<y.cutoff])
+    x$dur_above=sum(x$dtime[x[,dv]>=y.cutoff])
+    x<-lhtool2::nodup(x,c(id,"dur_below","dur_above",caryover),"var")
+    x1<-rbind(x1,x)
+    print(i)
+  }
+  x1
+}
+
+
 #' Open template from source 
 #'
 #'
@@ -2342,27 +2395,43 @@ doc
 #' @param time	chronologically ordered time variable present in data
 #' @param id	variable in data defining subject level data
 #' @param dv	dependent variable used to calculate AUC present in data
+#' @param method linlog= lin up and log down
 #' @keywords AUC
 #' @export
 #' @examples AUC(data, time = 'TIME', id = 'ID', dv = 'DV')
 
-AUC<-function (data, time = "TIME", id = "ID", dv = "DV")
+AUC<-function (data=dat, time = "TIME", id = "ID", dv = "DV",method="linlog") 
 {
-  if (any(is.na(data[[id]])))
+  if (any(is.na(data[[id]]))) 
     warning("id contains NA")
-  if (any(is.na(data[[time]])))
+  if (any(is.na(data[[time]]))) 
     warning("time contains NA")
-  if (any(is.na(data[[dv]])))
+  if (any(is.na(data[[dv]]))) 
     warning("dv contains NA")
   data <- data[order(data[[id]], -data[[time]]), ]
   nrec <- length(data[[time]])
+  
   data$diff <- c(data[[time]][-nrec] - data[[time]][-1], 0)
-  data$meanDV <- c((data[[dv]][-1] + data[[dv]][-nrec])/2,
-                   0)
-  data$dAUC <- data$diff * data$meanDV
+  
+  ind<-c(data[[dv]][-1] > data[[dv]][-nrec])
+  data$meanDV<- c((data[[dv]][-1] + data[[dv]][-nrec])/2,0)
+  data$meanDVln <- c((data[[dv]][-1]-data[[dv]][-nrec])/(log(data[[dv]][-1])-log(data[[dv]][-nrec])),0)
+  data$dAUC <-NA
+  if(method=="linlog"){
+    data$dAUC[ind] <- data$diff[ind] * data$meanDVln[ind]
+    data$dAUC[!ind] <- data$diff[!ind] * data$meanDV[!ind]
+  }
+  if(method=="lin"){
+    data$dAUC <- data$diff * data$meanDV
+  }
+  
+  if(method=="log"){
+    data$dAUC <- data$diff * data$meanDVln
+  }
+  
   data <- data[order(data[[id]], data[[time]]), ]
   data <- data[duplicated(data[[id]]), ]
-  AUC <- aggregate.data.frame(data$dAUC, by = list(data[[id]]),
+  AUC <- aggregate.data.frame(data$dAUC, by = list(data[[id]]), 
                               FUN = sum)
   names(AUC) <- c(id, "AUC")
   return(AUC)

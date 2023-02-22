@@ -4,7 +4,7 @@
 \alias{AUC}
 \title{Calculate AUC Using the Trapezoidal Method}
 \usage{
-AUC(data, time = "TIME", id = "ID", dv = "DV")
+AUC(data = dat, time = "TIME", id = "ID", dv = "DV", method = "linlog")
 }
 \arguments{
 \item{time}{chronologically ordered time variable present in data}
@@ -12,6 +12,8 @@ AUC(data, time = "TIME", id = "ID", dv = "DV")
 \item{id}{variable in data defining subject level data}
 
 \item{dv}{dependent variable used to calculate AUC present in data}
+
+\item{method}{linlog= lin up and log down}
 
 \item{data.frame}{containing the data to use for the AUC calculation}
 }
