@@ -1,4 +1,19 @@
 
+#' Expand data frame
+#'
+#'@param  data data frame to be expand
+#'@param  n.rows number of row to be expanded 
+#'@keywords lh_expand
+#'@export
+
+lh_expand<-function(data,n.rows=20){
+dum1<-data.frame(matrix(ncol=ncol(data),nrow =nrow(data)*n.rows))
+names(dum1)<-names(data)
+dum1[,names(dum1)]<-data
+dum1
+}
+
+
 #' Find the closest df2 value (or date) to df1 value
 #'
 #'@param  df1 fixed vector
@@ -8,7 +23,7 @@
 #'@keywords lh_proximity
 #'@export
 
-lh_proximity<-function(df1=df1,df2=df2,direction="<"){
+lh_proximity<-function(df1,df2,direction="<"){
   dat<-data.frame(df1,df2=NA,diff=NA)
   for(i in 1:length(df1)){
     if(direction=="<"){

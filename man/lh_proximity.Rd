@@ -4,7 +4,7 @@
 \alias{lh_proximity}
 \title{Find the closest df2 value (or date) to df1 value}
 \usage{
-lh_proximity(df1 = df1, df2 = df2, direction = "<")
+lh_proximity(df1, df2, direction = "<")
 }
 \arguments{
 \item{df1}{fixed vector}
