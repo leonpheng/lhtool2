@@ -1062,33 +1062,62 @@ lhlong<-function(data,long.vector){
 
 #' find different values between two datasets
 #'
-#' @param dat1 Data frame 1
-#' @param dat2  Data frame 2"
+#' @param dat1 Data frame 1; uid: unique subject identifier
+#' @param dat2  Data frame 2; uid: unique subject identifier
 #' @keywords findiff
 #' @export
 #' @examples findiff
 
-
-findiff<-function(dat1,dat2){
-  dum1a<-""
-  nm1<-"dat1"
-  dum2a<-""
-  nm2<-"dat2"
-  for(i in 1:length(names(dat1))){
-    nm1<-paste(nm1,names(dat1)[i],sep="/")
-    dum1a<-paste(dum1a,dat1[,names(dat1)[i]],sep="/")
-    nm2<-paste(nm2,names(dat2)[i],sep="/")
-    dum2a<-paste(dum2a,dat2[,names(dat2)[i]],sep="/")
-  }
-  a<-setdiff(dum1a,dum2a)
-  b<-setdiff(dum2a,dum1a)
-  out<-data.frame(nm1=unique(a));names(out)<-nm1
-  out1<-data.frame(nm2=unique(b));names(out1)<-nm2
-  row1<-data.frame(N1=length(dum1a),N2=length(dum2a))
-  out3<-lhcbind(out,out1)
-  out3<-lhcbind(out3,row1)
-  out3 }
-
+findiff<-function (dat1,uid1,dat2,uid2,var.to.compare=NULL,tol=0) 
+{
+  
+  if(!is.null(var.to.compare)){
+    df1<-data.frame(Variable="Row number",Number_of_rows=paste0("DF1=",nrow(dat1)," DF2=",nrow(dat2)),
+                    ID="",DF1_value="example",DF2_value="example",flag="")
+  }else{
+    df1<-data.frame(Variable="Row number",Number_of_rows=paste0("DF1=",nrow(dat1)," DF2=",nrow(dat2)),Row_number="",DF1_value="example",DF2_value="example")}
+  
+  if(!is.null(var.to.compare)){    
+    keep<-min(c(nrow(dat1),nrow(dat2)))
+    dat1<-dat1[1:keep,c(uid1,var.to.compare)]
+    dat2<-dat2[1:keep,c(uid2,var.to.compare)]
+    if(tol==0){
+      df2<-data.frame(Variable=var.to.compare,Number_of_rows="",ID=dat1[,uid2],DF1_value=dat1[,var.to.compare],
+                      DF2_value=dat2[,var.to.compare],flag=ifelse(dat1[,var.to.compare]==dat2[,var.to.compare],0,1))
+    }else{
+      dat1[,"tol1"]<-tolower(dat1[,var.to.compare]);dat1[,"tol1"]<-gsub(" ","",dat1[,"tol1"])
+      dat2[,"tol2"]<-tolower(dat2[,var.to.compare]);dat2[,"tol2"]<-gsub(" ","",dat2[,"tol2"])
+      df2<-data.frame(Variable=var.to.compare,Number_of_rows="",ID=dat1[,uid2],DF1_value=dat1[,var.to.compare],
+                      DF2_value=dat2[,var.to.compare],flag=ifelse(dat1[,"tol1"]==dat2[,"tol2"],0,1))
+    }
+    df1<-rbind(df1,df2)
+  }else{
+    
+    for (i in 1:length(names(dat1))) {
+      keep<-min(c(nrow(dat1),nrow(dat2)))
+      dat1<-dat1[1:keep,]
+      dat2<-dat2[1:keep,]
+      nmm1<-paste("ID=",dat1[,uid1],"VAR=",dat1[, names(dat1)[i]], sep = "_")
+      nmm2<-paste("ID=",dat2[,uid2],"VAR=", dat2[, names(dat2)[i]], sep = "_")
+      
+      t<-dat1[nmm1!=nmm2,names(dat1)[i]]
+      t2<-dat2[nmm2!=nmm1,names(dat2)[i]]
+      
+      if(length(nmm1[t!=nm1])==0){
+        df<-NULL}else{
+          if(length(nmm1[t!=nm1])==length(nmm1)){
+            n.row="all rows"}else{n.row="some rows"}  
+          row.number<-head(row.names(data.frame(nmm1[t!=nm1])),3)
+          t1<-head(t,3)
+          t2<-head(t2,3)
+          df<-data.frame(Variable=names(dat1)[i],Number_of_rows=n.row,Row_number=n.number,DF1_value=t1,DF2_value=t2)
+        }
+      df1<-rbind(df1,df)
+    }}
+  
+  print("Note that the smaller data frame was kept as reference, i.e. the exceeded rows in the longer data frame were excluded")
+  df1
+}
 
 #' lhjoin funtion
 #'Join two datasets and print report of joining procedure

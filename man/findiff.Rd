@@ -4,12 +4,12 @@
 \alias{findiff}
 \title{find different values between two datasets}
 \usage{
-findiff(dat1, dat2)
+findiff(dat1, uid1, dat2, uid2, var.to.compare = NULL, tol = 0)
 }
 \arguments{
-\item{dat1}{Data frame 1}
+\item{dat1}{Data frame 1; uid: unique subject identifier}
 
-\item{dat2}{Data frame 2"}
+\item{dat2}{Data frame 2; uid: unique subject identifier}
 }
 \description{
 find different values between two datasets
