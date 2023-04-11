@@ -37,8 +37,6 @@ lh_proximity<-function(df1,df2,direction="<"){
 }
 
 
-
-
 #' Compute duration below and above target
 #'
 #'@param  data input data
@@ -2496,8 +2494,8 @@ AUC<-function (data=dat, time = "TIME", id = "ID", dv = "DV",method="linlog")
 #' @export
 #'@examples test<-nca.cal(data=d,id="id",partialAUC =c(0,12,12,24),partialConc =c(1,2),time = "time",dv = "conc")
 
-nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv", 
-                   partialAUC = NULL, partialConc = NULL, full = F) 
+nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", 
+                   dv = "dv", partialAUC = NULL, partialConc = NULL, full = F) 
 {
   library(ggplot2)
   dat1 <- data
@@ -2515,10 +2513,12 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
   dat2 <- dat2[order(dat2[, id], dat2$tad), ]
   dat2$dvtm <- dat2[, dv] * dat2[, time]
   datauc <- dat2
-  auclast <- AUC(datauc, time = "tad", id = "id", dv = "dv")
-  names(auclast) <- c("id", "AUClast")
-  aucmlast <- AUC(datauc, time = "tad", id = "id", dv = "dvtm")
-  names(aucmlast) <- c("id", "AUMClast")
+  auclast <- AUC(datauc, time = "tad", id = "id", 
+                 dv = "dv")
+  names(auclast) <- c(id, "AUClast")
+  aucmlast <- AUC(datauc, time = "tad", id = "id", 
+                  dv = "dvtm")
+  names(aucmlast) <- c(id, "AUMClast")
   dat2$tad1 <- dat2$tad
   aucpart <- NULL
   if (!is.null(partialAUC)) {
@@ -2526,28 +2526,30 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
     for (z in seq(1, length(partialAUC), 2)) {
       tm1 <- partialAUC[z]
       tm2 <- partialAUC[z + 1]
-      auc <- AUC(dat2[dat2[, "tad1"] >= tm1 & dat2[, "tad1"] <= 
-                        tm2, ], time = "tad1", id = "id", dv = dv)
-      names(auc) <- c("id", paste0("AUC", tm1, "-", tm2))
+      auc <- AUC(dat2[dat2[, "tad1"] >= tm1 & dat2[, 
+                                                   "tad1"] <= tm2, ], time = "tad1", 
+                 id = id, dv = dv)
+      names(auc) <- c(id, paste0("AUC", tm1, "-", 
+                                 tm2))
       if (z == 1) {
         aucpart <- rbind(aucpart, auc)
       }      else {
-        aucpart[, paste0("AUC", tm1, "-", tm2)] <- auc[, 
-                                                       2]
+        aucpart[, paste0("AUC", tm1, "-", 
+                         tm2)] <- auc[, 2]
       }
     }
     aucpart
   }  else {
     aucpart <- NULL
   }
-  
   Cpart <- NULL
   if (!is.null(partialConc)) {
     nauc <- length(partialConc)
     for (z in 1:length(partialConc)) {
       tm1 <- partialConc[z]
-      partc <- dat2[dat2[, "tad1"] == tm1, c("id", dv)]
-      names(partc) <- c("id", paste0("C", tm1))
+      partc <- dat2[dat2[, "tad1"] == tm1, c(id, 
+                                             dv)]
+      names(partc) <- c(id, paste0("C", tm1))
       if (z == 1) {
         Cpart <- rbind(Cpart, partc)
       }
@@ -2563,23 +2565,25 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
     dat3 <- dat2
     dat3$time <- dat3$tad
     dat3$tmp <- seq(nrow(dat3))
-    dat3 <- addvar(dat3, "id", "tmp", "max(x)", "yes", "tmp2")
+    dat3 <- addvar(dat3, "id", "tmp", "max(x)", 
+                   "yes", "tmp2")
     head(dat3)
     dat3$tmp <- dat3$tmp2 - dat3$tmp
     dat3 <- dat3[dat3$tmp < n_lambda, ]
-    test1 <- plyr::ddply(dat3[, c("id", "time", "dv")], .(id), 
-                         summarize, interc = lm(log(dv) ~ time)$coef[1], Lambda = lm(log(dv) ~ 
-                                                                                       time)$coef[2] * -1, R2 = summary(lm(log(dv) ~ 
-                                                                                                                             time))$r.squared, HL = (log(2)/lm(log(dv) ~ time)$coef[2]) * 
-                           -1, that = max(time))
+    test1 <- ddply(dat3[, c("id", "time", "dv")], 
+                   .(id), summarize, interc = lm(log(dv) ~ time)$coef[1], 
+                   Lambda = lm(log(dv) ~ time)$coef[2] * -1, R2 = summary(lm(log(dv) ~ 
+                                                                               time))$r.squared, HL = (log(2)/lm(log(dv) ~ time)$coef[2]) * 
+                     -1, that = max(time))
     test1$n_lambda <- n_lambda
     test1$Clast_hat <- with(test1, exp(-Lambda * that + interc))
     head(dat3)
-    test1a <- plyr::ddply(dat3[, c("id", "time", "dv", "dvtm")], 
-                          .(id), summarize, intercc = lm(log(dvtm) ~ time)$coef[1], 
-                          Lambdac = lm(log(dvtm) ~ time)$coef[2] * -1, R2c = summary(lm(log(dvtm) ~ 
-                                                                                          time))$r.squared, HLc = (log(2)/lm(log(dvtm) ~ 
-                                                                                                                               time)$coef[2]) * -1, thatc = max(time))
+    test1a <- ddply(dat3[, c("id", "time", "dv", 
+                             "dvtm")], .(id), summarize, intercc = lm(log(dvtm) ~ 
+                                                                        time)$coef[1], Lambdac = lm(log(dvtm) ~ time)$coef[2] * 
+                      -1, R2c = summary(lm(log(dvtm) ~ time))$r.squared, 
+                    HLc = (log(2)/lm(log(dvtm) ~ time)$coef[2]) * -1, 
+                    thatc = max(time))
     test1a$n_lambdac <- n_lambda
     test1a$Clast_hatc <- with(test1a, exp(-Lambdac * thatc + 
                                             intercc))
@@ -2587,21 +2591,25 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
     test1 <- NULL
   }
   
-  if (TRUE %in% c(test1a$HL < 0)) {
-    test1$Warning.HL.Negative = ifelse(test1$HL, "yes", "")
-  }
+  #test1$HL[test1$HL<0]<-NA  
+  #   
+  # if (TRUE %in% c(test1$HL < 0)) {
+  #     test1$Warning.HL.Negative = ifelse(test1$HL, "yes", 
+  #                                        "")
+  #   }
   dat2$time1 <- dat2$time
-  max <- addvar(dat2, "id", "dv", "min(x)", "yes", "Cmin")
-  max <- left_join(max, addvar(dat2, "id", "dv", "max(x)", 
-                               "no", "Cmax"))
-  max <- left_join(max, addvar(dat2, "id", "time1", "max(x)", 
-                               "no", "Tlast"))
-  clast <- max[max$time1 == max$Tlast, c("id", dv)]
+  max <- addvar(dat2, "id", "dv", "min(x)", 
+                "yes", "Cmin")
+  max <- left_join(max, addvar(dat2, "id", "dv", 
+                               "max(x)", "no", "Cmax"))
+  max <- left_join(max, addvar(dat2, "id", "time1", 
+                               "max(x)", "no", "Tlast"))
+  clast <- max[max$time1 == max$Tlast, c(id, dv)]
   names(clast)[2] <- "Clast"
-  max <- lhmutate(max[max[, dv] == max$Cmax, c("id", "time1", 
+  max <- lhmutate(max[max[, dv] == max$Cmax, c(id, "time1", 
                                                "Cmin", "Cmax", "Tlast")], "time1=Tmax")
   max <- left_join(max, clast)
-  maxa <- plyr::ddply(dat2, .(id), summarize, Clastc = dvtm[time == 
+  maxa <- ddply(dat2, .(id), summarize, Clastc = dvtm[time == 
                                                         max(time)])
   head(dat1)
   test <- plyr::join(max, maxa)
@@ -2609,6 +2617,8 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
   test <- plyr::join(test, aucmlast)
   
   if (!is.null(n_lambda)) {
+    test$id<-test[,id]
+    test[,id]<-NULL
     test <- plyr::join(test, test1)
     test <- plyr::join(test, test1a)
     test$AUCinf_obs <- abs(as.numeric(as.character(test$AUClast)) + 
@@ -2622,7 +2632,7 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
     test$MRTlast <- test$AUMClast/test$AUClast
     test$MRTobs <- test$AUMCinf_obs/test$AUCinf_obs
     test$MRTpred <- test$AUMCinf_pred/test$AUCinf_pred
-  }  else {
+  } else {
     test$MRTlast <- test$AUMClast/test$AUClast
   }
   if (!is.null(Cpart)) {
@@ -2632,15 +2642,22 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", dv = "dv",
     test <- plyr::join(test, aucpart)
   }
   test$interc <- test$that <- NULL
-  no_keep <- c("Clastc", "AUMClast", "Lambda", "R2", "n_lambda", 
-               "R2c", "HLc", "thatc", "n_lambdac", "Clast_hatc", "AUMCinf_obs", 
-               "AUCinf_pred", "AUMCinf_pred", "intercc", "Lambdac")
+  no_keep <- c("Clastc", "AUMClast", "Lambda", 
+               "R2", "n_lambda", "R2c", "HLc", 
+               "thatc", "n_lambdac", "Clast_hatc", 
+               "AUMCinf_obs", "AUCinf_pred", "AUMCinf_pred", 
+               "intercc", "Lambdac")
+  
   if (!full) {
     test <- test[, !names(test) %in% no_keep]
   }  else {
     test <- test
   }
-  test[,id]<-test[,"id"];test$id<-NULL
+  dem<-data
+  dem$id<-dem[,id];dem[,id]<-NULL
+  dem<-nodup(dem,"id","all")
+  test<-left_join(test,dem)
+  test<-nodup(test[,c("id",names(test)[!names(test)%in%"id"])],"id","all")
   test
 }
 
