@@ -6,13 +6,13 @@
 \usage{
 lhtab2(
   data,
-  sort.by = c("STUDYID", "SEXC"),
-  cont = c("ALT", "BAST", "AST"),
+  sort.by = c("AGEGRP"),
+  cont = c("WT", "C6h", "Cmax", "Cavg"),
   stats = c("length(x[!is.na(x)])=N", "length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean",
     "median(x,na.rm=T)=Median", "quantile(x,0.5,na.rm=T)=50thPI", "mean(x,na.rm=T)=Mean",
     "cv(x)=CV\%", "min(x)=Min", "max(x)=Max", "geocv(x)=GeoCV\%"),
-  stat.group = list(c("N", " (", "Nmiss", ")"), c("Mean", " (", "CV\%", ")"),
-    c("Median", " [", "Min", ", ", "Max", "]"), c("GeoMean", " (", "GeoCV\%", ")")),
+  stat.group = list(c("N", " (", "Nmiss", ")"), c("Mean", " (", "CV\%", ")"), c("Median",
+    " [", "Min", ", ", "Max", "]"), c("GeoMean", " (", "GeoCV\%", ")")),
   render = "flextable",
   overall = "yes",
   format = "stacked"

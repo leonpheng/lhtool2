@@ -540,123 +540,148 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
 #' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
 #'@examples print(tab1,"Demog.docx")
 
-lhtab2<-function (data, sort.by = c("STUDYID","SEXC"), cont =c("ALT","BAST","AST"),
-                  stats = c("length(x[!is.na(x)])=N","length(x[is.na(x)])=Nmiss", "geom(x)=GeoMean","median(x,na.rm=T)=Median","quantile(x,0.5,na.rm=T)=50thPI","mean(x,na.rm=T)=Mean","cv(x)=CV%","min(x)=Min","max(x)=Max","geocv(x)=GeoCV%"), stat.group = list(c("N", " (","Nmiss", ")"),c("Mean"," (","CV%",")"), c("Median"," [","Min",", ","Max","]"),c("GeoMean"," (","GeoCV%",")")),render = "flextable", overall = "yes",format="stacked")
-
+lhtab2<-function (data, sort.by = c("AGEGRP"), cont = c("WT","C6h","Cmax","Cavg"), 
+                  stats = c("length(x[!is.na(x)])=N", "length(x[is.na(x)])=Nmiss", 
+                            "geom(x)=GeoMean", "median(x,na.rm=T)=Median", "quantile(x,0.5,na.rm=T)=50thPI", 
+                            "mean(x,na.rm=T)=Mean", "cv(x)=CV%", "min(x)=Min", "max(x)=Max", 
+                            "geocv(x)=GeoCV%"), 
+                  stat.group = list(c("N", " (", "Nmiss",")"), 
+                                    c("Mean", " (", "CV%", ")"), 
+                                    c("Median", " [", "Min",", ", "Max", "]"), 
+                                    c("GeoMean", " (", "GeoCV%", ")")), 
+                  render = "flextable", 
+                  overall = "yes", format = "stacked") 
 {
-
   if (!is.null(overall)) {
     dataxxx <- data
     dataxxx[, sort.by] <- "Overall"
-    #setdiff(names(dataxxx), names(data))
     data3 <- rbind(data, dataxxx)
-  }else {
+  } else {
     data3 <- data
   }
-
-  data3<-chclass(data3,cont,"num")
-
+  data3 <- chclass(data3, cont, "num")
   t1 <- addvar2(data3, sort = sort.by, cont, stats)
-
-  t1[,names(t1)=="Nmiss"]<-round(as.numeric(as.character(t1[,names(t1)=="Nmiss"])),0)
-
-
-  if(format=="stacked"){
-    t3<-NULL
-    for(i in 1:length(stat.group)){
-      t33<-t1
-      t33$sum<-""
-      t33$lab<-""
-      for(ii in unlist(stat.group[i])){
-        if(ii%in%names(t33)){
-          t33$sum<-paste0(t33$sum,t33[,ii])
-        }else{t33$sum<-paste0(t33$sum,ii)}
-        t33$lab<-paste0(t33$lab,ii)
-        t33$labsor<-i
+  t1[, names(t1) == "Nmiss"] <- round(as.numeric(as.character(t1[, 
+                                                                 names(t1) == "Nmiss"])), 0)
+  if (format == "stacked") {
+    t3 <- NULL
+    for (i in 1:length(stat.group)) {
+      t33 <- t1
+      t33$sum <- ""
+      t33$lab <- ""
+      for (ii in unlist(stat.group[i])) {
+        if (ii %in% names(t33)) {
+          t33$sum <- paste0(t33$sum, t33[, ii])
+        } else {
+          t33$sum <- paste0(t33$sum, ii)
+        }
+        t33$lab <- paste0(t33$lab, ii)
+        t33$labsor <- i
       }
-      t3<-rbind(t3,t33)
+      t3 <- rbind(t3, t33)
     }
-  }else{
-    t33<-t1
-    t33$sum<-""
-    t33$lab<-""
-    for(i in 1:length(stat.group)){
-
-      for(ii in unlist(stat.group[i])){
-        if(ii%in%names(t33)){
-          t33$sum<-paste0(t33$sum,t33[,ii])
-        }else{t33$sum<-paste0(t33$sum,ii)}
-        t33$lab<-paste0(t33$lab,ii)
-        t33$labsor<-i
+  } else {
+    t33 <- t1
+    t33$sum <- ""
+    t33$lab <- ""
+    for (i in 1:length(stat.group)) {
+      for (ii in unlist(stat.group[i])) {
+        if (ii %in% names(t33)) {
+          t33$sum <- paste0(t33$sum, t33[, ii])
+        } else {
+          t33$sum <- paste0(t33$sum, ii)
+        }
+        t33$lab <- paste0(t33$lab, ii)
+        t33$labsor <- i
       }
-      if(i<length(stat.group)){
-        t33$sum<-paste0(t33$sum,"\n ")
-        t33$lab<-paste0(t33$lab,"\n ")}else{
-          t33$sum<-t33$sum
-          t33$lab<-t33$lab
-        }}
-    t3<-t33}
-
-  #SORT
-  sby<-nodup(t3,sort.by,"all")
-  sby$sort<-""
-  sby<-sby[,c(sort.by,"sort")]
-  for(iii in sort.by){
-    sby$sort<-paste0(sby$sort,"-",sby[,iii])
-  }
-  t4<-dplyr::left_join(t3,sby)
-  s1<-sort(unique(t4[,sort.by[1]]))
-
-  t4<-reflag(t4,sort.by[1],c(as.character(s1[s1!="Overall"]),"Overall"))
-  t4<-t4[order(t4[,sort.by[1]]),]
-  colord<-c("var","lab",unique(t4$sort))
-
-  t5<-lhwide(t4[,c("var","labsor","lab","sort","sum")],"sum","sort")
-  setdiff(colord,names(t5))
-  t5<-t5[,c("labsor",colord)]
-
-  keep<-unlist(names(t5))
-  sby<-reflag(sby,"sort",keep)
-  sby<-sby[order(sby$sort),]
-
-  t5a<-t5[1:ncol(sby)-1,]
-  for(t in 1:nrow(t5a)){
-    t5a[t,]<-c("labsor","var","lab",as.character(unlist(sby[,t])))
-  }
-
-  if(render!="flextable"){
-    if(format=="stacked"){
-
-      t6<-stackvar(t5,c("var","lab"))
-      t6$labsor<-NULL
-      t6<-rbind(t5a[,names(t6)],t6)
-      names(t6)<-t6[1,]}else{
-        t6<-rbind(t5a[,names(t5)],t5)
+      if (i < length(stat.group)) {
+        t33$sum <- paste0(t33$sum, "\n ")
+        t33$lab <- paste0(t33$lab, "\n ")
+      } else {
+        t33$sum <- t33$sum
+        t33$lab <- t33$lab
       }
-  }else{
-    if(format=="stacked"){
-      bold<-t5[,c("var","lab")]
-      bold$row<-seq(nrow(bold))
-      bold<-nodup(bold,"var","all")
-      bold$row2<-seq(0,nrow(bold)-1,1)
-      bold<-unlist(bold$row+bold$row2)
-      t6<-stackvar(t5,c("var","lab"))
-      t6$labsor<-NULL
-      hd<-data.frame(t(t5a[,names(t6)]))
-      row.names(hd)<-NULL
-      t6<-lhflex(t6,select =names(t6),add.h=hd)
+    }
+    t3 <- t33
+  }
+  sby <- nodup(t3, sort.by, "all")
+  sby$sort <- ""
+  sby <- sby[, c(sort.by, "sort")]
+  for (iii in sort.by) {
+    sby$sort <- paste0(sby$sort, "-", sby[, iii])
+  }
+  t4 <- dplyr::left_join(t3, sby)
+  s1 <- sort(unique(t4[, sort.by[1]]))
+  t4 <- reflag(t4, sort.by[1], c(as.character(s1[s1 != "Overall"]), 
+                                 "Overall"))
+  t4 <- t4[order(t4[, sort.by[1]]), ]
+  colord <- c("var", "lab", unique(t4$sort))
+  t5 <- lhwide(t4[, c("var", "labsor", "lab", "sort", "sum")], 
+               "sum", "sort")
+  setdiff(colord, names(t5))
+  t5 <- t5[, c("labsor", colord)]
+  keep <- unlist(names(t5))
+  sby <- reflag(sby, "sort", keep)
+  sby <- sby[order(sby$sort), ]
+  t5a <- t5[1:ncol(sby) - 1, ]
+  for (t in 1:nrow(t5a)) {
+    t5a[t, ] <- c("labsor", "var", "lab", as.character(unlist(sby[, 
+                                                                  t])))
+  }
+  if (render != "flextable") {
+    if (format == "stacked") {
+      t6 <- stackvar(t5, c("var", "lab"))
+      t6$labsor <- NULL
+      t6 <- rbind(t5a[, names(t6)], t6)
+      names(t6) <- t6[1, ]
+    } else {
+      t6 <- rbind(t5a[, names(t5)], t5)
+    }
+  } else {
+    if (format == "stacked") {
+      bold <- t5[, c("var", "lab")]
+      bold$row <- seq(nrow(bold))
+      bold <- nodup(bold, "var", "all")
+      bold$row2 <- seq(0, nrow(bold) - 1, 1)
+      bold <- unlist(bold$row + bold$row2)
+      t6 <- stackvar(t5, c("var", "lab"))
+      t6$labsor <- NULL
+      hd <- data.frame(t(t5a[, names(t6)]))
+      row.names(hd) <- NULL
+      t6 <- flextable(t6)#lhflex(t6, select = names(t6), add.h = hd)
       t6 <- bold(t6, i = c(bold), j = "lab")
-    }else{
-      t6<-t5
-      lab<-unique(t6$lab)
-      t6$labsor<-t6$lab<-NULL
-      hd<-data.frame(t(t5a[,names(t6)]))
-      kn<-names(hd)
-      hd$y<-lab
-      hd$y[1]<-"var"
-      hd<-hd[,c("y",kn)]
-      row.names(hd)<-NULL
-      t6<-lhflex(t6,select =names(t6),add.h=hd)
+      t6<-align(t6,i = NULL,j = NULL,
+                align = c("center"),part = "header")
+      t6 <- bold(t6, i =NULL,part = "header")
+    }else {
+      t6 <- t5
+      lab <- unique(t6$lab)
+      l1<-NULL
+      for(i in lab){
+        if(i==lab[1]){
+          l1<-paste0(l1,i) 
+        }else{
+          l1<-paste0(l1,"\n ",i)}}
+      
+      t6$labsor <- t6$lab <- NULL
+      hd <- data.frame(t(t5a[, names(t6)]))
+      kn <- names(hd)
+      hd$y <- l1
+      hd$y[1] <- "var"
+      unique(hd$y)
+      hd <- hd[, c("y", kn)]
+      row.names(hd) <- NULL
+      t6 <- flextable(t6)#lhflex(t6, select = names(t6), add.h = hd)
+      t6<-add_header_row(t6,value =hd$y)
+      t6<-merge_h(t6, i = 1, part = "header")
+      t6<-merge_v(t6, j = 1, part = "body")
+      t6<-align(t6,i = NULL,j = NULL,
+                align = c("center"),part = "body")
+      t6<-align(t6,i = NULL,j = NULL,
+                align = c("center"),part = "header")
+      t6 <- bold(t6, i =NULL, j = 1)
+      t6 <- bold(t6, i =NULL,part = "header")
+      
     }
   }
   t6
@@ -2679,3 +2704,82 @@ lh.ehl.rc<-function(data,AUCsd="AUCsd",AUCss="AUCss",TAU=24){
   data$EHL <- with(data, log(2) * TAU/(log(Rc/(Rc - 1))))
   data$TAU<-TAU
   data}
+
+
+#' Compute BSV from Phoenix Omega
+#'
+#' @param par Parameter names
+#' @param om phoenix omega output, matrix
+#' @keywords phx_bsv
+#' @export
+#' @examples
+
+phx_bsv<-function(par="nCl",om){
+  n<-ncol(om)-2
+  x<-om[1:(n+1),]
+  sqrt(exp(as.numeric(x[x$Label==par,par]))-1)*100}
+
+#' Compute BSV from Phoenix shrinkage
+#'
+#' @param par Parameter names
+#' @param om phoenix omega output, matrix
+#' @keywords phx_shrk
+#' @export
+#' @examples
+
+phx_shrk<- function(par="nCl",om){
+  as.numeric(om[nrow(om),par])*100
+}
+
+#' Compute RSE for Omega from Phoenix 
+#'
+#' @param par Parameter names
+#' @param om Phoenix omega output, matrix
+#' @param sdom Phoenix omega SD output, matrix
+#' @keywords phx_shrk
+#' @export
+#' @examples
+
+phx_omrse<-function(par="nCl",om,sdom,exp=expression(sqrt(exp(x)-1)+y),y=c(0,0)){
+  n<-ncol(om)-2
+  x<-om[1:(n+1),]
+  x<-as.numeric(x[x$Label==par,par])
+  n1<-ncol(sdom)-2
+  x1<-as.numeric(sdom[sdom$Label==par,par])
+  x <- c(x,x1)
+  y <- y
+  DF1 <- cbind(x, y)
+  RES1 <- propagate::propagate(expr = exp, data = DF1, type = "stat", 
+                               do.sim =F, verbose = F, 
+                               nsim = 100000)
+  z<-unlist(RES1)
+  z$prop.sd.1   
+}
+
+#' Compute Error Propagation x and y 
+#'
+#' @param x Pair value and sd for x
+#' @param y Pair value and sd for y. If y not used, set it to value and sd to 0
+#' @param exp expression(equation)
+#' @param sim True if simulation is used to derive the error.
+#' @keywords errprop
+#' @export
+#' @examples
+
+errprop<-function(x=c(0.5,0.1),y=c(0.5,0.1),exp=expression(sqrt(exp(x)-1)+y),sim=F,verbiose=F,nsim=100000,raw=T){
+  library(propagate)
+  library(tidyverse)
+  DF1 <- cbind(x, y)
+  RES1 <- propagate::propagate(expr = exp, data = DF1, type = "stat", 
+                               do.sim =sim, verbose =verbiose, 
+                               nsim = nsim)
+  t<-unlist(RES1)# do unlist for list of selected value
+if(raw){
+  df=RES1
+}else{  
+  
+df<-data.frame(variable=c("X","Y"),Mean=c(t$prop.Mean.1,t$prop.Mean.2),SD=c(t$prop.sd.1,t$prop.sd.2))|>
+  mutate(RSE=SD/Mean*100)}
+df
+}
+
