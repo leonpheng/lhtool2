@@ -1,3 +1,132 @@
+#' Summary of typical values from Phoenix 
+#'
+#'@param  theta theta sheet 
+#'@param  omega omega data matrix format
+#'@param  omega_sd sd for omega matrix format
+#'@param  sd set to null if no covariance steps or specify variable name for SD theta
+#'@param  estimate specify variable name for estimate theta 
+#'@param  lab table format to be outputted (see example) 
+#'@examples Output table to be edited in lab: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y)
+#'@examples variables);;4) y values if needed or use original variable names (ex:CL) or set to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL)
+#'@examples Note: each variable in the lab is separated by ;;. If no transformation of x needed, 3) x+y and 4) c(0,0). Note that the error sd will be propagated 
+#'@examples according to the equation.
+#'@keywords phx_typical
+#'@export
+
+phx_typical<-function(theta=th,omega=om,omega_sd=omsd,sd=NULL,estimate="Estimate",
+                      lab=c(
+                        "tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa",
+                        "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;",
+                        "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl",
+                        "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;",
+                        "dCldECOG1;;CL, if ECOG=1;;exp(x)*y;;tvCl;;",
+                        "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")
+){
+  
+  lh.def1<-function(lab =c("parameter;;define;;x^y;y;;eta"))
+  {
+    def <- NULL
+    for (i in 1:length(lab)) {
+      splt <- strsplit(lab[i], ";;")[[1]]
+      def <- rbind(def, data.frame(theta = splt[1], define = splt[2], 
+                                   x = splt[3],y= splt[4],eta= splt[5]))
+    }
+    def$order<-seq(nrow(def))
+    def
+  }
+  
+  #t<-lh.def1()
+  
+  par<-lh.def1(lab)
+  
+  th1<-theta|>
+    mutate(theta=Parameter)|>
+    left_join(par)|>
+    filter(!is.na(define))
+  
+  
+  th1$Estimate1<-NA
+  if(!is.null(sd)){
+    th1$RSE<-NA}
+  
+  for(i in 1:nrow(th1)){
+    if(!is.null(sd)){
+      x=c(th1[i,estimate],th1[i,sd])}else{
+        x=c(th1[i,estimate],0)  
+      }
+    
+    if(th1[i,"y"]%in%th1$theta){
+      if(!is.null(sd)){
+        y=c(th1[th1$theta%in%th1[i,"y"],estimate],th1[th1$theta==th1[i,"y"],sd])
+      }else{y=c(th1[th1$theta%in%th1[i,"y"],estimate],0)}
+    }else{
+      A <-th1[i,"y"]
+      B <- function(x) {}
+      body(B) <- parse(text = A)
+      y=c(B(A))}
+    A <- paste0("expression(",th1[i,"x"],")")
+    B <- function(x) {}
+    body(B) <- parse(text = A)
+    t<-errprop(x=x,y=y,exp=B(A),raw=F)
+    th1$Estimate1[i]<-t$Mean[1]            
+    if(!is.null(sd)){
+      th1$RSE[i]<-t$RSE[1]            
+    }
+  }
+  
+  par<-th1|>
+    mutate(Estimate=sigfig(Estimate1,3))
+  if(!is.null(sd)){
+    par$RSE=sigfig(par$RSE,3)
+  }
+  #par<-par[,c("Variable","Description","Unit","Estimate","RSE")]
+  par_om<-par[!is.na(par$eta),c("theta","eta")]
+  
+  library(dplyr)
+  
+  iiv<-NULL
+  for(i in c(par_om$eta)){
+    iiv=c(iiv,sigfig(phx_bsv(i,omega),3))
+  }
+  
+  if(!is.null(sd)){
+    rseiiv<-NULL
+    for(i in c(par_om$eta)){
+      rseiiv=c(rseiiv,sigfig(phx_omrse(i,omega,omega_sd)*100,3))
+    }
+  }
+  
+  shk<-NULL
+  for(i in c(par_om$eta)){
+    shk=c(shk,sigfig(phx_shrk(i,omega),3))
+  }
+  
+  par_om<-par_om|>
+    mutate(BSV=ifelse(!is.null(sd),paste0(iiv," (",rseiiv,"%)"),iiv),
+           Shrinkage=shk)
+  
+  par_om$Description<-par_om$eta<-NULL
+  #Typical value
+  if(!is.null(sd)){
+    tab1<-left_join(par,par_om)|>
+      arrange(order)|>
+      dplyr::select(define,Estimate,RSE,BSV,Shrinkage)
+  }else{
+    tab1<-left_join(par,par_om)|>
+      arrange(order)|>
+      dplyr::select(define,Estimate,BSV,Shrinkage)
+  }
+  
+  tab1$BSV[is.na(tab1$BSV)]<-""  
+  tab1$Shrinkage[is.na(tab1$Shrinkage)]<-""  
+  
+  if(!is.null(sd)){
+    names(tab1)[names(tab1)=="BSV"]<-"BSV (RSE%)"}else{
+      names(tab1)[names(tab1)=="BSV"]<-"BSV (%)"}
+  
+  names(tab1)[1]<-"Parameter"
+  tab1
+}
 
 #' Expand data frame
 #'
