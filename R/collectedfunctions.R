@@ -7,124 +7,127 @@
 #'@param  estimate specify variable name for estimate theta 
 #'@param  lab table format to be outputted (see example) 
 #'@examples Output table to be edited in lab: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y)
-#'@examples variables);;4) y values if needed or use original variable names (ex:CL) or set to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL)
-#'@examples Note: each variable in the lab is separated by ;;. If no transformation of x needed, 3) x+y and 4) c(0,0). Note that the error sd will be propagated 
-#'@examples according to the equation.
+#'@examples variables);;4) specify y c(value,sd) if needed or use original variable names (ex:CL) or set it to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL);;
+#'@examples 6) expression for eta distribution.   
+#'@examples Note: each variable in the lab is separated by ;;. If no transformation of x needed set 3) to x+y and 4) as c(0,0). Note that the error sd will be derived  
+#'@examples using error propagation based on the expression. 
 #'@keywords phx_typical
 #'@export
-
-phx_typical<-function(theta=th,omega=om,omega_sd=omsd,sd=NULL,estimate="Estimate",
-                      lab=c(
-                        "tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa",
-                        "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;",
-                        "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl",
-                        "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;",
-                        "dCldECOG1;;CL, if ECOG=1;;exp(x)*y;;tvCl;;",
-                        "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")
-){
-  
-  lh.def1<-function(lab =c("parameter;;define;;x^y;y;;eta"))
-  {
+#'
+phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL, 
+                       estimate = "Estimate", lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100",
+                                                      "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;",
+                                                      "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100",
+                                                      "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
+                                                      "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
+                                                      "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100",
+                                                      "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100",
+                                                      "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
+{
+  lh.def1 <- function(lab = c("parameter;;define;;x^y;;y;;eta;;exp(x)")) {
     def <- NULL
     for (i in 1:length(lab)) {
       splt <- strsplit(lab[i], ";;")[[1]]
       def <- rbind(def, data.frame(theta = splt[1], define = splt[2], 
-                                   x = splt[3],y= splt[4],eta= splt[5]))
+                                   x = splt[3], y = splt[4], eta = splt[5],eta_dist = splt[6]))
     }
-    def$order<-seq(nrow(def))
+    def$order <- seq(nrow(def))
     def
   }
+#lh.def1(lab)
   
-  #t<-lh.def1()
-  
-  par<-lh.def1(lab)
-  
-  th1<-theta|>
-    mutate(theta=Parameter)|>
-    left_join(par)|>
-    filter(!is.na(define))
-  
-  
-  th1$Estimate1<-NA
-  if(!is.null(sd)){
-    th1$RSE<-NA}
-  
-  for(i in 1:nrow(th1)){
-    if(!is.null(sd)){
-      x=c(th1[i,estimate],th1[i,sd])}else{
-        x=c(th1[i,estimate],0)  
+  par <- lh.def1(lab)
+  th1 <- filter(left_join(mutate(theta, theta = Parameter), 
+                          par), !is.na(define))
+  th1$Estimate1 <- NA
+  if (!is.null(sd)) {
+    th1$RSE <- NA
+  }
+  for (i in 1:nrow(th1)) {
+    if (!is.null(sd)) {
+      x = c(th1[i, estimate], th1[i, sd])
+    } else {
+      x = c(th1[i, estimate], 0)
+    }
+    if (th1[i, "y"] %in% th1$theta) {
+      if (!is.null(sd)) {
+        y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
+              th1[th1$theta == th1[i, "y"], sd])
+      } else {
+        y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
+              0)
       }
-    
-    if(th1[i,"y"]%in%th1$theta){
-      if(!is.null(sd)){
-        y=c(th1[th1$theta%in%th1[i,"y"],estimate],th1[th1$theta==th1[i,"y"],sd])
-      }else{y=c(th1[th1$theta%in%th1[i,"y"],estimate],0)}
-    }else{
-      A <-th1[i,"y"]
-      B <- function(x) {}
+    } else {
+      A <- th1[i, "y"]
+      B <- function(x) {
+      }
       body(B) <- parse(text = A)
-      y=c(B(A))}
-    A <- paste0("expression(",th1[i,"x"],")")
-    B <- function(x) {}
+      y = c(B(A))
+    }
+    A <- paste0("expression(", th1[i, "x"], ")")
+    B <- function(x) {
+    }
     body(B) <- parse(text = A)
-    t<-errprop(x=x,y=y,exp=B(A),raw=F)
-    th1$Estimate1[i]<-t$Mean[1]            
-    if(!is.null(sd)){
-      th1$RSE[i]<-t$RSE[1]            
+    t <- errprop(x = x, y = y, exp = B(A), raw = F)
+    th1$Estimate1[i] <- t$Mean[1]
+    if (!is.null(sd)) {
+      th1$RSE[i] <- t$RSE[1]
     }
   }
   
-  par<-th1|>
-    mutate(Estimate=sigfig(Estimate1,3))
-  if(!is.null(sd)){
-    par$RSE=sigfig(par$RSE,3)
+  par <- mutate(th1, Estimate = sigfig(Estimate1, 3))
+  
+  if (!is.null(sd)) {
+    par$RSE = sigfig(par$RSE, 3)
   }
-  #par<-par[,c("Variable","Description","Unit","Estimate","RSE")]
-  par_om<-par[!is.na(par$eta),c("theta","eta")]
+  ##OMEGA
+  par_om <- par[!is.na(par$eta), c("theta", "eta","eta_dist")]
   
   library(dplyr)
   
-  iiv<-NULL
-  for(i in c(par_om$eta)){
-    iiv=c(iiv,sigfig(phx_bsv(i,omega),3))
+  iiv <- NULL
+  for (i in c(par_om$eta)) {
+    n <- ncol(om) - 2
+    x <- om[1:(n + 1), ]
+    x <- as.numeric(x[x$Label == i, i])
+    if(!is.null(omega_sd)){
+      n1 <- ncol(omega_sd) - 2
+      x1 <- as.numeric(omega_sd[omega_sd$Label == i, i])}else{x1=0}
+    
+    x <- c(x, x1)
+    y <- c(0,0)
+    A <- paste0("expression(",par_om[par_om$eta==i, "eta_dist"],"+y)")
+    B <- function(x) {}
+    body(B) <- parse(text = A)
+    t1<-errprop(x,y,exp=B(A),raw=F)
+    if(!is.null(omega_sd)){
+      iiv1<-paste0(sigfig(t1$Mean[1],3)," (",sigfig(t1$RSE[1],3))
+    }else{iiv1<-sigfig(t1$Mean[1],3)}
+    iiv<-c(iiv,iiv1)}
+  
+  shk <- NULL
+  for (i in c(par_om$eta)) {
+    shk = c(shk, sigfig(phx_shrk(i, omega), 3))
   }
   
-  if(!is.null(sd)){
-    rseiiv<-NULL
-    for(i in c(par_om$eta)){
-      rseiiv=c(rseiiv,sigfig(phx_omrse(i,omega,omega_sd)*100,3))
-    }
+  par_om$BSV = iiv
+  par_om$Shrinkage = shk
+  par_om$Description <- par_om$eta <- NULL
+  if (!is.null(sd)) {
+    tab1 <- dplyr::select(arrange(left_join(par, par_om), 
+                                  order), define, Estimate, RSE, BSV, Shrinkage)
+  } else {
+    tab1 <- dplyr::select(arrange(left_join(par, par_om), 
+                                  order), define, Estimate, BSV, Shrinkage)
   }
-  
-  shk<-NULL
-  for(i in c(par_om$eta)){
-    shk=c(shk,sigfig(phx_shrk(i,omega),3))
+  tab1$BSV[is.na(tab1$BSV)] <- ""
+  tab1$Shrinkage[is.na(tab1$Shrinkage)] <- ""
+  if (!is.null(omega_sd)) {
+    names(tab1)[names(tab1) == "BSV"] <- "BSV (RSE%)"
+  } else {
+    names(tab1)[names(tab1) == "BSV"] <- "BSV (%)"
   }
-  
-  par_om<-par_om|>
-    mutate(BSV=ifelse(!is.null(sd),paste0(iiv," (",rseiiv,"%)"),iiv),
-           Shrinkage=shk)
-  
-  par_om$Description<-par_om$eta<-NULL
-  #Typical value
-  if(!is.null(sd)){
-    tab1<-left_join(par,par_om)|>
-      arrange(order)|>
-      dplyr::select(define,Estimate,RSE,BSV,Shrinkage)
-  }else{
-    tab1<-left_join(par,par_om)|>
-      arrange(order)|>
-      dplyr::select(define,Estimate,BSV,Shrinkage)
-  }
-  
-  tab1$BSV[is.na(tab1$BSV)]<-""  
-  tab1$Shrinkage[is.na(tab1$Shrinkage)]<-""  
-  
-  if(!is.null(sd)){
-    names(tab1)[names(tab1)=="BSV"]<-"BSV (RSE%)"}else{
-      names(tab1)[names(tab1)=="BSV"]<-"BSV (%)"}
-  
-  names(tab1)[1]<-"Parameter"
+  names(tab1)[1] <- "Parameter"
   tab1
 }
 

@@ -7,13 +7,16 @@
 phx_typical(
   theta = th,
   omega = om,
-  omega_sd = omsd,
+  omega_sd = NULL,
   sd = NULL,
   estimate = "Estimate",
-  lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa",
-    "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl",
+  lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100",
+    "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;",
+    "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100",
     "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;",
-    "dCldECOG1;;CL, if ECOG=1;;exp(x)*y;;tvCl;;",
+    "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100",
+    "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100",
+    "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100",
     "stdev0;;Proportional Error (\%);;x*100+y;;c(0,0);;")
 )
 }
@@ -35,8 +38,9 @@ Summary of typical values from Phoenix
 }
 \examples{
 Output table to be edited in lab: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y)
-variables);;4) y values if needed or use original variable names (ex:CL) or set to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL)
-Note: each variable in the lab is separated by ;;. If no transformation of x needed, 3) x+y and 4) c(0,0). Note that the error sd will be propagated 
-according to the equation.
+variables);;4) specify y c(value,sd) if needed or use original variable names (ex:CL) or set it to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL);;
+6) expression for eta distribution.   
+Note: each variable in the lab is separated by ;;. If no transformation of x needed set 3) to x+y and 4) as c(0,0). Note that the error sd will be derived  
+using error propagation based on the expression. 
 }
 \keyword{phx_typical}
