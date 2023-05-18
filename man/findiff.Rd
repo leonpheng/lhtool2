@@ -14,7 +14,4 @@ findiff(dat1, uid1, dat2, uid2, var.to.compare = NULL, tol = 0)
 \description{
 find different values between two datasets
 }
-\examples{
-findiff
-}
 \keyword{findiff}

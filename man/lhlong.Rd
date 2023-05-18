@@ -14,7 +14,4 @@ lhlong(data, long.vector)
 \description{
 Reshape long
 }
-\examples{
-lhlong()
-}
 \keyword{lhlong()}

@@ -38,8 +38,4 @@ lhtab1(
 \description{
 Generate descriptive statistic of continuous and/or categorical variables
 }
-\examples{
-tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
-print(tab1,"Demog.docx")
-}
 \keyword{lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)}

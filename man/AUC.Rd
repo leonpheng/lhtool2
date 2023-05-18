@@ -20,7 +20,4 @@ AUC(data = dat, time = "TIME", id = "ID", dv = "DV", method = "linlog")
 \description{
 data
 }
-\examples{
-AUC(data, time = 'TIME', id = 'ID', dv = 'DV')
-}
 \keyword{AUC}

@@ -5,7 +5,7 @@
 #'@param  omega_sd  sd for omega matrix format
 #'@param  sd  set to null if no covariance steps or specify variable name for SD theta
 #'@param  estimate specify variable name for estimate theta 
-#'@param  lab table format to be outputted. Edit the lab list: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y) variables);;4) specify y c(value,sd) if needed or use original variable names (ex:CL) or set it to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL);; 6) expression for eta distribution. Note: each variable in the lab is separated by ;;. If no transformation of x needed set 3) to x+y and 4) as c(0,0). Note that the error sd will be derived using error propagation based on the expression. 
+#'@param  lab table format
 #'@keywords phx_typical
 #'@export
 
@@ -398,8 +398,6 @@ pptdoc<-function (template = "C:/Users/lpheng/Desktop/Templates and Documents/te
 #'
 #' @keywords wdoc
 #' @export
-#'@examples "Create documet by listing the functions txt(text),tab(flextable table),df(data frame to table),fig(ggplot figure),img(image).
-#'@examples EX: doc<-wdoc(); doc<-wdoc(list(txt=c('your text', optional heading number),fig=ggplot fig,img=c(path/filename.png,width,height));print(doc,filename.docx)"
 #'
 
 wdoc<-function(template=NULL,start=list(NULL)){
@@ -462,7 +460,7 @@ if(unique(start[[i]]%in%start[i]$fig)){
 #' @param lab data specification c(variable name;;label;;unit)
 #' @keywords lh.def
 #' @export
-#'@examples lh.def(lab)
+
 
 lh.def<-function (lab = c("code;;define;;unit", "b;;test>=b;;ug",
                           "c;;test<c;b;a;; "))
@@ -486,8 +484,7 @@ lh.def<-function (lab = c("code;;define;;unit", "b;;test>=b;;ug",
 #' @param var Vector (s) to be verified
 #' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
 #' @export
-#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
-#'@examples print(tab1,"Demog.docx")
+
 
 lhtime_var<-function(data,by="ID",var=c("BBILI","BILI")){
   tab<-NULL
@@ -505,8 +502,7 @@ lhtime_var<-function(data,by="ID",var=c("BBILI","BILI")){
 #' @param table1 data frame
 #' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
 #' @export
-#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
-#'@examples print(tab1,"Demog.docx")
+
 
 
 lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL,
@@ -664,8 +660,7 @@ lhflex<-function (table1, csv = "yes", bord = "yes", select = NULL, add.h = NULL
 #' @param format two formats available, stacked or not
 #' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
 #' @export
-#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
-#'@examples print(tab1,"Demog.docx")
+
 
 lhtab2<-function (data, sort.by = c("AGEGRP"), cont = c("WT","C6h","Cmax","Cavg"), 
                   stats = c("length(x[!is.na(x)])=N", "length(x[is.na(x)])=Nmiss", 
@@ -832,8 +827,7 @@ lhtab2<-function (data, sort.by = c("AGEGRP"), cont = c("WT","C6h","Cmax","Cavg"
 #' @param transpose when transpose is TRUE, the output will be in docx containing both continuous and categorical covariate
 #' @keywords lhtab1(data=df,sort.by=c("study","form"),cont=cont,cat=NULL,stats="stat1",fun="fun1",overall="yes",render="flex",transpose=F)
 #' @export
-#' @examples tab1<-lhtab1(data=dat1,sort.by="ARM",cont=continous,cat=categorical,render="word",overall="yes")
-#'@examples print(tab1,"Demog.docx")
+
 
 
 lhtab1<-function (data , sort.by = c("study", "form"), cont =NULL,
@@ -1187,7 +1181,7 @@ lhmutate<-function(data,mutate){
 #' @param data Dataset
 #' @keywords lhwide()
 #' @export
-#' @examples lhwide()
+
 
 lhwide<-function(data,wide.data,wide.vector){
   data<-data[,c(names(data)[!names(data)%in%c(wide.data,wide.vector)],wide.vector,wide.data)]
@@ -1203,7 +1197,6 @@ lhwide<-function(data,wide.data,wide.vector){
 #'
 #' @keywords lhlong()
 #' @export
-#' @examples lhlong()
 
 lhlong<-function(data,long.vector){
   z1<-reshape2::melt(data,names(data)[!names(data)%in%long.vector])
@@ -1216,7 +1209,7 @@ lhlong<-function(data,long.vector){
 #' @param dat2  Data frame 2; uid: unique subject identifier
 #' @keywords findiff
 #' @export
-#' @examples findiff
+
 
 findiff<-function (dat1,uid1,dat2,uid2,var.to.compare=NULL,tol=0) 
 {
@@ -2423,7 +2416,6 @@ roundbatch<-function(data,variable,toround,nb){
 #' @param by  Stratification variable (ex: by="study")
 #' @keywords cat.tab
 #' @export
-#' @examples cat.tab(data=dat,var=c("SEX","RACE"),by=c("study"),colby="var",rowby=by)
 
 lhcattab<-function (data, var, by)
   {
@@ -2497,7 +2489,7 @@ lhcattab<-function (data, var, by)
 #' @param dec round decimal or number of significant figures
 #' @keywords ind.tab
 #' @export
-#' @examples lhtab3(data=dat,id="NMID",by=c("study"))
+
 
 lhtab3<-function(data=d,id="animal",by=c("antibody_name","dose_mpk"),horiz="time_point",var.list="conc",round="sifig",dec=3,heading=1,stat.eq=NULL,stat.list=NULL){
 doc<-read_docx()
@@ -2592,7 +2584,7 @@ doc
 #' @param method linlog= lin up and log down
 #' @keywords AUC
 #' @export
-#' @examples AUC(data, time = 'TIME', id = 'ID', dv = 'DV')
+
 
 AUC<-function (data=dat, time = "TIME", id = "ID", dv = "DV",method="linlog") 
 {
@@ -2644,7 +2636,7 @@ AUC<-function (data=dat, time = "TIME", id = "ID", dv = "DV",method="linlog")
 #' @param plots plog, plin, or plot
 #' @keywords nca.cal
 #' @export
-#'@examples test<-nca.cal(data=d,id="id",partialAUC =c(0,12,12,24),partialConc =c(1,2),time = "time",dv = "conc")
+
 
 nca.cal<-function (data, n_lambda = 3, id = "id", time = "time", 
                    dv = "dv", partialAUC = NULL, partialConc = NULL, full = F) 
@@ -2824,8 +2816,7 @@ nca.cal<-function (data, n_lambda = 3, id = "id", time = "time",
 #' @param TAU Dosing iterval
 #' @keywords lh.ehl.rc
 #' @export
-#' @examples
-#'
+
 lh.ehl.rc<-function(data,AUCsd="AUCsd",AUCss="AUCss",TAU=24){
   data$Rc <- with(data, AUCss/AUCsd)
   data$EHL <- with(data, log(2) * TAU/(log(Rc/(Rc - 1))))
@@ -2839,7 +2830,7 @@ lh.ehl.rc<-function(data,AUCsd="AUCsd",AUCss="AUCss",TAU=24){
 #' @param om phoenix omega output, matrix
 #' @keywords phx_bsv
 #' @export
-#' @examples
+
 
 phx_bsv<-function(par="nCl",om){
   n<-ncol(om)-2
@@ -2852,7 +2843,7 @@ phx_bsv<-function(par="nCl",om){
 #' @param om phoenix omega output, matrix
 #' @keywords phx_shrk
 #' @export
-#' @examples
+
 
 phx_shrk<- function(par="nCl",om){
   as.numeric(om[nrow(om),par])*100
@@ -2865,7 +2856,7 @@ phx_shrk<- function(par="nCl",om){
 #' @param sdom Phoenix omega SD output, matrix
 #' @keywords phx_shrk
 #' @export
-#' @examples
+
 
 phx_omrse<-function(par="nCl",om,sdom,exp=expression(sqrt(exp(x)-1)+y),y=c(0,0)){
   n<-ncol(om)-2
@@ -2891,7 +2882,7 @@ phx_omrse<-function(par="nCl",om,sdom,exp=expression(sqrt(exp(x)-1)+y),y=c(0,0))
 #' @param sim True if simulation is used to derive the error.
 #' @keywords errprop
 #' @export
-#' @examples
+
 
 errprop<-function(x=c(0.5,0.1),y=c(0.5,0.1),exp=expression(sqrt(exp(x)-1)+y),sim=F,verbiose=F,nsim=100000,raw=T){
   library(propagate)

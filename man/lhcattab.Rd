@@ -17,7 +17,4 @@ lhcattab(data, var, by)
 Descriptove stats of categorical covariates
 cat.tab(data,var,by,colby="var",rowby=by)
 }
-\examples{
-cat.tab(data=dat,var=c("SEX","RACE"),by=c("study"),colby="var",rowby=by)
-}
 \keyword{cat.tab}

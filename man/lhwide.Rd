@@ -15,7 +15,4 @@ lhwide(data, wide.data, wide.vector)
 \description{
 Reshape wide
 }
-\examples{
-lhwide()
-}
 \keyword{lhwide()}

@@ -12,7 +12,4 @@ lh.def(lab = c("code;;define;;unit", "b;;test>=b;;ug", "c;;test<c;b;a;; "))
 \description{
 Verify if vector is varying or duplicate
 }
-\examples{
-lh.def(lab)
-}
 \keyword{lh.def}

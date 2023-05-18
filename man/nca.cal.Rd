@@ -35,7 +35,4 @@ nca.cal(
 \description{
 nca.cal()
 }
-\examples{
-test<-nca.cal(data=d,id="id",partialAUC =c(0,12,12,24),partialConc =c(1,2),time = "time",dv = "conc")
-}
 \keyword{nca.cal}

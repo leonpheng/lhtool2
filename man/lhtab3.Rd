@@ -33,7 +33,4 @@ lhtab3(
 \description{
 Listing of individual data and descriptive stats
 }
-\examples{
-lhtab3(data=dat,id="NMID",by=c("study"))
-}
 \keyword{ind.tab}
