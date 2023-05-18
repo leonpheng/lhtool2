@@ -96,7 +96,7 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
     body(B) <- parse(text = A)
     t1<-errprop(x,y,exp=B(A),raw=F)
     if(!is.null(omega_sd)){
-      iiv1<-paste0(sigfig(t1$Mean[1],3)," (",sigfig(t1$RSE[1],3))
+      iiv1<-paste0(sigfig(t1$Mean[1],3)," (",sigfig(t1$RSE[1],3),")")
     }else{iiv1<-sigfig(t1$Mean[1],3)}
     iiv<-c(iiv,iiv1)}
   
