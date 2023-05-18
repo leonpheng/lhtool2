@@ -1,19 +1,14 @@
 #' Summary of typical values from Phoenix 
 #'
-#'@param  theta theta sheet 
-#'@param  omega omega data matrix format
-#'@param  omega_sd sd for omega matrix format
-#'@param  sd set to null if no covariance steps or specify variable name for SD theta
+#'@param  theta  theta sheet 
+#'@param  omega  omega data matrix format
+#'@param  omega_sd  sd for omega matrix format
+#'@param  sd  set to null if no covariance steps or specify variable name for SD theta
 #'@param  estimate specify variable name for estimate theta 
-#'@param  lab table format to be outputted (see example) 
-#'@examples Output table to be edited in lab: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y)
-#'@examples variables);;4) specify y c(value,sd) if needed or use original variable names (ex:CL) or set it to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL);;
-#'@examples 6) expression for eta distribution.   
-#'@examples Note: each variable in the lab is separated by ;;. If no transformation of x needed set 3) to x+y and 4) as c(0,0). Note that the error sd will be derived  
-#'@examples using error propagation based on the expression. 
+#'@param  lab table format to be outputted. Edit the lab list: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y) variables);;4) specify y c(value,sd) if needed or use original variable names (ex:CL) or set it to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL);; 6) expression for eta distribution. Note: each variable in the lab is separated by ;;. If no transformation of x needed set 3) to x+y and 4) as c(0,0). Note that the error sd will be derived using error propagation based on the expression. 
 #'@keywords phx_typical
 #'@export
-#'
+
 phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL, 
                        estimate = "Estimate", lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100",
                                                       "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;",

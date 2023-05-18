@@ -31,16 +31,9 @@ phx_typical(
 
 \item{estimate}{specify variable name for estimate theta}
 
-\item{lab}{table format to be outputted (see example)}
+\item{lab}{table format to be outputted. Edit the lab list: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y) variables);;4) specify y c(value,sd) if needed or use original variable names (ex:CL) or set it to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL);; 6) expression for eta distribution. Note: each variable in the lab is separated by ;;. If no transformation of x needed set 3) to x+y and 4) as c(0,0). Note that the error sd will be derived using error propagation based on the expression.}
 }
 \description{
 Summary of typical values from Phoenix
-}
-\examples{
-Output table to be edited in lab: Require 1) original Param name ;; 2) explicit name;;3)transformation equation (up to 2 variables x and y)
-variables);;4) specify y c(value,sd) if needed or use original variable names (ex:CL) or set it to c(0,0) if not used ;; 5)names corresponding ETA (ex: nCL);;
-6) expression for eta distribution.   
-Note: each variable in the lab is separated by ;;. If no transformation of x needed set 3) to x+y and 4) as c(0,0). Note that the error sd will be derived  
-using error propagation based on the expression. 
 }
 \keyword{phx_typical}
