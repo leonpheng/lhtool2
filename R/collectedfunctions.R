@@ -1984,8 +1984,9 @@ duprow<-function(data,var=NULL,remove=NULL){
 #' @param EVID evid variable
 #' @keywords tadRT
 #' @export
-tadRT<-function (data, id = "ID", dttm = NULL, cdate = NULL, ctime = NULL,
-                 evid = "EVID", tz = "GMT", format = "%Y-%m-%d %H:%M")
+
+tadRT<-function (data, id = "ID", dttm = NULL, cdate = NULL, ctime = NULL, 
+                 evid = "EVID", tz = "GMT", format = "%Y-%m-%d %H:%M") 
 {
   locf <- function(x) {
     good <- !is.na(x)
@@ -2001,10 +2002,9 @@ tadRT<-function (data, id = "ID", dttm = NULL, cdate = NULL, ctime = NULL,
     data[, dttm] <- NULL
     data <- data[order(data[, id], data$DTTM), ]
     data$tadtm <- NA
-  } else {
+  }  else {
     data <- chclass(data, c(cdate, ctime), "char")
-    data$DTTM <- as.character(paste(data[, cdate], data[,
-                                                        ctime], sep = " "))
+    data$DTTM <- as.character(paste(data[, cdate], data[,ctime], sep = " "))
     data$tadtm <- NA
     data <- data[order(data[, id], data$DTTM), ]
   }
@@ -2018,23 +2018,23 @@ tadRT<-function (data, id = "ID", dttm = NULL, cdate = NULL, ctime = NULL,
   data <- rbind(dose, nodose)
   data$tadtm <- as.character(data$tadtm)
   head(data)
-  data$DTTM <- strftime(strptime(data$DTTM, format = format,
+  data$DTTM <- strftime(strptime(data$DTTM, format = format, 
                                  tz = tz), format = format, tz = tz)
   data <- data[order(data[, id], data$DTTM), ]
   data$WT1 <- unlist(tapply(data$tadtm, data[, id], locf))
   data$tadtm <- rev(locf(rev(data$WT1)))
   data <- data[order(data[, id], data$DTTM), ]
   head(data)
-  data$DTTM <- strftime(strptime(data$DTTM, format = format,
+  data$DTTM <- strftime(strptime(data$DTTM, format = format, 
                                  tz = tz), format = format, tz = tz)
-  data$tadtm <- strftime(strptime(data$tadtm, format = format,
+  data$tadtm <- strftime(strptime(data$tadtm, format = format, 
                                   tz = tz), format = format, tz = tz)
-  data$TAD <- as.numeric(difftime(strptime(data$tadtm, format = format,
-                                           tz = tz), strptime(data$DTTM, format = format, tz = tz),
+  data$TAD <- as.numeric(difftime(strptime(data$tadtm, format = format, 
+                                           tz = tz), strptime(data$DTTM, format = format, tz = tz), 
                                   units = "hour")) * (-1)
-  data <- left_join(data, rtime, all.x = T)
-  data$RTIME <- as.numeric(difftime(strptime(data$DTTM, format = format,
-                                             tz = tz), strptime(data$FDDTM, format = format, tz = tz),
+  data <- left_join(data, rtime)
+  data$RTIME <- as.numeric(difftime(strptime(data$DTTM, format = format, 
+                                             tz = tz), strptime(data$FDDTM, format = format, tz = tz), 
                                     units = "hour"))
   data$WT1 <- NULL
   data$tadtm <- NULL
