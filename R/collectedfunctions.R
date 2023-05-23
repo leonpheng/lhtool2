@@ -8,15 +8,13 @@
 #'@param  lab table format
 #'@keywords phx_typical
 #'@export
-
 phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL, 
-                       estimate = "Estimate", lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100",
-                                                      "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;",
-                                                      "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100",
+                       estimate = "Estimate", lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
+                                                      "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
                                                       "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
                                                       "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
-                                                      "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100",
-                                                      "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100",
+                                                      "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100", 
+                                                      "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100", 
                                                       "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
 {
   lh.def1 <- function(lab = c("parameter;;define;;x^y;;y;;eta;;exp(x)")) {
@@ -24,13 +22,11 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
     for (i in 1:length(lab)) {
       splt <- strsplit(lab[i], ";;")[[1]]
       def <- rbind(def, data.frame(theta = splt[1], define = splt[2], 
-                                   x = splt[3], y = splt[4], eta = splt[5],eta_dist = splt[6]))
+                                   x = splt[3], y = splt[4], eta = splt[5], eta_dist = splt[6]))
     }
     def$order <- seq(nrow(def))
     def
   }
-#lh.def1(lab)
-  
   par <- lh.def1(lab)
   th1 <- filter(left_join(mutate(theta, theta = Parameter), 
                           par), !is.na(define))
@@ -41,14 +37,14 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
   for (i in 1:nrow(th1)) {
     if (!is.null(sd)) {
       x = c(th1[i, estimate], th1[i, sd])
-    } else {
+    }  else {
       x = c(th1[i, estimate], 0)
     }
     if (th1[i, "y"] %in% th1$theta) {
       if (!is.null(sd)) {
         y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
               th1[th1$theta == th1[i, "y"], sd])
-      } else {
+      }  else {
         y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
               0)
       }
@@ -69,60 +65,65 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
       th1$RSE[i] <- t$RSE[1]
     }
   }
-  
   par <- mutate(th1, Estimate = sigfig(Estimate1, 3))
-  
   if (!is.null(sd)) {
     par$RSE = sigfig(par$RSE, 3)
   }
-  ##OMEGA
-  par_om <- par[!is.na(par$eta), c("theta", "eta","eta_dist")]
   
-  library(dplyr)
-  
-  iiv <- NULL
-  for (i in c(par_om$eta)) {
-    n <- ncol(om) - 2
-    x <- om[1:(n + 1), ]
-    x <- as.numeric(x[x$Label == i, i])
-    if(!is.null(omega_sd)){
-      n1 <- ncol(omega_sd) - 2
-      x1 <- as.numeric(omega_sd[omega_sd$Label == i, i])}else{x1=0}
+  if(!is.null(omega)){    
+    par_om <- par[!is.na(par$eta), c("theta", "eta", "eta_dist")]
     
-    x <- c(x, x1)
-    y <- c(0,0)
-    A <- paste0("expression(",par_om[par_om$eta==i, "eta_dist"],"+y)")
-    B <- function(x) {}
-    body(B) <- parse(text = A)
-    t1<-errprop(x,y,exp=B(A),raw=F)
-    if(!is.null(omega_sd)){
-      iiv1<-paste0(sigfig(t1$Mean[1],3)," (",sigfig(t1$RSE[1],3),")")
-    }else{iiv1<-sigfig(t1$Mean[1],3)}
-    iiv<-c(iiv,iiv1)}
-  
-  shk <- NULL
-  for (i in c(par_om$eta)) {
-    shk = c(shk, sigfig(phx_shrk(i, omega), 3))
-  }
-  
-  par_om$BSV = iiv
-  par_om$Shrinkage = shk
-  par_om$Description <- par_om$eta <- NULL
-  if (!is.null(sd)) {
-    tab1 <- dplyr::select(arrange(left_join(par, par_om), 
-                                  order), define, Estimate, RSE, BSV, Shrinkage)
-  } else {
-    tab1 <- dplyr::select(arrange(left_join(par, par_om), 
-                                  order), define, Estimate, BSV, Shrinkage)
-  }
-  tab1$BSV[is.na(tab1$BSV)] <- ""
-  tab1$Shrinkage[is.na(tab1$Shrinkage)] <- ""
-  if (!is.null(omega_sd)) {
-    names(tab1)[names(tab1) == "BSV"] <- "BSV (RSE%)"
-  } else {
-    names(tab1)[names(tab1) == "BSV"] <- "BSV (%)"
-  }
-  names(tab1)[1] <- "Parameter"
+    library(dplyr)
+    iiv <- NULL
+    for (i in c(par_om$eta)) {
+      n <- ncol(om) - 2
+      x <- om[1:(n + 1), ]
+      x <- as.numeric(x[x$Label == i, i])
+      if (!is.null(omega_sd)) {
+        n1 <- ncol(omega_sd) - 2
+        x1 <- as.numeric(omega_sd[omega_sd$Label == i, i])
+      } else {
+        x1 = 0
+      }
+      x <- c(x, x1)
+      y <- c(0, 0)
+      A <- paste0("expression(", par_om[par_om$eta == i, "eta_dist"], 
+                  "+y)")
+      B <- function(x) {
+      }
+      body(B) <- parse(text = A)
+      t1 <- errprop(x, y, exp = B(A), raw = F)
+      if (!is.null(omega_sd)) {
+        iiv1 <- paste0(sigfig(t1$Mean[1], 3), " (", sigfig(t1$RSE[1], 
+                                                           3), ")")
+      }  else {
+        iiv1 <- sigfig(t1$Mean[1], 3)
+      }
+      iiv <- c(iiv, iiv1)
+    }
+    shk <- NULL
+    for (i in c(par_om$eta)) {
+      shk = c(shk, sigfig(phx_shrk(i, omega), 3))
+    }
+    par_om$BSV = iiv
+    par_om$Shrinkage = shk
+    par_om$Description <- par_om$eta <- NULL
+    if (!is.null(sd)) {
+      tab1 <- dplyr::select(arrange(left_join(par, par_om), 
+                                    order),theta,define, Estimate, RSE, BSV, Shrinkage)
+    } else {
+      tab1 <- dplyr::select(arrange(left_join(par, par_om), 
+                                    order),theta, define, Estimate, BSV, Shrinkage)
+    }
+    tab1$BSV[is.na(tab1$BSV)] <- ""
+    tab1$Shrinkage[is.na(tab1$Shrinkage)] <- ""
+    if (!is.null(omega_sd)) {
+      names(tab1)[names(tab1) == "BSV"] <- "BSV (RSE%)"
+    } else {
+      names(tab1)[names(tab1) == "BSV"] <- "BSV (%)"
+    }
+    names(tab1)[2] <- "Parameter"
+  }else{tab1<-par[,c("theta","define","Estimate1","RSE")]}
   tab1
 }
 
