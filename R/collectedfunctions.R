@@ -28,7 +28,7 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
     def
   }
   par <- lh.def1(lab)
-  th1 <- filter(left_join(mutate(theta, theta = Parameter), 
+  th1 <- filter(full_join(mutate(theta, theta = Parameter), 
                           par), !is.na(define))
   th1$Estimate1 <- NA
   if (!is.null(sd)) {
@@ -37,14 +37,14 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
   for (i in 1:nrow(th1)) {
     if (!is.null(sd)) {
       x = c(th1[i, estimate], th1[i, sd])
-    }  else {
+    } else {
       x = c(th1[i, estimate], 0)
     }
     if (th1[i, "y"] %in% th1$theta) {
       if (!is.null(sd)) {
         y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
               th1[th1$theta == th1[i, "y"], sd])
-      }  else {
+      }else {
         y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
               0)
       }
@@ -65,14 +65,14 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
       th1$RSE[i] <- t$RSE[1]
     }
   }
+  
   par <- mutate(th1, Estimate = sigfig(Estimate1, 3))
   if (!is.null(sd)) {
     par$RSE = sigfig(par$RSE, 3)
   }
   
-  if(!is.null(omega)){    
+  if (!is.null(omega)) {
     par_om <- par[!is.na(par$eta), c("theta", "eta", "eta_dist")]
-    
     library(dplyr)
     iiv <- NULL
     for (i in c(par_om$eta)) {
@@ -81,14 +81,15 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
       x <- as.numeric(x[x$Label == i, i])
       if (!is.null(omega_sd)) {
         n1 <- ncol(omega_sd) - 2
-        x1 <- as.numeric(omega_sd[omega_sd$Label == i, i])
-      } else {
+        x1 <- as.numeric(omega_sd[omega_sd$Label == i, 
+                                  i])
+      }  else {
         x1 = 0
       }
       x <- c(x, x1)
       y <- c(0, 0)
-      A <- paste0("expression(", par_om[par_om$eta == i, "eta_dist"], 
-                  "+y)")
+      A <- paste0("expression(", par_om[par_om$eta == i, 
+                                        "eta_dist"], "+y)")
       B <- function(x) {
       }
       body(B) <- parse(text = A)
@@ -96,7 +97,7 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
       if (!is.null(omega_sd)) {
         iiv1 <- paste0(sigfig(t1$Mean[1], 3), " (", sigfig(t1$RSE[1], 
                                                            3), ")")
-      }  else {
+      }   else {
         iiv1 <- sigfig(t1$Mean[1], 3)
       }
       iiv <- c(iiv, iiv1)
@@ -110,10 +111,10 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
     par_om$Description <- par_om$eta <- NULL
     if (!is.null(sd)) {
       tab1 <- dplyr::select(arrange(left_join(par, par_om), 
-                                    order),theta,define, Estimate, RSE, BSV, Shrinkage)
-    } else {
+                                    order), theta, define, Estimate, RSE, BSV, Shrinkage)
+    }  else {
       tab1 <- dplyr::select(arrange(left_join(par, par_om), 
-                                    order),theta, define, Estimate, BSV, Shrinkage)
+                                    order), theta, define, Estimate, BSV, Shrinkage)
     }
     tab1$BSV[is.na(tab1$BSV)] <- ""
     tab1$Shrinkage[is.na(tab1$Shrinkage)] <- ""
@@ -123,7 +124,9 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
       names(tab1)[names(tab1) == "BSV"] <- "BSV (%)"
     }
     names(tab1)[2] <- "Parameter"
-  }else{tab1<-par[,c("theta","define","Estimate1","RSE")]}
+  } else {
+    tab1 <- par[, c("theta", "define", "Estimate1", "RSE")]
+  }
   tab1
 }
 
