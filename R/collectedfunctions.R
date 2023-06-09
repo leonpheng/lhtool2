@@ -1,3 +1,16 @@
+#' Derive confidence interval for binary data  
+#'
+#'@param  p  probabililty   
+#'@param  n  total number 
+#'@param  ci confidence interval 0.975 for 95%. To derive lower and upper bounds, do p -/+ ci_bin  
+#'@keywords ci_bin
+#'@export
+
+ci_bin<-function(p,n,ci=0.975){
+  qnorm(ci)*sqrt(p*(1-p)/n)
+  }
+
+
 #' Summary of typical values from Phoenix 
 #'
 #'@param  theta  theta sheet 
