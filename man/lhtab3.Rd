@@ -5,39 +5,23 @@
 \title{Descriptive Statistics Continuous in matrix style}
 \usage{
 lhtab3(
-  data = d,
-  id = "animal",
-  by = c("antibody_name", "dose_mpk"),
-  horiz = "time_point",
-  var.list = "conc",
-  round = "sifig",
-  dec = 3,
-  heading = 1,
-  stat.eq = NULL,
-  stat.list = NULL
-)
-
-lhtab3(
-  data = d,
-  id = "animal",
-  by = c("antibody_name", "dose_mpk"),
-  horiz = "time_point",
-  var.list = "conc",
-  round = "sifig",
-  dec = 3,
-  heading = 1,
-  stat.eq = NULL,
-  stat.list = NULL
+  data,
+  sort.header = c("group", "studyid"),
+  sort.body = NULL,
+  cont = c("bestpcttl", "WT"),
+  stat1 = c("length(x)=N", "length(x[is.na(x)])=Nmiss", "mean(x,na.rm=T)=Mean",
+    "median(x,na.rm=T)=Median", "min(x,na.rm=T)=Min", "max(x,na.rm=T)=Max", "cv(x)=CV",
+    "geom(x)=GeoMean", "geocv(x)=GeoCV"),
+  stat.label = list(c("N"), c("Mean", " (", "CV", ")"), c("Median", " [", "Min", "-",
+    "Max", "]"), c("GeoMean", " (", "GeoCV", ")")),
+  render.word = T,
+  overall = T,
+  stacked = T,
+  rounding = "sigfig(x,3)"
 )
 }
 \arguments{
-\item{data}{datset or data frame (ex:data=PKdatat)}
-
-\item{id}{unique identifier}
-
-\item{by}{Stratification variable (ex: by="study")}
-
-\item{dec}{round decimal or number of significant figures}
+\item{data}{dataset}
 
 \item{sort.header}{horizontal sorting}
 
@@ -56,15 +40,8 @@ lhtab3(
 \item{stacked}{output the stats in stacking style}
 
 \item{rounding}{define rounding method}
-
-\item{variables}{Specify sorting variable to be displayed vertically. (ex: colby=by or colby="var")}
-
-\item{rtype}{rounding type. (sigfig by default)}
 }
 \description{
 Generate descriptive statistic of continuous variable with style
-
-Listing of individual data and descriptive stats
 }
-\keyword{ind.tab}
 \keyword{lhtab3()}

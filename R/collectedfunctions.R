@@ -2697,8 +2697,7 @@ lhcattab<-function (data, var, by)
 #' @keywords ind.tab
 #' @export
 
-
-lhtab3<-function(data=d,id="animal",by=c("antibody_name","dose_mpk"),horiz="time_point",var.list="conc",round="sifig",dec=3,heading=1,stat.eq=NULL,stat.list=NULL){
+ind.tab<-function(data=d,id="animal",by=c("antibody_name","dose_mpk"),horiz="time_point",var.list="conc",round="sifig",dec=3,heading=1,stat.eq=NULL,stat.list=NULL){
 doc<-read_docx()
 for(tt in seq(var.list)){
   var<-var.list[tt]
