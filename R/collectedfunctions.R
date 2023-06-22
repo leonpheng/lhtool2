@@ -842,180 +842,163 @@ lhtab2<-function (data, sort.by = c("AGEGRP"), cont = c("WT","C6h","Cmax","Cavg"
 #' @keywords lhtab3()
 #' @export
 
-lhtab3<-function (data, sort.header = c("group","studyid"),
-                  sort.body =NULL, 
-                  cont=c("bestpcttl","WT"),
-                  stat1=c("length(x)=N","length(x[is.na(x)])=Nmiss","mean(x,na.rm=T)=Mean","median(x,na.rm=T)=Median",
-                          "min(x,na.rm=T)=Min","max(x,na.rm=T)=Max","cv(x)=CV","geom(x)=GeoMean","geocv(x)=GeoCV"),
-                  stat.label=list(c("N"),c("Mean"," (","CV",")"),c("Median"," [","Min","-","Max","]"),c("GeoMean"," (","GeoCV",")")),
-                  render.word =T,
-                  overall =T, 
-                  stacked=T,rounding="sigfig(x,3)") 
+lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL, 
+                  cont = c("bestpcttl", "WT"), stat1 = c("length(x)=N", "length(x[is.na(x)])=Nmiss", 
+                                                         "mean(x,na.rm=T)=Mean", "median(x,na.rm=T)=Median", "min(x,na.rm=T)=Min", 
+                                                         "max(x,na.rm=T)=Max", "cv(x)=CV", "geom(x)=GeoMean", 
+                                                         "geocv(x)=GeoCV"), 
+                  stat.label = list(c("N"), c("Mean",  " (", "CV", ")"), c("Median", " [", "Min", "-", "Max","]"), 
+                                    c("GeoMean", " (", "GeoCV", ")")), render.word = T, 
+                  overall = T, stacked = T, rounding = "sigfig(x,3)") 
 {
-  
-  listalpha<-c(LETTERS,paste0(LETTERS,"_",LETTERS))  
-  
+  listalpha <- c(LETTERS, paste0(LETTERS, "_", LETTERS))
   dataxxx <- data
   dataxxx[, sort.header] <- "Overall"
   data3 <- rbind(data, dataxxx)
-  
-  ##CONTINUES
-  
-  if(!is.null(sort.body)){
-    conx<-data3[,c(sort.body,sort.header,cont)]
-  }else{
-    conx<-data3[,c(sort.header,cont)]
+  if (!is.null(sort.body)) {
+    conx <- data3[, c(sort.body, sort.header, cont)]
+  }  else {
+    conx <- data3[, c(sort.header, cont)]
   }
-  if(length(sort.header)>1){
-    hh<-nodup(conx,sort.header,"var")
-    hh$hh=listalpha[1:nrow(hh)]
-  }else{
-    hh<-data.frame(var=nodup(conx,sort.header,"var"),hh=listalpha[1:length(nodup(conx,sort.header,"var"))])
-    names(hh)<-c(sort.header,"hh")
+  if (length(sort.header) > 1) {
+    hh <- nodup(conx, sort.header, "var")
+    hh$hh = listalpha[1:nrow(hh)]
+  }  else {
+    hh <- data.frame(var = nodup(conx, sort.header, "var"), 
+                     hh = listalpha[1:length(nodup(conx, sort.header, 
+                                                   "var"))])
+    names(hh) <- c(sort.header, "hh")
   }
-  #vv<-nodup(conx,sort.body,"var")
-  #vv$vv=listalpha[1:nrow(hh)]
-  
-  conx<-conx|>
-    left_join(hh)
-  conx<-lhlong(conx,cont)
+  conx <- left_join(conx, hh)
+  conx <- lhlong(conx, cont)
   head(conx)
-  
-  
-  tab<-addvar2(conx,c("hh","variable"),"value",stat1)
-  nhh<-nodup(tab,c("hh","N"),"var")|>
-    right_join(hh)
-  nhh[,sort.header[length(sort.header)]]<-paste0(unlist(nhh[,sort.header[length(sort.header)]])," (N=",unlist(nhh[,"N"]),")")
-  
-  tab<-addvar2(conx,c(sort.body,"hh","variable"),"value",stat1)
-  
-  
-  ###LABEL STATS
-  lab1<-data.frame(ord="",lab="")
-  
-  
-  if(stacked){
-    col<-list(c(""))
-    for(i in 1:length(stat.label)){
-      if(i==1){
-        col[[1]]<-stat.label[i]}else{
-          col[[1]]<-c(col[[1]],"\n ",stat.label[i])}
+  tab <- addvar2(conx, c("hh", "variable"), "value", stat1)
+  nhh <- right_join(nodup(tab, c("hh", "N"), "var"), hh)
+  nhh[, sort.header[length(sort.header)]] <- paste0(unlist(nhh[, 
+                                                               sort.header[length(sort.header)]]), " (N=", unlist(nhh[, 
+                                                                                                                      "N"]), ")")
+  tab <- addvar2(conx, c(sort.body, "hh", "variable"), "value", 
+                 stat1)
+  lab1 <- data.frame(ord = "", lab = "")
+  if (stacked) {
+    col <- list(c(""))
+    for (i in 1:length(stat.label)) {
+      if (i == 1) {
+        col[[1]] <- stat.label[i]
+      }      else {
+        col[[1]] <- c(col[[1]], "\n ", stat.label[i])
+      }
     }
-    stat.label<-list(col)}
-  
-  for(i in 1:length(stat.label)){
-    lab3<-stat.label[[i]]
-    lab<-""
-    for(j in 1:length(lab3)){
-      lab<-paste0(lab,lab3[j])
-    }
-    lab1[i,1]<-paste0(listalpha[i],i)
-    lab1[i,2]<-lab
+    stat.label <- list(col)
   }
-  
-  ##GROUP STATS
-  keep<-names(tab)
-  
-  for(i in 1:length(stat.label)){
-    if(stacked){
-      lab3<-unlist(stat.label[[i]])}else{lab3<-stat.label[[i]]} 
-    tab[,lab1[i,1]]<-"" 
-    for(j in 1:length(lab3)){
-      if(lab3[j]%in%names(tab)){
-        tab[,lab1[i,1]]<-paste0(tab[,lab1[i,1]],tab[,lab3[j]]) 
-      }else{tab[,lab1[i,1]]<-paste0(tab[,lab1[i,1]],lab3[j])}    
-    }}
-  
-  tab<-tab|>
-    mutate(covar=variable)|>
-    select(-variable)
-  
-  keep<-c(setdiff(names(tab),keep))
-  keep<-keep[!keep%in%c("covar")]
-  
+  for (i in 1:length(stat.label)) {
+    lab3 <- stat.label[[i]]
+    lab <- ""
+    for (j in 1:length(lab3)) {
+      lab <- paste0(lab, lab3[j])
+    }
+    lab1[i, 1] <- paste0(listalpha[i], i)
+    lab1[i, 2] <- lab
+  }
+  keep <- names(tab)
+  for (i in 1:length(stat.label)) {
+    if (stacked) {
+      lab3 <- unlist(stat.label[[i]])
+    }    else {
+      lab3 <- stat.label[[i]]
+    }
+    tab[, lab1[i, 1]] <- ""
+    for (j in 1:length(lab3)) {
+      if (lab3[j] %in% names(tab)) {
+        tab[, lab1[i, 1]] <- paste0(tab[, lab1[i, 1]], 
+                                    tab[, lab3[j]])
+      }      else {
+        tab[, lab1[i, 1]] <- paste0(tab[, lab1[i, 1]], 
+                                    lab3[j])
+      }
+    }
+  }
+  tab <- select(mutate(tab, covar = variable), -variable)
+  keep <- c(setdiff(names(tab), keep))
+  keep <- keep[!keep %in% c("covar")]
   head(tab)
-  if(!is.null(sort.body)){
-    tab1<-lhlong(tab[,c(sort.body,"hh","covar",keep)],keep)}else{
-      tab1<-lhlong(tab[,c("hh","covar",keep)],keep)}
+  if (!is.null(sort.body)) {
+    tab1 <- lhlong(tab[, c(sort.body, "hh", "covar", keep)], 
+                   keep)
+  } else {
+    tab1 <- lhlong(tab[, c("hh", "covar", keep)], keep)
+  }
+  tab1 <- lhwide(tab1, "value", "hh")
+  tab1 <- reflag(tab1, "variable", unique(tab1$variable), lab1$lab)
   
-  tab1<-lhwide(tab1,"value","hh")
-  tab1<-reflag(tab1,"variable",unique(tab1$variable),lab1$lab)
-  tab1
-  
-  #TAB FORMAT
-  if(stacked){
-    hh1<-NULL
-    for(i in unlist(stat.label[[1]])){
-      hh1<-paste0(hh1,i)
+  if (stacked) {
+    hh1 <- NULL
+    for (i in unlist(stat.label[[1]])) {
+      hh1 <- paste0(hh1, i)
     }
-    hhx<-as.data.frame(matrix(ncol=ncol(tab1),nrow=length(sort.header)+1))
-  }else{hhx<-as.data.frame(matrix(ncol=ncol(tab1),nrow=length(sort.header)))
-  names(hhx)<-names(tab1)
+    hhx <- as.data.frame(matrix(ncol = ncol(tab1), nrow = length(sort.header) + 
+                                  1))
+  } else {
+    hhx <- as.data.frame(matrix(ncol = ncol(tab1), nrow = length(sort.header)))
   }
-  
-  if(stacked){
-    hhx[1,]<-c(setdiff(names(hhx),nhh$hh),rep(hh1,length(nhh[,sort.header[1]])))
-    for(i in 1:length(sort.header)){
-      hhx[i+1,]<-c(setdiff(names(hhx),nhh$hh),nhh[,sort.header[i]])}
-  }else{
-    for(i in 1:length(sort.header)){
-      hhx[i,]<-c(setdiff(names(hhx),nhh$hh),nhh[,sort.header[i]])
-    }}
-  
-  txx<-rbind(hhx,tab1)
-  
-  if(stacked){
-    txx$variable<-NULL
+  names(hhx) <- names(tab1)
+  if (stacked) {
+    hhx[1, ] <- c(setdiff(names(hhx), nhh$hh), rep(hh1, length(nhh[, 
+                                                                   sort.header[1]])))
+    for (i in 1:length(sort.header)) {
+      hhx[i + 1, ] <- c(setdiff(names(hhx), nhh$hh), nhh[, 
+                                                         sort.header[i]])
+    }
+  }  else {
+    for (i in 1:length(sort.header)) {
+      hhx[i, ] <- c(setdiff(names(hhx), nhh$hh), nhh[, 
+                                                     sort.header[i]])
+    }
   }
-  
-  if(!overall){
-    txx[,ncol(txx)]<-NULL
+  txx <- rbind(hhx, tab1)
+  if (stacked) {
+    txx$variable <- NULL
   }
-  if(render.word){
-    tabxx<-flextable(txx)
+  if (!overall) {
+    txx[, ncol(txx)] <- NULL
+  }
+  if (render.word) {
+    library(flextable)
+    tabxx <- flextable(txx)
     tabxx <- delete_part(x = tabxx, part = "header")
-    
-    vcol<-(length(sort.body)+1)
-    hcol<-(length(sort.header))
-    
-    a<-paste0("hline(tabxx,i=1:",hcol,")")
-    b <- function(x) {}
-    body(b) <-parse(text = a)
-    tabxx <-b()
-    
-    a<-paste0("merge_v(tabxx,j=1:",vcol,")")
-    b <- function(x) {}
-    body(b) <-parse(text = a)
-    tabxx <-b()
-    
-    a<-paste0("merge_h(tabxx,i=1:",hcol,")")
-    b <- function(x) {}
-    body(b) <-parse(text = a)
-    tabxx <-b()
-    
-    a<-paste0("bold(tabxx,i=1:",hcol,")")
-    b <- function(x) {}
-    body(b) <-parse(text = a)
-    tabxx <-b()
-    
-    a<-paste0("bold(tabxx,j=1:",vcol,")")
-    b <- function(x) {}
-    body(b) <-parse(text = a)
-    tabxx <-b()
-    
-    tabxx <-align(tabxx,align="center")
-    txx=tabxx
-    txx<-txx|>
-      #theme_booktabs()|>
-      theme_vanilla()|>
-      #theme_box()|>
-      #theme_tron()|>
-      #theme_tron_legacy()|>
-      autofit()|>
-      hline_top()}
-  txx  
+    vcol <- (length(sort.body) + 1)
+    hcol <- (length(sort.header))
+    a <- paste0("hline(tabxx,i=1:", hcol, ")")
+    b <- function(x) {
+    }
+    body(b) <- parse(text = a)
+    tabxx <- b()
+    a <- paste0("merge_v(tabxx,j=1:", vcol, ")")
+    b <- function(x) {
+    }
+    body(b) <- parse(text = a)
+    tabxx <- b()
+    a <- paste0("merge_h(tabxx,i=1:", hcol, ")")
+    b <- function(x) {
+    }
+    body(b) <- parse(text = a)
+    tabxx <- b()
+    a <- paste0("bold(tabxx,i=1:", hcol, ")")
+    b <- function(x) {
+    }
+    body(b) <- parse(text = a)
+    tabxx <- b()
+    a <- paste0("bold(tabxx,j=1:", vcol, ")")
+    b <- function(x) {
+    }
+    body(b) <- parse(text = a)
+    tabxx <- b()
+    tabxx <- align(tabxx, align = "center")
+    txx = tabxx
+    txx <- hline_top(autofit(theme_vanilla(txx)))
+  }
+  txx
 }
-
 
 
 
