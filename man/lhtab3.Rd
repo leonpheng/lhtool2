@@ -2,8 +2,21 @@
 % Please edit documentation in R/collectedfunctions.R
 \name{lhtab3}
 \alias{lhtab3}
-\title{Individual table with descriptive statse}
+\title{Descriptive Statistics Continuous in matrix style}
 \usage{
+lhtab3(
+  data = d,
+  id = "animal",
+  by = c("antibody_name", "dose_mpk"),
+  horiz = "time_point",
+  var.list = "conc",
+  round = "sifig",
+  dec = 3,
+  heading = 1,
+  stat.eq = NULL,
+  stat.list = NULL
+)
+
 lhtab3(
   data = d,
   id = "animal",
@@ -26,11 +39,32 @@ lhtab3(
 
 \item{dec}{round decimal or number of significant figures}
 
+\item{sort.header}{horizontal sorting}
+
+\item{sort.body}{vertical sorting}
+
+\item{cont}{list of continuous variables}
+
+\item{stat1}{define statistic functions}
+
+\item{stat.label}{define group of statistics to be outputted}
+
+\item{render.word}{if true then render as flextable, else, render as csv}
+
+\item{overall}{output overall}
+
+\item{stacked}{output the stats in stacking style}
+
+\item{rounding}{define rounding method}
+
 \item{variables}{Specify sorting variable to be displayed vertically. (ex: colby=by or colby="var")}
 
 \item{rtype}{rounding type. (sigfig by default)}
 }
 \description{
+Generate descriptive statistic of continuous variable with style
+
 Listing of individual data and descriptive stats
 }
 \keyword{ind.tab}
+\keyword{lhtab3()}
