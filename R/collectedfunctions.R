@@ -138,7 +138,7 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
     }
     names(tab1)[2] <- "Parameter"
   } else {
-    tab1 <- par[, c("theta", "define", "Estimate1", "RSE")]
+    tab1 <- par[, c("order","theta", "define", "Estimate1", "RSE")]
   }
   tab1
 }
@@ -918,10 +918,10 @@ lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL,
       }
     }
   }
-  tab <- select(mutate(tab, covar = variable), -variable)
+  tab <- dplyr::select(mutate(tab, covar = variable), -variable)
   keep <- c(setdiff(names(tab), keep))
   keep <- keep[!keep %in% c("covar")]
-  head(tab)
+  
   if (!is.null(sort.body)) {
     tab1 <- lhlong(tab[, c(sort.body, "hh", "covar", keep)], 
                    keep)
@@ -999,7 +999,6 @@ lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL,
   }
   txx
 }
-
 
 
 #' Descriptive Statistics Continuous and Discrete
