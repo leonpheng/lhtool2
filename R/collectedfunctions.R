@@ -11,6 +11,69 @@ ci_bin<-function(p,n,ci=0.975){
   }
 
 
+#' Format NONMEM output for phx_typical  
+#'
+#'@param  ext  theta sheet 
+#'@param  phi  required for shrinkage calculation
+#'@keywords nm_ph
+#'@export
+
+nm_ph<-function(ext="run16.ext",phi="run16.phi"){
+  par<-read.nonmem.table(ext)
+  res1<-read.nonmem.table(phi)
+  unique(par$iteration)
+  th<-par[par$iteration==-1000000000,]
+  th<-lhlong(th,c(names(th)[!names(th)%in%"iteration"]))
+  shrk<-eta|>
+    mutate(eta1=sd(nCL),eta2=sd(nV2),eta3=sd(nV3),eta4=sd(nCLM))|>
+    distinct(eta1,eta2,eta3,eta4)
+  thx<-th[grep("theta",th$variable),]|>
+    rbind(th[grep("sigma",th$variable),])|>
+    filter(value!=0)|>
+    mutate(Parameter=variable)
+  om<-th[grep("omega",th$variable),]|>
+    filter(value!=0)
+  om<-left_join(om,lhwide(om,"value","variable"))
+  names(om)[names(om)=="value"]<-"Label"
+  omsh<-om|>
+    mutate(om=paste0("eta",seq(nrow(om))))
+  keep<-res1[,c(1,grep("eta",names(res1)))];keep[,1]<-"dum"
+  shrk<-addvar2(keep,names(keep)[1],names(keep)[2:ncol(keep)],"sd(x)=sd")
+  shrk<-shrk|>
+    dplyr::mutate(om=paste0("eta",seq(nrow(shrk))))|>
+    dplyr::select(om,sd)|>
+    left_join(omsh|>
+                dplyr::select(om,Label))|>
+    dplyr::mutate(shrinkage=(1-as.numeric(sd)/sqrt(Label)))|>
+    dplyr::mutate(om=omsh$variable)
+  mat<-data.frame(matrix(nrow=1,ncol=ncol(om)))
+  names(mat)<-names(om)
+  mat<-c("shr","Shrinkage","",as.numeric(unlist(shrk$shrinkage)))
+  om<-om|>
+    mutate(variable=as.character(variable))|>
+    rbind(mat)|>
+    mutate(Label=variable)
+  
+  se1<-par[par$iteration==-1000000001,]
+  
+  if(nrow(se1)!=0){
+    se<-lhlong(se1,c(names(se1)[!names(se1)%in%"iteration"]))
+    thse<-se[grep("theta",se$variable),]|>
+      rbind(se[grep("sigma",se$variable),])|>
+      filter(value!=0)|>
+      mutate(Parameter=variable)
+    omse<-se[grep("omega",se$variable),]|>
+      filter(value!=0)
+    omse<-left_join(omse,lhwide(omse,"value","variable"))
+    names(om)[names(om)=="value"]<-"Label"
+    df<-list(thx,om,thse,omse)}else{df<-list(thx,om)}
+  df
+}
+
+
+
+
+
 #' Summary of typical values from Phoenix 
 #'
 #'@param  theta  theta sheet 
