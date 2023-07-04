@@ -71,9 +71,6 @@ nm_ph<-function(ext="run16.ext",phi="run16.phi"){
 }
 
 
-
-
-
 #' Summary of typical values from Phoenix 
 #'
 #'@param  theta  theta sheet 
@@ -84,15 +81,19 @@ nm_ph<-function(ext="run16.ext",phi="run16.phi"){
 #'@param  lab table format
 #'@keywords phx_typical
 #'@export
-phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL, 
-                       estimate = "Estimate", lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
-                                                      "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
-                                                      "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
-                                                      "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
-                                                      "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100", 
-                                                      "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100", 
-                                                      "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
+#'
+phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", omega_sd = NULL, sd = NULL, 
+                       estimate = "Estimate",nonmem=list(th="run16.ext",om="omega",res="run16.phi"), 
+                       
+                       lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
+                               "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
+                               "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
+                               "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
+                               "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100", 
+                               "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100", 
+                               "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
 {
+  
   lh.def1 <- function(lab = c("parameter;;define;;x^y;;y;;eta;;exp(x)")) {
     def <- NULL
     for (i in 1:length(lab)) {
@@ -103,6 +104,8 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
     def$order <- seq(nrow(def))
     def
   }
+  
+  
   par <- lh.def1(lab)
   th1 <- filter(full_join(mutate(theta, theta = Parameter), 
                           par), !is.na(define))
@@ -152,8 +155,8 @@ phx_typical<-function (theta = th, omega = om, omega_sd = NULL, sd = NULL,
     library(dplyr)
     iiv <- NULL
     for (i in c(par_om$eta)) {
-      n <- ncol(om) - 2
-      x <- om[1:(n + 1), ]
+      n <- ncol(omega) - 2
+      x <- omega[1:(n + 1), ]
       x <- as.numeric(x[x$Label == i, i])
       if (!is.null(omega_sd)) {
         n1 <- ncol(omega_sd) - 2

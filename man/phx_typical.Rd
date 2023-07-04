@@ -5,11 +5,13 @@
 \title{Summary of typical values from Phoenix}
 \usage{
 phx_typical(
-  theta = th,
-  omega = om,
+  theta = "run16.ext",
+  omega = "omega",
+  residual = "run16.phi",
   omega_sd = NULL,
   sd = NULL,
   estimate = "Estimate",
+  nonmem = list(th = "run16.ext", om = "omega", res = "run16.phi"),
   lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100",
     "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;",
     "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100",
