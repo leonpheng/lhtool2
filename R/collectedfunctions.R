@@ -1,15 +1,21 @@
 #' Derive confidence interval for binary data  
 #'
-#'@param  p  probabililty   
-#'@param  n  total number 
-#'@param  ci confidence interval 0.975 for 95%. To derive lower and upper bounds, do p -/+ ci_bin  
-#'@keywords ci_bin
+#'@param  n  number of responder   
+#'@param  total  total number 
+#'@keywords ci_prob
 #'@export
 
-ci_bin<-function(p,n,ci=0.975){
-  qnorm(ci)*sqrt(p*(1-p)/n)
-  }
-
+ci_prob<-ci<-function(n,total){
+  p <- prop.test(n,total)
+  # data.frame(
+  #   N=total,
+  #   Responders=n_resp,
+  #   Percent=sprintf("%s", signif.pad(100*p$estimate, 3)),
+  #   "95% CI"=
+  paste(sprintf("%s", signif.pad(100*p$estimate, 3)),
+  sprintf("[%s]", paste0(signif.pad(100*p$conf.int, 3), collapse=", ")))
+}
+ 
 
 #' Format NONMEM output for phx_typical  
 #'
