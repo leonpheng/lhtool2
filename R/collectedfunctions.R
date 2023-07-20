@@ -1024,7 +1024,7 @@ lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL,
       tyy = tabxx
       tyy <- hline_top(autofit(theme_vanilla(tyy)))
       tcat<-tyy}else{tcat<-txx}
-  }else{tcat<-NULL}
+  }else{tcat<-"Not available"}
   
   ##CONTINUOS  
   if(!is.null(cont)){
@@ -1153,10 +1153,8 @@ lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL,
       txx <- hline_top(autofit(theme_vanilla(txx)))
     }
     tcont<-txx
-  }
-  print(tcat)
-  print(tcont)
-  tab<-list(tcat,tcont)
+  }else{tcont<-"Not available"}
+   tab<-list(tcat,tcont)
 }
 
 
