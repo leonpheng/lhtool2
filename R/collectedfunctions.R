@@ -905,32 +905,33 @@ lhtab2<-function (data, sort.by = c("AGEGRP"), cont = c("WT","C6h","Cmax","Cavg"
 #' @param sort.header horizontal sorting
 #' @param sort.body vertical sorting
 #' @param cont list of continuous variables
-#' @param stat1 define statistic functions
+#' @param stat1 define statistic functions for continous
 #' @param stat.label define group of statistics to be outputted
-#' @param render.word if true then render as flextable, else, render as csv
+#' @param render if docx or csv then render as flextable
 #' @param overall output overall
-#' @param stacked output the stats in stacking style
-#' @param rounding define rounding method
+#' @param stacked output the stats in stacking style for continuous
+#' @param rounding define rounding method for continuous
 #' @keywords lhtab3()
 #' @export
 
 lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL, 
-                  cont = c("bestpcttl", "WT"), stat1 = c("length(x)=N", "length(x[is.na(x)])=Nmiss", 
-                                                         "mean(x,na.rm=T)=Mean", "median(x,na.rm=T)=Median", "min(x,na.rm=T)=Min", 
-                                                         "max(x,na.rm=T)=Max", "cv(x)=CV", "geom(x)=GeoMean", 
-                                                         "geocv(x)=GeoCV"), 
+                  cont=c("bestpcttl", "WT"),cat=NULL,render="demog.docx", 
+                  overall = T, stacked = T, rounding = "sigfig(x,3)", 
+                  stat1 = c("length(x)=N", "length(x[is.na(x)])=Nmiss", 
+                            "mean(x,na.rm=T)=Mean", "median(x,na.rm=T)=Median", "min(x,na.rm=T)=Min", 
+                            "max(x,na.rm=T)=Max", "cv(x)=CV", "geom(x)=GeoMean", 
+                            "geocv(x)=GeoCV"), 
                   stat.label = list(c("N"), c("Mean",  " (", "CV", ")"), c("Median", " [", "Min", "-", "Max","]"), 
-                                    c("GeoMean", " (", "GeoCV", ")")), render.word = T, 
-                  overall = T, stacked = T, rounding = "sigfig(x,3)") 
+                                    c("GeoMean", " (", "GeoCV", ")"))) 
 {
   listalpha <- c(LETTERS, paste0(LETTERS, "_", LETTERS))
   dataxxx <- data
   dataxxx[, sort.header] <- "Overall"
   data3 <- rbind(data, dataxxx)
   if (!is.null(sort.body)) {
-    conx <- data3[, c(sort.body, sort.header, cont)]
+    conx <- data3[, c(sort.body, sort.header,cont,cat)]
   }  else {
-    conx <- data3[, c(sort.header, cont)]
+    conx <- data3[, c(sort.header, cont,cat)]
   }
   if (length(sort.header) > 1) {
     hh <- nodup(conx, sort.header, "var")
@@ -942,134 +943,220 @@ lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL,
     names(hh) <- c(sort.header, "hh")
   }
   conx <- left_join(conx, hh)
-  conx <- lhlong(conx, cont)
-  head(conx)
-  tab <- addvar2(conx, c("hh", "variable"), "value", stat1)
-  nhh <- right_join(nodup(tab, c("hh", "N"), "var"), hh)
-  nhh[, sort.header[length(sort.header)]] <- paste0(unlist(nhh[, 
-                                                               sort.header[length(sort.header)]]), " (N=", unlist(nhh[, 
-                                                                                                                      "N"]), ")")
-  tab <- addvar2(conx, c(sort.body, "hh", "variable"), "value", 
-                 stat1)
-  lab1 <- data.frame(ord = "", lab = "")
-  if (stacked) {
-    col <- list(c(""))
-    for (i in 1:length(stat.label)) {
-      if (i == 1) {
-        col[[1]] <- stat.label[i]
-      }      else {
-        col[[1]] <- c(col[[1]], "\n ", stat.label[i])
-      }
-    }
-    stat.label <- list(col)
-  }
-  for (i in 1:length(stat.label)) {
-    lab3 <- stat.label[[i]]
-    lab <- ""
-    for (j in 1:length(lab3)) {
-      lab <- paste0(lab, lab3[j])
-    }
-    lab1[i, 1] <- paste0(listalpha[i], i)
-    lab1[i, 2] <- lab
-  }
-  keep <- names(tab)
-  for (i in 1:length(stat.label)) {
-    if (stacked) {
-      lab3 <- unlist(stat.label[[i]])
-    }    else {
-      lab3 <- stat.label[[i]]
-    }
-    tab[, lab1[i, 1]] <- ""
-    for (j in 1:length(lab3)) {
-      if (lab3[j] %in% names(tab)) {
-        tab[, lab1[i, 1]] <- paste0(tab[, lab1[i, 1]], 
-                                    tab[, lab3[j]])
-      }      else {
-        tab[, lab1[i, 1]] <- paste0(tab[, lab1[i, 1]], 
-                                    lab3[j])
-      }
-    }
-  }
-  tab <- dplyr::select(mutate(tab, covar = variable), -variable)
-  keep <- c(setdiff(names(tab), keep))
-  keep <- keep[!keep %in% c("covar")]
   
-  if (!is.null(sort.body)) {
-    tab1 <- lhlong(tab[, c(sort.body, "hh", "covar", keep)], 
-                   keep)
-  } else {
-    tab1 <- lhlong(tab[, c("hh", "covar", keep)], keep)
-  }
-  tab1 <- lhwide(tab1, "value", "hh")
-  tab1 <- reflag(tab1, "variable", unique(tab1$variable), lab1$lab)
-  
-  if (stacked) {
-    hh1 <- NULL
-    for (i in unlist(stat.label[[1]])) {
-      hh1 <- paste0(hh1, i)
+  ###CATEGORICAL
+  if(!is.null(cat)){
+    cony <- lhlong(conx[,c(!names(conx)%in%cont)], c(cat))
+    tab<-addvar2(cony,c(sort.body,"hh", "variable","value"),"value","length(x)=n1",rounding ="round(x,0)")|>
+      left_join(addvar2(cony,c("hh","variable"),"value","length(x)=N",rounding ="round(x,0)"))|>
+      mutate(sumr=paste0(n1," (",sigfig(n1/N*100,3),"%)"))
+    
+    nhh <- right_join(nodup(tab, c("hh", "N"), "var"), hh)
+    nhh[, sort.header[length(sort.header)]] <- paste0(unlist(nhh[, 
+                                                                 sort.header[length(sort.header)]]), " (N=", unlist(nhh[, 
+                                                                                                                        "N"]), ")")
+    
+    tcat<-lhwide(tab|>
+                   mutate(Covariate=variable,Category=value)|>
+                   select(sort.body,hh,Covariate,Category,sumr),"sumr","hh")
+    ord<-NULL
+    for(x in cat){
+      ord<-c(ord,as.character(sort(unique(data[,x]))))
     }
-    hhx <- as.data.frame(matrix(ncol = ncol(tab1), nrow = length(sort.header) + 
-                                  1))
-  } else {
-    hhx <- as.data.frame(matrix(ncol = ncol(tab1), nrow = length(sort.header)))
-  }
-  names(hhx) <- names(tab1)
-  if (stacked) {
-    hhx[1, ] <- c(setdiff(names(hhx), nhh$hh), rep(hh1, length(nhh[, 
-                                                                   sort.header[1]])))
-    for (i in 1:length(sort.header)) {
-      hhx[i + 1, ] <- c(setdiff(names(hhx), nhh$hh), nhh[, 
-                                                         sort.header[i]])
+    tcat<-reflag(tcat,"Covariate",cat)
+    tcat<-reflag(tcat,"Category",ord)
+    
+    library(rlang)
+    if(!is.null(sort.body)){
+      var <- sort.body[1]
+      tcat<-tcat|>
+        arrange((!!sym(var)),Covariate,Category)}else{
+          tcat<-tcat|>
+            arrange(Covariate,Category)}
+    
+    
+    for(i in nhh$hh){
+      tcat[,i][is.na(tcat[,i])]<-"0 (0)"
     }
-  }  else {
+    
+    hhy <- as.data.frame(matrix(ncol = ncol(tcat), nrow = length(sort.header)))
+    names(hhy) <- names(tcat)
+    nhh<-nhh[order(nhh$hh),]
     for (i in 1:length(sort.header)) {
-      hhx[i, ] <- c(setdiff(names(hhx), nhh$hh), nhh[, 
+      hhy[i, ] <- c(setdiff(names(hhy), nhh$hh), nhh[, 
                                                      sort.header[i]])
     }
+    
+    txx <- rbind(hhy, tcat)
+    
+    if(1%in%grep("docx",render)|1%in%grep("html",render)){
+      library(flextable)
+      tabxx <- flextable(txx)
+      tabxx <- delete_part(x = tabxx, part = "header")
+      vcol <- (length(sort.body) + 1)
+      hcol <- (length(sort.header))
+      a <- paste0("hline(tabxx,i=1:", hcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("merge_v(tabxx,j=1:", vcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("merge_h(tabxx,i=1:", hcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("bold(tabxx,i=1:", hcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("bold(tabxx,j=1:", vcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      tabxx <- align(tabxx, align = "center")
+      tyy = tabxx
+      tyy <- hline_top(autofit(theme_vanilla(tyy)))
+      tcat<-tyy}else{tcat<-txx}
+  }else{tcat<-NULL}
+  
+  ##CONTINUOS  
+  if(!is.null(cont)){
+    conxx <- lhlong(conx[,c(!names(conx)%in%cat)], c(cont))
+    tab <- addvar2(conxx, c("hh", "variable"), "value", stat1)
+    nhh <- right_join(nodup(tab, c("hh", "N"), "var"), hh)
+    nhh[, sort.header[length(sort.header)]] <- paste0(unlist(nhh[,sort.header[length(sort.header)]]), " (N=", unlist(nhh[,"N"]), ")")
+    tab <- addvar2(conxx, c(sort.body, "hh", "variable"), "value", stat1)
+    lab1 <- data.frame(ord = "", lab = "")
+    if (stacked) {
+      col <- list(c(""))
+      for (i in 1:length(stat.label)) {
+        if (i == 1) {
+          col[[1]] <- stat.label[i]
+        }      else {
+          col[[1]] <- c(col[[1]], "\n ", stat.label[i])
+        }
+      }
+      stat.label <- list(col)
+    }
+    for (i in 1:length(stat.label)) {
+      lab3 <- stat.label[[i]]
+      lab <- ""
+      for (j in 1:length(lab3)) {
+        lab <- paste0(lab, lab3[j])
+      }
+      lab1[i, 1] <- paste0(listalpha[i], i)
+      lab1[i, 2] <- lab
+    }
+    keep <- names(tab)
+    for (i in 1:length(stat.label)) {
+      if (stacked) {
+        lab3 <- unlist(stat.label[[i]])
+      }    else {
+        lab3 <- stat.label[[i]]
+      }
+      tab[, lab1[i, 1]] <- ""
+      for (j in 1:length(lab3)) {
+        if (lab3[j] %in% names(tab)) {
+          tab[, lab1[i, 1]] <- paste0(tab[, lab1[i, 1]], 
+                                      tab[, lab3[j]])
+        }      else {
+          tab[, lab1[i, 1]] <- paste0(tab[, lab1[i, 1]], 
+                                      lab3[j])
+        }
+      }
+    }
+    tab <- dplyr::select(mutate(tab, covar = variable), -variable)
+    keep <- c(setdiff(names(tab), keep))
+    keep <- keep[!keep %in% c("covar")]
+    
+    if (!is.null(sort.body)) {
+      tab1 <- lhlong(tab[, c(sort.body, "hh", "covar", keep)], 
+                     keep)
+    } else {
+      tab1 <- lhlong(tab[, c("hh", "covar", keep)], keep)
+    }
+    tab1 <- lhwide(tab1, "value", "hh")
+    tab1 <- reflag(tab1, "variable", unique(tab1$variable), lab1$lab)
+    
+    if (stacked) {
+      hh1 <- NULL
+      for (i in unlist(stat.label[[1]])) {
+        hh1 <- paste0(hh1, i)
+      }
+      hhx <- as.data.frame(matrix(ncol = ncol(tab1), nrow = length(sort.header) + 
+                                    1))
+    } else {
+      hhx <- as.data.frame(matrix(ncol = ncol(tab1), nrow = length(sort.header)))
+    }
+    names(hhx) <- names(tab1)
+    if (stacked) {
+      hhx[1, ] <- c(setdiff(names(hhx), nhh$hh), rep(hh1, length(nhh[, 
+                                                                     sort.header[1]])))
+      for (i in 1:length(sort.header)) {
+        hhx[i + 1, ] <- c(setdiff(names(hhx), nhh$hh), nhh[, 
+                                                           sort.header[i]])
+      }
+    }  else {
+      for (i in 1:length(sort.header)) {
+        hhx[i, ] <- c(setdiff(names(hhx), nhh$hh), nhh[, 
+                                                       sort.header[i]])
+      }
+    }
+    txx <- rbind(hhx, tab1)
+    if (stacked) {
+      txx$variable <- NULL
+    }
+    if (!overall) {
+      txx[, ncol(txx)] <- NULL
+    }
+    
+    if (1%in%grep("docx",render)|1%in%grep("html",render)) {
+      library(flextable)
+      tabxx <- flextable(txx)
+      tabxx <- delete_part(x = tabxx, part = "header")
+      vcol <- (length(sort.body) + 1)
+      hcol <- (length(sort.header))
+      a <- paste0("hline(tabxx,i=1:", hcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("merge_v(tabxx,j=1:", vcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("merge_h(tabxx,i=1:", hcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("bold(tabxx,i=1:", hcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      a <- paste0("bold(tabxx,j=1:", vcol, ")")
+      b <- function(x) {
+      }
+      body(b) <- parse(text = a)
+      tabxx <- b()
+      tabxx <- align(tabxx, align = "center")
+      txx = tabxx
+      txx <- hline_top(autofit(theme_vanilla(txx)))
+    }
+    tcont<-txx
   }
-  txx <- rbind(hhx, tab1)
-  if (stacked) {
-    txx$variable <- NULL
-  }
-  if (!overall) {
-    txx[, ncol(txx)] <- NULL
-  }
-  if (render.word) {
-    library(flextable)
-    tabxx <- flextable(txx)
-    tabxx <- delete_part(x = tabxx, part = "header")
-    vcol <- (length(sort.body) + 1)
-    hcol <- (length(sort.header))
-    a <- paste0("hline(tabxx,i=1:", hcol, ")")
-    b <- function(x) {
-    }
-    body(b) <- parse(text = a)
-    tabxx <- b()
-    a <- paste0("merge_v(tabxx,j=1:", vcol, ")")
-    b <- function(x) {
-    }
-    body(b) <- parse(text = a)
-    tabxx <- b()
-    a <- paste0("merge_h(tabxx,i=1:", hcol, ")")
-    b <- function(x) {
-    }
-    body(b) <- parse(text = a)
-    tabxx <- b()
-    a <- paste0("bold(tabxx,i=1:", hcol, ")")
-    b <- function(x) {
-    }
-    body(b) <- parse(text = a)
-    tabxx <- b()
-    a <- paste0("bold(tabxx,j=1:", vcol, ")")
-    b <- function(x) {
-    }
-    body(b) <- parse(text = a)
-    tabxx <- b()
-    tabxx <- align(tabxx, align = "center")
-    txx = tabxx
-    txx <- hline_top(autofit(theme_vanilla(txx)))
-  }
-  txx
+  print(tcat)
+  print(tcont)
+  tab<-list(tcat,tcont)
 }
 
 

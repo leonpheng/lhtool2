@@ -9,15 +9,16 @@ lhtab3(
   sort.header = c("group", "studyid"),
   sort.body = NULL,
   cont = c("bestpcttl", "WT"),
+  cat = NULL,
+  render = "demog.docx",
+  overall = T,
+  stacked = T,
+  rounding = "sigfig(x,3)",
   stat1 = c("length(x)=N", "length(x[is.na(x)])=Nmiss", "mean(x,na.rm=T)=Mean",
     "median(x,na.rm=T)=Median", "min(x,na.rm=T)=Min", "max(x,na.rm=T)=Max", "cv(x)=CV",
     "geom(x)=GeoMean", "geocv(x)=GeoCV"),
   stat.label = list(c("N"), c("Mean", " (", "CV", ")"), c("Median", " [", "Min", "-",
-    "Max", "]"), c("GeoMean", " (", "GeoCV", ")")),
-  render.word = T,
-  overall = T,
-  stacked = T,
-  rounding = "sigfig(x,3)"
+    "Max", "]"), c("GeoMean", " (", "GeoCV", ")"))
 )
 }
 \arguments{
@@ -29,17 +30,17 @@ lhtab3(
 
 \item{cont}{list of continuous variables}
 
-\item{stat1}{define statistic functions}
-
-\item{stat.label}{define group of statistics to be outputted}
-
-\item{render.word}{if true then render as flextable, else, render as csv}
+\item{render}{if docx or csv then render as flextable}
 
 \item{overall}{output overall}
 
-\item{stacked}{output the stats in stacking style}
+\item{stacked}{output the stats in stacking style for continuous}
 
-\item{rounding}{define rounding method}
+\item{rounding}{define rounding method for continuous}
+
+\item{stat1}{define statistic functions for continous}
+
+\item{stat.label}{define group of statistics to be outputted}
 }
 \description{
 Generate descriptive statistic of continuous variable with style
