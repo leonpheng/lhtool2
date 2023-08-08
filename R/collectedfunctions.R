@@ -30,9 +30,9 @@ nm_ph<-function(ext="run16.ext",phi="run16.phi"){
   unique(par$iteration)
   th<-par[par$iteration==-1000000000,]
   th<-lhlong(th,c(names(th)[!names(th)%in%"iteration"]))
-  shrk<-eta|>
-    mutate(eta1=sd(nCL),eta2=sd(nV2),eta3=sd(nV3),eta4=sd(nCLM))|>
-    distinct(eta1,eta2,eta3,eta4)
+  #shrk<-eta|>
+  #  mutate(eta1=sd(nCL),eta2=sd(nV2),eta3=sd(nV3),eta4=sd(nCLM))|>
+  #  distinct(eta1,eta2,eta3,eta4)
   thx<-th[grep("theta",th$variable),]|>
     rbind(th[grep("sigma",th$variable),])|>
     filter(value!=0)|>
