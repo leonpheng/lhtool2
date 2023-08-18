@@ -4,7 +4,7 @@
 \alias{nm_ph}
 \title{Format NONMEM output for phx_typical}
 \usage{
-nm_ph(ext = "run16.ext", phi = "run16.phi")
+nm_ph(ext = "run16.ext", phi = "run16.phi", eta.names = "phi")
 }
 \arguments{
 \item{ext}{theta sheet}

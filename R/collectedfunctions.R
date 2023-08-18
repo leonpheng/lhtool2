@@ -24,58 +24,54 @@ ci_prob<-ci<-function(n,total){
 #'@keywords nm_ph
 #'@export
 
-nm_ph<-function(ext="run16.ext",phi="run16.phi"){
-  par<-read.nonmem.table(ext)
-  res1<-read.nonmem.table(phi)
+nm_ph<-function (ext = "run16.ext", phi = "run16.phi",eta.names="phi") 
+{
+  par <- read.nonmem.table(ext)
+  res1 <- read.nonmem.table(phi)
+  print(names(res1))
   unique(par$iteration)
-  th<-par[par$iteration==-1000000000,]
-  th<-lhlong(th,c(names(th)[!names(th)%in%"iteration"]))
-  #shrk<-eta|>
-  #  mutate(eta1=sd(nCL),eta2=sd(nV2),eta3=sd(nV3),eta4=sd(nCLM))|>
-  #  distinct(eta1,eta2,eta3,eta4)
-  thx<-th[grep("theta",th$variable),]|>
-    rbind(th[grep("sigma",th$variable),])|>
-    filter(value!=0)|>
-    mutate(Parameter=variable)
-  om<-th[grep("omega",th$variable),]|>
-    filter(value!=0)
-  om<-left_join(om,lhwide(om,"value","variable"))
-  names(om)[names(om)=="value"]<-"Label"
-  omsh<-om|>
-    mutate(om=paste0("eta",seq(nrow(om))))
-  keep<-res1[,c(1,grep("eta",names(res1)))];keep[,1]<-"dum"
-  shrk<-addvar2(keep,names(keep)[1],names(keep)[2:ncol(keep)],"sd(x)=sd")
-  shrk<-shrk|>
-    dplyr::mutate(om=paste0("eta",seq(nrow(shrk))))|>
-    dplyr::select(om,sd)|>
-    left_join(omsh|>
-                dplyr::select(om,Label))|>
-    dplyr::mutate(shrinkage=(1-as.numeric(sd)/sqrt(Label)))|>
-    dplyr::mutate(om=omsh$variable)
-  mat<-data.frame(matrix(nrow=1,ncol=ncol(om)))
-  names(mat)<-names(om)
-  mat<-c("shr","Shrinkage","",as.numeric(unlist(shrk$shrinkage)))
-  om<-om|>
-    mutate(variable=as.character(variable))|>
-    rbind(mat)|>
-    mutate(Label=variable)
+  th <- par[par$iteration == -1e+09, ]
+  th <- lhlong(th, c(names(th)[!names(th) %in% "iteration"]))
+  thx <- mutate(filter(rbind(th[grep("theta", th$variable), 
+  ], th[grep("sigma", th$variable), ]), value != 0), Parameter = variable)
+  om <- filter(th[grep("omega", th$variable), ], value != 0)
+  om <- left_join(om, lhwide(om, "value", "variable"))
   
-  se1<-par[par$iteration==-1000000001,]
+  names(om)[names(om) == "variable"] <- "Label"
+  nom<-ncol(om)
+  kom<-paste0("omega(",seq(nom),",",seq(nom),")")
+  om<-om[om$Label%in%kom,c("Label","value",names(om)[names(om)%in%kom])]
   
-  if(nrow(se1)!=0){
-    se<-lhlong(se1,c(names(se1)[!names(se1)%in%"iteration"]))
-    thse<-se[grep("theta",se$variable),]|>
-      rbind(se[grep("sigma",se$variable),])|>
-      filter(value!=0)|>
-      mutate(Parameter=variable)
-    omse<-se[grep("omega",se$variable),]|>
-      filter(value!=0)
-    omse<-left_join(omse,lhwide(omse,"value","variable"))
-    names(om)[names(om)=="value"]<-"Label"
-    df<-list(thx,om,thse,omse)}else{df<-list(thx,om)}
+  omsh <- mutate(om, om = paste0(eta.names,seq(nrow(om))))
+  keep <- res1[, c(1, grep(eta.names, names(res1)))]
+  keep[, 1] <- "dum"
+  shrk <- addvar2(keep, names(keep)[1], names(keep)[2:ncol(keep)], 
+                  "sd(x)=sd")
+  shrk <- dplyr::mutate(dplyr::mutate(left_join(dplyr::select(dplyr::mutate(shrk, 
+                                                                            om = paste0(eta.names, seq(nrow(shrk)))), om, sd), dplyr::select(omsh, 
+                                                                                                                                             om, Label,value)), shrinkage = (1 - as.numeric(sd)/sqrt(value))), 
+                        om = omsh$Label)
+  mat <- data.frame(matrix(nrow = 1, ncol = ncol(om)))
+  names(mat) <- names(om)
+  mat <- c("shr", "Shrinkage", as.numeric(unlist(shrk$shrinkage)))
+  om <- mutate(rbind(mutate(om, Label = as.character(Label)), 
+                     mat), Label = Label)
+  se1 <- par[par$iteration == -1000000001, ]
+  if (nrow(se1) != 0) {
+    se <- lhlong(se1, c(names(se1)[!names(se1) %in% "iteration"]))
+    thse <- mutate(filter(rbind(se[grep("theta", se$variable), 
+    ], se[grep("sigma", se$variable), ]), value != 0), 
+    Parameter = variable)
+    omse <- filter(se[grep("omega", se$variable), ], value != 
+                     0)
+    omse <- left_join(omse, lhwide(omse, "value", "variable"))
+    names(omse)[names(omse) == "variable"] <- "Label"
+    df <- list(thx, om, thse, omse)
+  }  else {
+    df <- list(thx,om[om$Label%in%kom,])
+  }
   df
 }
-
 
 #' Summary of typical values from Phoenix 
 #'
@@ -88,9 +84,9 @@ nm_ph<-function(ext="run16.ext",phi="run16.phi"){
 #'@keywords phx_typical
 #'@export
 #'
-phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", omega_sd = NULL, sd = NULL, 
-                       estimate = "Estimate",nonmem=list(th="run16.ext",om="omega",res="run16.phi"), 
-                       
+phx_typical<-function (theta = "run16.ext", omega = "omega", residual = "run16.phi", 
+                       omega_sd = NULL, sd = NULL, estimate = "Estimate", nonmem = list(th = "run16.ext", 
+                                                                                        om = "omega", res = "run16.phi"), 
                        lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
                                "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
                                "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
@@ -99,7 +95,6 @@ phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", 
                                "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100", 
                                "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
 {
-  
   lh.def1 <- function(lab = c("parameter;;define;;x^y;;y;;eta;;exp(x)")) {
     def <- NULL
     for (i in 1:length(lab)) {
@@ -110,18 +105,18 @@ phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", 
     def$order <- seq(nrow(def))
     def
   }
-  
-  
   par <- lh.def1(lab)
   th1 <- filter(full_join(mutate(theta, theta = Parameter), 
                           par), !is.na(define))
   th1$Estimate1 <- NA
   if (!is.null(sd)) {
-    th1$RSE <- NA
+    th1$RSE <- sd$value[1:length(lab)]
   }
+  
+  
   for (i in 1:nrow(th1)) {
     if (!is.null(sd)) {
-      x = c(th1[i, estimate], th1[i, sd])
+      x = c(th1[i, estimate], th1[i, "RSE"])
     } else {
       x = c(th1[i, estimate], 0)
     }
@@ -146,6 +141,7 @@ phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", 
     body(B) <- parse(text = A)
     t <- errprop(x = x, y = y, exp = B(A), raw = F)
     th1$Estimate1[i] <- t$Mean[1]
+    
     if (!is.null(sd)) {
       th1$RSE[i] <- t$RSE[1]
     }
@@ -153,7 +149,8 @@ phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", 
   
   par <- mutate(th1, Estimate = sigfig(Estimate1, 3))
   if (!is.null(sd)) {
-    par$RSE = sigfig(par$RSE, 3)
+    par$CI=with(par,paste0(sigfig(Estimate1-1.96*RSE/100,3),", ",sigfig(Estimate1+1.96*RSE/100,3)))
+    par$RSE = sigfig(par$RSE,3)
   }
   
   if (!is.null(omega)) {
@@ -163,26 +160,28 @@ phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", 
     for (i in c(par_om$eta)) {
       n <- ncol(omega) - 2
       x <- omega[1:(n + 1), ]
-      x <- as.numeric(x[x$Label == i, i])
+      x <- as.numeric(x[x$Label == i, "value"])
+      x<-x[!is.na(x)]
       if (!is.null(omega_sd)) {
+        labi<-omega_sd$Label[i]
         n1 <- ncol(omega_sd) - 2
-        x1 <- as.numeric(omega_sd[omega_sd$Label == i, 
-                                  i])
-      }  else {
+        x1 <- as.numeric(omega_sd[omega_sd$Label ==i,"value"])
+      } else {
         x1 = 0
       }
       x <- c(x, x1)
       y <- c(0, 0)
-      A <- paste0("expression(", par_om[par_om$eta == i, 
+      A <- paste0("expression(", par_om[par_om$eta ==i, 
                                         "eta_dist"], "+y)")
       B <- function(x) {
       }
       body(B) <- parse(text = A)
-      t1 <- errprop(x, y, exp = B(A), raw = F)
+      t1 <- errprop(x,y,exp = B(A), raw = F)
+      
       if (!is.null(omega_sd)) {
         iiv1 <- paste0(sigfig(t1$Mean[1], 3), " (", sigfig(t1$RSE[1], 
                                                            3), ")")
-      }   else {
+      } else {
         iiv1 <- sigfig(t1$Mean[1], 3)
       }
       iiv <- c(iiv, iiv1)
@@ -196,8 +195,8 @@ phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", 
     par_om$Description <- par_om$eta <- NULL
     if (!is.null(sd)) {
       tab1 <- dplyr::select(arrange(left_join(par, par_om), 
-                                    order), theta, define, Estimate, RSE, BSV, Shrinkage)
-    }  else {
+                                    order), theta, define, Estimate, RSE,CI, BSV, Shrinkage)
+    }else {
       tab1 <- dplyr::select(arrange(left_join(par, par_om), 
                                     order), theta, define, Estimate, BSV, Shrinkage)
     }
@@ -210,10 +209,12 @@ phx_typical<-function (theta ="run16.ext", omega ="omega",residual="run16.phi", 
     }
     names(tab1)[2] <- "Parameter"
   } else {
-    tab1 <- par[, c("order","theta", "define", "Estimate1", "RSE")]
+    tab1 <- par[, c("order", "theta", "define", "Estimate1", 
+                    "RSE")]
   }
   tab1
 }
+
 
 #' Expand data frame
 #'
