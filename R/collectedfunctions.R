@@ -108,11 +108,16 @@ phx_typical<-function (theta = "run16.ext", omega = "omega", residual = "run16.p
   par <- lh.def1(lab)
   th1 <- filter(full_join(mutate(theta, theta = Parameter), 
                           par), !is.na(define))
-  th1$Estimate1 <- NA
-  if (!is.null(sd)) {
-    th1$RSE <- sd$value[1:length(lab)]
-  }
   
+  th1$Estimate1 <- NA
+  
+  if (!is.null(sd)) {
+    rse<-sd|>
+      mutate(RSE=value)|>
+      dplyr::select(variable,RSE)
+    th1<-th1|>
+      left_join(rse)
+  }
   
   for (i in 1:nrow(th1)) {
     if (!is.null(sd)) {
@@ -214,7 +219,6 @@ phx_typical<-function (theta = "run16.ext", omega = "omega", residual = "run16.p
   }
   tab1
 }
-
 
 #' Expand data frame
 #'
