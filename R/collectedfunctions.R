@@ -1,3 +1,156 @@
+
+#' Summary of Phoenix typical values  
+#'
+#'@param  theta  theta sheet: data frame
+#'@param  omega  omega data matrix format:  data frame
+#'@param  omega_sd  sd for omega matrix format:  data frame
+#'@param  sd  set to null if no covariance steps or variable name Stderr for sd of theta
+#'@param  estimate specify variable name Estimate for theta 
+#'@param  lab table format
+#'@keywords phx_typical
+#'@export
+#'
+
+phoenix_typical<-function (theta = "df theta", omega = "df omega", 
+                          omega_sd = "df omsd or null", sd="Stderr", estimate="Estimate",
+                          lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
+                             "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
+                             "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
+                             "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
+                             "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100", 
+                             "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100", 
+                             "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
+{
+  lh.def1 <- function(lab = c("parameter;;define;;x^y;;y;;eta;;exp(x)")) {
+    def <- NULL
+    for (i in 1:length(lab)) {
+      splt <- strsplit(lab[i], ";;")[[1]]
+      def <- rbind(def, data.frame(theta = splt[1], define = splt[2], 
+                                   x = splt[3], y = splt[4], eta = splt[5], eta_dist = splt[6]))
+    }
+    def$order <- seq(nrow(def))
+    def
+  }
+  par <- lh.def1(lab)
+  th1 <- filter(full_join(mutate(theta, theta = Parameter), 
+                          par), !is.na(define))
+  th1$Estimate1 <- NA
+  
+  if (!is.null(sd)) {
+    if(is.data.frame(sd)){
+      rse <- dplyr::select(mutate(sd, RSE = value), variable, 
+                           RSE)
+      th1 <- left_join(th1, rse)}else{th1<-th1|>mutate(RSE=th1[,sd])}
+  }
+  
+  for (i in 1:nrow(th1)) {
+    if (!is.null(sd)) {
+      x = c(th1[i, estimate], th1[i, "RSE"])
+    } else {
+      x = c(th1[i, estimate], 0)
+    }
+    if (th1[i, "y"] %in% th1$theta) {
+      if (!is.null(sd)) {
+        y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
+              th1[th1$theta == th1[i, "y"], sd])
+      } else {
+        y = c(th1[th1$theta %in% th1[i, "y"], estimate], 
+              0)
+      }
+    }  else {
+      A <- th1[i, "y"]
+      B <- function(x) {
+      }
+      body(B) <- parse(text = A)
+      y = c(B(A))
+    }
+    A <- paste0("expression(", th1[i, "x"], ")")
+    B <- function(x) {
+    }
+    body(B) <- parse(text = A)
+    t <- errprop(x = x, y = y, exp = B(A), raw = F)
+    th1$Estimate1[i] <- t$Mean[1]
+    if (!is.null(sd)) {
+      th1$RSE[i] <- t$RSE[1]
+    }
+  }
+  
+  par <- mutate(th1, Estimate = sigfig(Estimate1, 3))
+  
+  if (!is.null(sd)) {
+    par$CI = with(par, paste0(sigfig(Estimate1 - 1.96 * RSE/100, 
+                                     3), ", ", sigfig(Estimate1 + 1.96 * RSE/100, 3)))
+    par$RSE = sigfig(par$RSE, 3)
+  }
+  
+  if(!is.null(omega)) {
+    par_om <- par[!is.na(par$eta), c("theta", "eta", "eta_dist")]
+    library(dplyr)
+    iiv <- NULL
+    for (i in c(par_om$eta)) {
+      n <- ncol(omega) - 2
+      x <- omega[1:(n + 1), ]
+      x <- as.numeric(x[x$Label == i, i])
+      x <- x[!is.na(x)]
+      if (!is.null(omega_sd)) {
+        labi <- omega_sd$Label[i]
+        n1 <- ncol(omega_sd) - 2
+        x1 <- as.numeric(omega_sd[omega_sd$Label == i, 
+                                  i])
+      }else {
+        x1 = 0
+      }
+      x <- c(x, x1)
+      y <- c(0, 0)
+      A <- paste0("expression(", par_om[par_om$eta == i, 
+                                        "eta_dist"], "+y)")
+      B <- function(x) {
+      }
+      body(B) <- parse(text = A)
+      t1 <- errprop(x, y, exp = B(A), raw = F)
+      if (!is.null(omega_sd)) {
+        iiv1 <- paste0(sigfig(t1$Mean[1], 3), " (", sigfig(t1$RSE[1], 
+                                                           3), ")")
+      } else {
+        iiv1 <- sigfig(t1$Mean[1], 3)
+      }
+      iiv <- c(iiv, iiv1)
+    }
+    
+    shk <- NULL
+    for (i in c(par_om$eta)) {
+      shk = c(shk, sigfig(phx_shrk(i, omega), 3))
+    }
+    par_om$BSV = iiv
+    par_om$Shrinkage = shk
+    par_om$Description <- par_om$eta <- NULL
+    if (!is.null(sd)) {
+      tab1 <- dplyr::select(arrange(left_join(par, par_om), 
+                                    order), theta, define, Estimate, RSE, CI, BSV, 
+                            Shrinkage)
+    } else {
+      tab1 <- dplyr::select(arrange(left_join(par, par_om), 
+                                    order), theta, define, Estimate, BSV, Shrinkage)
+    }
+    
+    tab1$BSV[is.na(tab1$BSV)] <- ""
+    tab1$Shrinkage[is.na(tab1$Shrinkage)] <- ""
+    if (!is.null(omega_sd)) {
+      names(tab1)[names(tab1) == "BSV"] <- "BSV (RSE%)"
+    } else {
+      names(tab1)[names(tab1) == "BSV"] <- "BSV (%)"
+    }
+    names(tab1)[2] <- "Parameter"
+  } else {
+    tab1 <- par[, c("order", "theta", "define", "Estimate1", 
+                    "RSE")]
+  }
+  tab1
+}
+
+
+
+
 #' Derive confidence interval for binary data  
 #'
 #'@param  n  number of responder   
@@ -17,40 +170,54 @@ ci_prob<-ci<-function(n,total){
 }
  
 
-#' Format NONMEM output for phx_typical  
+#' Format NONMEM outputs for phx_typical  
 #'
 #'@param  ext  theta sheet 
-#'@param  phi  required for shrinkage calculation
+#'@param  phi  required for shrinkage calculation. Outputs: 1 for theta; 2 for omega and shrinkage; 3 for se theta; 4 for se omega 
 #'@keywords nm_ph
 #'@export
 
-nm_ph<-function (ext = "run16.ext", phi = "run16.phi",eta.names="phi") 
+nm_ph<-function (ext = "BLOC6.ext", tab ="mod_3001_noJAP.TAB",id="id") 
 {
   par <- read.nonmem.table(ext)
-  res1 <- read.nonmem.table(phi)
-  print(names(res1))
-  unique(par$iteration)
+  res1 <- read.nonmem.table(tab)
+  head(res1)
+  keep<-names(res1[grep("eta",names(res1))])
+  print(head(res1))
+  res1<-nodup(res1,id,"all")
+  #res1<-res1[res1[,keep[1]]!=0,]
+  
   th <- par[par$iteration == -1e+09, ]
   th <- lhlong(th, c(names(th)[!names(th) %in% "iteration"]))
-  thx <- mutate(filter(rbind(th[grep("theta", th$variable), 
+  thx <- dplyr::mutate(dplyr::filter(rbind(th[grep("theta", th$variable), 
   ], th[grep("sigma", th$variable), ]), value != 0), Parameter = variable)
-  om <- filter(th[grep("omega", th$variable), ], value != 0)
+  
+  om <- dplyr::filter(th[grep("omega", th$variable), ], value != 0)
   om <- left_join(om, lhwide(om, "value", "variable"))
   
   names(om)[names(om) == "variable"] <- "Label"
   nom<-ncol(om)
-  kom<-paste0("omega(",seq(nom),",",seq(nom),")")
-  om<-om[om$Label%in%kom,c("Label","value",names(om)[names(om)%in%kom])]
   
-  omsh <- mutate(om, om = paste0(eta.names,seq(nrow(om))))
-  keep <- res1[, c(1, grep(eta.names, names(res1)))]
-  keep[, 1] <- "dum"
-  shrk <- addvar2(keep, names(keep)[1], names(keep)[2:ncol(keep)], 
-                  "sd(x)=sd")
-  shrk <- dplyr::mutate(dplyr::mutate(left_join(dplyr::select(dplyr::mutate(shrk, 
-                                                                            om = paste0(eta.names, seq(nrow(shrk)))), om, sd), dplyr::select(omsh, 
-                                                                                                                                             om, Label,value)), shrinkage = (1 - as.numeric(sd)/sqrt(value))), 
-                        om = omsh$Label)
+  kom<-paste0("omega(",seq(nom),",",seq(nom),")")
+  names(om)[names(om) == "variable"] <- "Label"
+  om<-om[om$Label%in%kom,c("Label","value",names(om)[names(om)%in%kom])]
+  omsh <- mutate(om, om = paste0("eta",seq(nrow(om))))
+  keep <- res1[,grep("eta",names(res1))]
+  omsh$om<-names(keep)
+  
+  keep$dum <- "dum"
+  head(keep)
+  nrow(res1)
+  
+  shrk <- addvar2(keep, "dum", names(keep)[1:ncol(keep)-1], 
+                  "sd(x)=sd",rounding = "round(x,10)")
+  
+  names(shrk)[names(shrk)=="var"]<-"om"
+  
+  shrk <- left_join(shrk, 
+                    omsh)|>
+    mutate(shrinkage = 1-(as.numeric(sd)/sqrt(value)))
+  
   mat <- data.frame(matrix(nrow = 1, ncol = ncol(om)))
   names(mat) <- names(om)
   mat <- c("shr", "Shrinkage", as.numeric(unlist(shrk$shrinkage)))
@@ -68,27 +235,27 @@ nm_ph<-function (ext = "run16.ext", phi = "run16.phi",eta.names="phi")
     names(omse)[names(omse) == "variable"] <- "Label"
     df <- list(thx, om, thse, omse)
   }  else {
-    df <- list(thx,om[om$Label%in%kom,])
+    df <- list(thx,om)
   }
   df
 }
 
-#' Summary of typical values from Phoenix 
+#' Summary of NONMEM typical values using outputs from nm_ph function 
 #'
-#'@param  theta  theta sheet 
-#'@param  omega  omega data matrix format
-#'@param  omega_sd  sd for omega matrix format
+#'@param  theta  theta sheet nm_ph 1 
+#'@param  omega  omega data matrix format nm_ph 2
+#'@param  omega_sd  sd for omega matrix format nm_ph 4. Null if no covariance steps
 #'@param  sd  set to null if no covariance steps or specify variable name for SD theta
-#'@param  estimate specify variable name for estimate theta 
+#'@param  estimate specify variable name for estimate, default is value 
 #'@param  lab table format
 #'@keywords phx_typical
 #'@export
 #'
-phx_typical<-function (theta = "run16.ext", omega = "omega", residual = "run16.phi", 
-                       omega_sd = NULL, sd = NULL, estimate = "Estimate", nonmem = list(th = "run16.ext", 
-                                                                                        om = "omega", res = "run16.phi"), 
+phx_typical<-function (theta = "nm_ph1", omega = "nm_ph2", 
+                       sd = "nm_ph3", omega_sd = "nm_ph4",  estimate = "value", 
                        lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
-                               "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
+                               "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", 
+                               "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
                                "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
                                "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
                                "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100", 

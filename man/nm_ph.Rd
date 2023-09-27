@@ -2,16 +2,16 @@
 % Please edit documentation in R/collectedfunctions.R
 \name{nm_ph}
 \alias{nm_ph}
-\title{Format NONMEM output for phx_typical}
+\title{Format NONMEM outputs for phx_typical}
 \usage{
-nm_ph(ext = "run16.ext", phi = "run16.phi", eta.names = "phi")
+nm_ph(ext = "BLOC6.ext", tab = "mod_3001_noJAP.TAB", id = "id")
 }
 \arguments{
 \item{ext}{theta sheet}
 
-\item{phi}{required for shrinkage calculation}
+\item{phi}{required for shrinkage calculation. Outputs: 1 for theta; 2 for omega and shrinkage; 3 for se theta; 4 for se omega}
 }
 \description{
-Format NONMEM output for phx_typical
+Format NONMEM outputs for phx_typical
 }
 \keyword{nm_ph}
