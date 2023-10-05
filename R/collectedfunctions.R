@@ -1127,10 +1127,15 @@ lhtab3<-function (data, sort.header = c("group", "studyid"), sort.body = NULL,
     nhh[, sort.header[length(sort.header)]] <- paste0(unlist(nhh[, 
                                                                  sort.header[length(sort.header)]]), " (N=", unlist(nhh[, 
                                                                                                                         "N"]), ")")
-    
+
+    if(!is.null(sort.body)){
     tcat<-lhwide(tab|>
                    mutate(Covariate=variable,Category=value)|>
-                   select(sort.body,hh,Covariate,Category,sumr),"sumr","hh")
+                   dplyr::select(sort.body,hh,Covariate,Category,sumr),"sumr","hh")}else{
+    tcat<-lhwide(tab|>mutate(Covariate=variable,Category=value)|>
+                   dplyr::select(hh,Covariate,Category,sumr),"sumr","hh")
+                   }
+    
     ord<-NULL
     for(x in cat){
       ord<-c(ord,as.character(sort(unique(data[,x]))))
