@@ -1,3 +1,29 @@
+#' Descriptive statistics using addvar function  
+#'
+#'@param  dat  data frame
+#'@param  by sort list
+#'@param  var variables list
+#'@param  stat.fun basic statistic function (single variate) ex:mean, sd, se, cv
+#'@keywords lh_stat
+#'@export
+
+lh_stat<-function(dat,by,var,stat.fun="mean"){
+  t1<-nodup(dat[,by],by,"all")
+  for(y in var){
+    t3<-t1  
+    for(x in stat.fun){
+      x1<-paste0(x,"(x)")
+      y1<-paste0(x,"_",y)
+      t<-addvar(dat,by,y,x1,"non",y1)
+      t3<-left_join(t3,t)
+    }
+    t1<-left_join(t1,t3)
+  }
+  t3
+}
+
+
+
 
 #' Summary of Phoenix typical values  
 #'
