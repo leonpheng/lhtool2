@@ -60,15 +60,14 @@ lh_stat<-function(dat,by,var,stat.fun="mean"){
 #'@export
 #'
 
-phoenix_typical<-function (theta = "df theta", omega = "df omega", 
-                          omega_sd = "df omsd or null", sd="Stderr", estimate="Estimate",
-                          lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
-                             "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
-                             "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
-                             "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
-                             "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100", 
-                             "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100", 
-                             "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
+phoenix_typical<-function (theta = "df theta", omega = "df omega", omega_sd = "df omsd or null", 
+                           sd = "Stderr", estimate = "Estimate", lab = c("tvKa;;Ka (1/h);;x+y;;c(0,0);;nKa;;sqrt(exp(x)-1)*100", 
+                                                                         "dKadSTR100;;If dose=100;;exp(x)+y;;c(0,0);;", "tvCl;;CL/F (L/h);;x+y;;c(0,0);;nCl;;sqrt(exp(x)-1)*100", 
+                                                                         "dCldMULT2;;CL, if multiple dose;;exp(x)*y;;tvCl;;", 
+                                                                         "tvV;;Vc/F (L);;x+y;;c(0,0);;nV;;sqrt(exp(x)-1)*100", 
+                                                                         "tvCl2;;Q/F (L/h);;x+y;;c(0,0);;nCl2;;sqrt(exp(x)-1)*100", 
+                                                                         "tvV2;;Vp/F (L/h);;x+y;;c(0,0);;nV2;;sqrt(exp(x)-1)*100", 
+                                                                         "stdev0;;Proportional Error (%);;x*100+y;;c(0,0);;")) 
 {
   lh.def1 <- function(lab = c("parameter;;define;;x^y;;y;;eta;;exp(x)")) {
     def <- NULL
@@ -84,14 +83,15 @@ phoenix_typical<-function (theta = "df theta", omega = "df omega",
   th1 <- filter(full_join(mutate(theta, theta = Parameter), 
                           par), !is.na(define))
   th1$Estimate1 <- NA
-  
   if (!is.null(sd)) {
-    if(is.data.frame(sd)){
+    if (is.data.frame(sd)) {
       rse <- dplyr::select(mutate(sd, RSE = value), variable, 
                            RSE)
-      th1 <- left_join(th1, rse)}else{th1<-th1|>mutate(RSE=th1[,sd])}
+      th1 <- left_join(th1, rse)
+    }  else {
+      th1 <- mutate(th1, RSE = th1[, sd])
+    }
   }
-  
   for (i in 1:nrow(th1)) {
     if (!is.null(sd)) {
       x = c(th1[i, estimate], th1[i, "RSE"])
@@ -123,16 +123,16 @@ phoenix_typical<-function (theta = "df theta", omega = "df omega",
       th1$RSE[i] <- t$RSE[1]
     }
   }
-  
   par <- mutate(th1, Estimate = sigfig(Estimate1, 3))
   
   if (!is.null(sd)) {
-    par$CI = with(par, paste0(sigfig(Estimate1 - 1.96 * RSE/100, 
-                                     3), ", ", sigfig(Estimate1 + 1.96 * RSE/100, 3)))
+    par$CI_derived = with(par, paste0(sigfig(Estimate1 - 1.96 * RSE/100, 
+                                             3), ", ", sigfig(Estimate1 + 1.96 * RSE/100, 3)))
+    par$CI = with(par, paste0(sigfig(X2.5..CI,3),", ",sigfig(X97.5..CI,3)))
     par$RSE = sigfig(par$RSE, 3)
   }
   
-  if(!is.null(omega)) {
+  if (!is.null(omega)) {
     par_om <- par[!is.na(par$eta), c("theta", "eta", "eta_dist")]
     library(dplyr)
     iiv <- NULL
@@ -146,7 +146,7 @@ phoenix_typical<-function (theta = "df theta", omega = "df omega",
         n1 <- ncol(omega_sd) - 2
         x1 <- as.numeric(omega_sd[omega_sd$Label == i, 
                                   i])
-      }else {
+      }      else {
         x1 = 0
       }
       x <- c(x, x1)
@@ -160,12 +160,11 @@ phoenix_typical<-function (theta = "df theta", omega = "df omega",
       if (!is.null(omega_sd)) {
         iiv1 <- paste0(sigfig(t1$Mean[1], 3), " (", sigfig(t1$RSE[1], 
                                                            3), ")")
-      } else {
+      }      else {
         iiv1 <- sigfig(t1$Mean[1], 3)
       }
       iiv <- c(iiv, iiv1)
     }
-    
     shk <- NULL
     for (i in c(par_om$eta)) {
       shk = c(shk, sigfig(phx_shrk(i, omega), 3))
@@ -175,28 +174,26 @@ phoenix_typical<-function (theta = "df theta", omega = "df omega",
     par_om$Description <- par_om$eta <- NULL
     if (!is.null(sd)) {
       tab1 <- dplyr::select(arrange(left_join(par, par_om), 
-                                    order), theta, define, Estimate, RSE, CI, BSV, 
+                                    order), theta, define, Estimate, RSE, CI,CI_derived, BSV, 
                             Shrinkage)
-    } else {
+    }    else {
       tab1 <- dplyr::select(arrange(left_join(par, par_om), 
                                     order), theta, define, Estimate, BSV, Shrinkage)
     }
-    
     tab1$BSV[is.na(tab1$BSV)] <- ""
     tab1$Shrinkage[is.na(tab1$Shrinkage)] <- ""
     if (!is.null(omega_sd)) {
       names(tab1)[names(tab1) == "BSV"] <- "BSV (RSE%)"
-    } else {
+    }    else {
       names(tab1)[names(tab1) == "BSV"] <- "BSV (%)"
     }
     names(tab1)[2] <- "Parameter"
-  } else {
+  }  else {
     tab1 <- par[, c("order", "theta", "define", "Estimate1", 
                     "RSE")]
   }
   tab1
 }
-
 
 
 
