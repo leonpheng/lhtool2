@@ -3,9 +3,10 @@
 #'@param  x data 1 
 #'@param  y data 2
 #'@param  type If var for variable else data frame
-#'@keywords comp
+#'@keywords comp_fun
 #'@export
-comp<-function(x,y,type="var"){
+
+comp_fun<-function(x,y,type="var"){
   if(type=="var"){
     print(data.frame(lab=c("Mean","N_Total","N_NA","N_Unique","Class","Min","Max"),
                      x=c(mean(as.numeric(x),na.rm=T),length(x),length(x[!is.na(x)]),
@@ -44,8 +45,6 @@ lh_stat<-function(dat,by,var,stat.fun="mean"){
   }
   t3
 }
-
-
 
 
 #' Summary of Phoenix typical values  
