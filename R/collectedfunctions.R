@@ -125,8 +125,8 @@ phoenix_typical<-function (theta = "df theta", omega = "df omega", omega_sd = "d
   par <- mutate(th1, Estimate = sigfig(Estimate1, 3))
   
   if (!is.null(sd)) {
-    par$CI_derived = with(par, paste0(sigfig(Estimate1 - 1.96 *(RSE/100)/Estimate1, 
-                                             3), ", ", sigfig(Estimate1 + 1.96 * (RSE/100)/Estimate1,3)))
+    par$CI_derived = with(par, paste0(sigfig(Estimate1 - 1.96 *(RSE/100)/Estimate1,3), 
+                                  ", ", sigfig(Estimate1 + 1.96 * (RSE/100)/Estimate1,3)))
     par$CI = with(par, paste0(sigfig(X2.5..CI,3),", ",sigfig(X97.5..CI,3)))
     par$RSE = sigfig(par$RSE,3)
   }
