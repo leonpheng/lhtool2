@@ -213,7 +213,31 @@ ci_prob<-ci<-function(n,total){
   paste(sprintf("%s", signif.pad(100*p$estimate, 3)),
   sprintf("[%s]", paste0(signif.pad(100*p$conf.int, 3), collapse=", ")))
 }
- 
+
+#' Derive BSV and RSE with additive ETA 
+#'
+#'@param  omega  theta 
+#'@param  omega  omega 
+#'@param  se_omega se omega
+#'@keywords bsv_add
+#'@export
+
+bsv_add<-function(theta=4.25546,omega=0.495652,se_omega=NULL,fancy="yes"){
+  x<- sqrt(as.numeric(omega))/
+    theta*100
+  y=0
+  if(!is.null(se_omega)){
+    y<-as.numeric(se_omega)/
+      as.numeric(omega)/2*100}
+  
+  if(y==0){
+    z=sigfig(x,3)}else{z=paste0(sigfig(x,3)," (",sigfig(y,3),")")}
+  
+  if(fancy!="yes"){
+    z=data.frame(bsv=x,rse=y)
+  }
+  z
+} 
 
 #' Format NONMEM outputs for phx_typical  
 #'
@@ -290,7 +314,7 @@ nm_ph<-function (ext = "BLOC6.ext", tab ="mod_3001_noJAP.TAB",id="id")
 #'@param  theta  theta sheet nm_ph 1 
 #'@param  omega  omega data matrix format nm_ph 2
 #'@param  omega_sd  sd for omega matrix format nm_ph 4. Null if no covariance steps
-#'@param  sd  set to null if no covariance steps or specify variable name for SD theta
+#'@param  sd  set to null if no covariance steps or specify variable name for SD theta.
 #'@param  estimate specify variable name for estimate, default is value 
 #'@param  lab table format
 #'@keywords phx_typical
@@ -389,9 +413,9 @@ phx_typical<-function (theta = "nm_ph1", omega = "nm_ph2", sd = "nm_ph3",
       }
       body(B) <- parse(text = A)
       t1 <- errprop(x, y, exp = B(A), raw = F)
-      if (!is.null(omega_sd)) {
-        iiv1 <- paste0(sigfig(t1$Mean[1], 3), " (", sigfig(t1$RSE[1], 
-                                                           3), ")")
+    if (!is.null(omega_sd)) {
+      iiv1 <- paste0(sigfig(t1$Mean[1], 3), " (", sigfig(t1$RSE[1], 
+                                                         3), ")")
       }
       else {
         iiv1 <- sigfig(t1$Mean[1], 3)

@@ -25,7 +25,7 @@ phx_typical(
 
 \item{omega}{omega data matrix format nm_ph 2}
 
-\item{sd}{set to null if no covariance steps or specify variable name for SD theta}
+\item{sd}{set to null if no covariance steps or specify variable name for SD theta.}
 
 \item{omega_sd}{sd for omega matrix format nm_ph 4. Null if no covariance steps}
 
