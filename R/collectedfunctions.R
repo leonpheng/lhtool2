@@ -1,3 +1,30 @@
+#' Unicode   
+#'
+#'@param symbol code name: ex: alpha or alfa or al, gte=greater than or egale; lte=less than or equal 
+#'@keywords uc
+#'@export
+
+uc<-function(symbol="gte"){
+  if(symbol%in%c("greater","gte")) {symb="\U2265"}
+  if(symbol%in%c("less","lte")) {symb="\U2264"}
+  if(symbol%in%c("alf","alpha","alfa","al")) {symb="\U03B1"}
+  if(symbol%in%c("bet","beta","be")) {symb="\U03B2"}
+  if(symbol%in%c("gamma","gam","ga")) {symb="\U03B3"}
+  if(symbol%in%c("delta","del","de")) {symb="\U03B4"}
+  if(symbol%in%c("epsilon","eps","ep")) {symb="\U03B5"}
+  if(symbol%in%c("eta")) {symb="\U03B7"}
+  if(symbol%in%c("tetha","tet","te")) {symb="\U03B8"}
+  if(symbol%in%c("kappa","kap","ka")) {symb="\U03BA"}
+  if(symbol%in%c("lambda","lam","la")) {symb="\U03BB"}
+  if(symbol%in%c("mu","m")) {symb="\U03BC"}
+  if(symbol%in%c("rho","ro")) {symb="\U03C1"}
+  if(symbol%in%c("sigma","sig","si")) {symb="\U03C3"}
+  if(symbol%in%c("tau","ta")) {symb="\U03C3"}
+  if(symbol%in%c("omega","ome","om")) {symb="\U03C9"}
+  symb
+}
+
+
 #' Compare Function  
 #'
 #'@param  x data 1 
